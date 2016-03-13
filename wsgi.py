@@ -15,6 +15,7 @@ def application(environ, start_response):
     conn = sqlite3.connect(TABLE_FILE_NAME)
     c = conn.cursor()
     c.execute("SELECT * from Heroes")
+    oneEntry = c.fetchone()
     
 
     ctype = 'text/plain'
@@ -37,7 +38,7 @@ def application(environ, start_response):
         <h1>Hello world!</h1>
         <h2>{}</h2>
 </body>
-</html>'''.format("see")
+</html>'''.format(oneEntry)
     response_body = response_body.encode('utf-8')
 
     status = '200 OK'
