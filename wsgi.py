@@ -7,6 +7,9 @@ import sqlite3
 
 TABLE_FILE_NAME = "app-root/data/advantages.db"
 
+app = Flask(__name__)
+api = Api(app)
+
 def application(environ, start_response):
 
     c = None
@@ -15,7 +18,7 @@ def application(environ, start_response):
     conn = sqlite3.connect(TABLE_FILE_NAME)
     c = conn.cursor()
 
-    c.exceute("SELECT name FROM Heroes WHERE Heroes._id = 5")
+    c.execute("SELECT name FROM Heroes WHERE Heroes._id = 5")
     oneEntry = c.fetchone()
    
 
