@@ -35,9 +35,9 @@ def application(environ, start_response):
 </head>
 <body>
         <h1>Hello world!</h1>
-        <h2>words</h2>
+        <h2>{}</h2>
 </body>
-</html>'''
+</html>'''.format("see")
     response_body = response_body.encode('utf-8')
 
     status = '200 OK'
