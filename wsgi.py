@@ -1,21 +1,8 @@
 #!/usr/bin/env python
 import os
-from flask import Flask, request
-from flask_restful import Resource, Api
-from sqlalchemy import create_engine
 import sqlite3
 
 TABLE_FILE_NAME = "app-root/data/advantages.db"
-
-app = Flask(__name__)
-api = Api(app)
-
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
-
-api.add_resource(HelloWorld, '/')
-
 
 
 def application(environ, start_response):
@@ -67,4 +54,4 @@ if __name__ == '__main__':
     httpd = make_server('localhost', 8051, application)
     # Wait for a single request, serve it and quit.
     httpd.handle_request()
-    app.run(debug=True)
+
