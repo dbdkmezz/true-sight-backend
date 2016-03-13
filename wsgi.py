@@ -1,7 +1,21 @@
 #!/usr/bin/env python
 import os
+import flask
+import flask_restful
+import sqlalchemy
+import sqlite3
+
+TABLE_FILE_NAME = "data/advantages.db"
 
 def application(environ, start_response):
+
+    c = None
+    conn = None
+
+    conn = sqlite3.connect(TABLE_FILE_NAME)
+    c = conn.cursor()
+    c.execute("SELECT * from Heroes")
+    
 
     ctype = 'text/plain'
     if environ['PATH_INFO'] == '/health':
@@ -218,8 +232,9 @@ pre {
 </head>
 <body>
         <h1>Hello world!</h1>
+        <h2>{}</h2>
 </body>
-</html>'''
+</html>'''.format(c.fetchone())
     response_body = response_body.encode('utf-8')
 
     status = '200 OK'
