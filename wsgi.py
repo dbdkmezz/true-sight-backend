@@ -3,7 +3,7 @@ import os
 from flask import Flask, request
 from flask_restful import Resource, Api
 from sqlalchemy import create_engine
-# import sqlite3
+import sqlite3
 
 TABLE_FILE_NAME = "app-root/data/advantages.db"
 
