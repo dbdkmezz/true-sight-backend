@@ -232,9 +232,9 @@ pre {
 </head>
 <body>
         <h1>Hello world!</h1>
-        <h2>{}</h2>
+        <h2>words</h2>
 </body>
-</html>'''.format(c.fetchone())
+</html>'''
     response_body = response_body.encode('utf-8')
 
     status = '200 OK'
