@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import os
-import flask
-import flask_restful
-import sqlalchemy
-import sqlite3
+from flask import Flask, request
+from flask_restful import Resource, Api
+from sqlalchemy import create_engine
+# import sqlite3
 
 TABLE_FILE_NAME = "app-root/data/advantages.db"
 
@@ -14,7 +14,9 @@ def application(environ, start_response):
 
     conn = sqlite3.connect(TABLE_FILE_NAME)
     c = conn.cursor()
-    c.execute("SELECT * from Heroes")
+    c.execute(
+        "SELECT name from Heroes" + 
+        "WHERE Heroes._id = 5")
     oneEntry = c.fetchone()
     
 
