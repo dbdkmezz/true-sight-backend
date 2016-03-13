@@ -14,11 +14,10 @@ def application(environ, start_response):
 
     conn = sqlite3.connect(TABLE_FILE_NAME)
     c = conn.cursor()
-    c.execute(
-        "SELECT name FROM Heroes" + 
-        "WHERE Heroes._id = 5")
+
+    c.exceute("SELECT name FROM Heroes WHERE Heroes._id = 5")
     oneEntry = c.fetchone()
-    
+   
 
     ctype = 'text/plain'
     if environ['PATH_INFO'] == '/health':
