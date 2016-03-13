@@ -15,8 +15,8 @@ def application(environ, start_response):
     conn = sqlite3.connect(TABLE_FILE_NAME)
     c = conn.cursor()
     c.execute(
-        "SELECT name from Heroes" + 
-        "WHERE _id = 5")
+        "SELECT name FROM Heroes" + 
+        "WHERE Heroes._id = 5")
     oneEntry = c.fetchone()
     
 
