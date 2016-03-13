@@ -5,7 +5,7 @@ import flask_restful
 import sqlalchemy
 import sqlite3
 
-TABLE_FILE_NAME = "data/advantages.db"
+TABLE_FILE_NAME = "app-root/data/advantages.db"
 
 def application(environ, start_response):
 
