@@ -16,7 +16,7 @@ def application(environ, start_response):
     c = conn.cursor()
     c.execute(
         "SELECT name from Heroes" + 
-        "WHERE Heroes._id = 5")
+        "WHERE _id = 5")
     oneEntry = c.fetchone()
     
 
