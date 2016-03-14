@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, fields, marshal_with
 import sqlite3
 
 TABLE_FILE_NAME = "app-root/data/advantages.db"
@@ -7,17 +7,19 @@ TABLE_FILE_NAME = "app-root/data/advantages.db"
 app = Flask(__name__)
 api = Api(app)
 
-class AdvantageDataForAHero:
-    # id_num = None
-    # name  = None
-    # is_carry  = None
-    # is_support  = None
-    # is_mid  = None
-    # is_off_lane  = None
-    # is_jungler  = None
-    # is_roaming  = None
-    # advantages = []
+resource_fields = {
+    'id_num': fields.Integer,
+    'name': fields.String,
+    'is_carry': fields.Boolean,
+    'is_support': fields.Boolean,
+    'is_mid': fields.Boolean,
+    'is_off_lane': fields.Boolean,
+    'is_jungler': fields.Boolean,
+    'is_roaming': fields.Boolean,
+    'advantages': fields.List(fields.Float),
+}
 
+class AdvantageDataForAHero:
     def __init__(self, id_num, name, is_carry, is_support, is_mid, is_off_lane, is_jungler, is_roaming):
         self.id_num = id_num
         self.name = name
@@ -48,12 +50,11 @@ class hero_name(Resource):
         return {'Name': [i[0] for i in query.fetchall()]}
 
 class Advantages(Resource):
+    @marshal_with(resource_fields, envelope='data')
     def get(self, name1, name2, name3, name4, name5):
         conn = sqlite3.connect(TABLE_FILE_NAME)
         c = conn.cursor()
 
-        print("hello")
-        
         c.execute("SELECT _id, name, is_carry, is_support, is_mid, is_off_lane, is_jungler, is_roaming FROM Heroes")
         heroes = []
         for row in c.fetchall():
@@ -63,8 +64,8 @@ class Advantages(Resource):
         for hero in heroes:
             for enemyName in enemyNames:
                 Advantages.add_advantage(c, hero, enemyName)
-
-        return {'heroes' : [{i.name : i.advantages} for i in heroes]}
+                
+        return heroes
 
     @staticmethod
     def add_advantage(c, hero, enemyName):
