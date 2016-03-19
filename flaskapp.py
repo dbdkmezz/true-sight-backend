@@ -49,7 +49,38 @@ class hero_name(Resource):
         query = c.execute("SELECT name FROM Heroes WHERE Heroes._id = {}".format(hero_id))
         return {'Name': [i[0] for i in query.fetchall()]}
 
-class Advantages(Resource):
+def add_advantage(c, hero, enemyName):
+    c.execute("""SELECT advantage
+         FROM Heroes, Advantages
+         WHERE Heroes.name = \'{}\'
+         AND Heroes._id = Advantages.enemy_id
+         AND Advantages.hero_id = {}""".format(enemyName, hero.id_num))
+    result = c.fetchone()
+    if(result == None):
+        hero.advantages.append(None)
+    else:
+        hero.advantages.append(result[0])
+
+
+class SingleAdvantage(Resource):
+    @marshal_with(resource_fields, envelope='data')
+    def get(self, enemyName):
+
+        conn = sqlite3.connect(TABLE_FILE_NAME)
+        c = conn.cursor()
+
+        c.execute("SELECT _id, name, is_carry, is_support, is_mid, is_off_lane, is_jungler, is_roaming FROM Heroes")
+        heroes = []
+        for row in c.fetchall():
+            heroes.append(AdvantageDataForAHero(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+
+        for hero in heroes:
+            add_advantage(c, hero, enemyName)
+                
+        return heroes
+
+
+class FiveAdvantages(Resource):
     @marshal_with(resource_fields, envelope='data')
     def get(self, name1, name2, name3, name4, name5):
         conn = sqlite3.connect(TABLE_FILE_NAME)
@@ -63,42 +94,16 @@ class Advantages(Resource):
         enemyNames = [name1, name2, name3, name4, name5]
         for hero in heroes:
             for enemyName in enemyNames:
-                Advantages.add_advantage(c, hero, enemyName)
+                add_advantage(c, hero, enemyName)
                 
         return heroes
-
-    @staticmethod
-    def add_advantage(c, hero, enemyName):
-        c.execute("""SELECT advantage
-             FROM Heroes, Advantages
-             WHERE Heroes.name = \'{}\'
-             AND Heroes._id = Advantages.enemy_id
-             AND Advantages.hero_id = {}""".format(enemyName, hero.id_num))
-        result = c.fetchone()
-        if(result == None):
-            hero.advantages.append(None)
-        else:
-            hero.advantages.append(result[0])
-
-
-# class advantages(Resource):
-#     def get(self, name1, name2, name3, name4, name5):
-#         conn = sqlite3.connect(TABLE_FILE_NAME)
-#         c = conn.cursor()
-#         c.execute("SELECT name FROM Heroes")
-# #         c.execute("SELECT _id, name, is_carry, is_support, is_mid, is_off_lane, is_jungler, is_roaming FROM Heroes")
-#         heroes = []
-#         for row in c.fetchall():
-#             heroes.append(c)
-
-#         return {'heroes' : [i for i in heroes]}
-
 
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(heroes, '/heroes')
 api.add_resource(hero_name, '/hero/<string:hero_id>')
-api.add_resource(Advantages, '/advantages/<string:name1>/<string:name2>/<string:name3>/<string:name4>/<string:name5>')
+api.add_resource(FiveAdvantages, '/advantages/<string:name1>/<string:name2>/<string:name3>/<string:name4>/<string:name5>')
+api.add_resource(SingleAdvantage, '/advantages/<string:enemyName>')
 
 if __name__ == '__main__':
     app.run(debug=True)
