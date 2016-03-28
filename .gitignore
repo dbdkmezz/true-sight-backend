@@ -1,0 +1,4 @@
+*~
+app-root/*
+__pycache__/*
+*.pyc
