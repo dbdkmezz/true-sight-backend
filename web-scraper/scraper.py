@@ -20,7 +20,7 @@ class AdvantageDataForAHero:
     ADVANTAGES_URL_END = "/matchups"
 
     HERO_ROLES_URL = "http://wiki.teamliquid.net/dota2/Hero_Roles"
-    HERO_ROLES_FILE = "~/app-root/repo/web-scraper/samples/Hero Roles.html"
+    HERO_ROLES_FILE = "samples/Hero Roles.html"
     CARRY_STRING = "Carry"
     SUPPORT_STRING = "Support"
 
