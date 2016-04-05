@@ -2,6 +2,5 @@ sqlite3
 flask
 flask-restful
 sqlalchemy
-bs4
+beautifulsoup4
 requests
-
