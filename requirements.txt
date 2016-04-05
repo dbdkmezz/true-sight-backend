@@ -2,3 +2,6 @@ sqlite3
 flask
 flask-restful
 sqlalchemy
+bs4
+requests
+
