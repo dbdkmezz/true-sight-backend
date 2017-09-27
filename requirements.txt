@@ -1,5 +1,2 @@
-flask
-flask-restful
-sqlalchemy
-beautifulsoup4
-requests
+gunicorn
+Flask

@@ -1,8 +1,21 @@
+from flask import Flask
+application = Flask(__name__)
+
+@application.route("/")
+def hello():
+    return "Hello World!"
+
+if __name__ == "__main__":
+    application.run()
+
+
+
+
 #!/usr/bin/env python
 # import os
 # import sqlite3
 
-from flaskapp import app as application
+# from flaskapp import app as application
 
 # TABLE_FILE_NAME = "app-root/data/advantages.db"
 
@@ -58,8 +71,8 @@ from flaskapp import app as application
 
 
 
-if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
-    httpd = make_server('localhost', 8051, application)
-    # Wait for a single request, serve it and quit.
-    httpd.serve_forever()
+# if __name__ == '__main__':
+#     from wsgiref.simple_server import make_server
+#     httpd = make_server('localhost', 8051, application)
+#     # Wait for a single request, serve it and quit.
+#     httpd.serve_forever()
