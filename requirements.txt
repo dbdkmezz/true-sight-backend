@@ -1,5 +1,7 @@
-flask
-flask-restful
-sqlalchemy
-beautifulsoup4
-requests
+apipkg==1.4
+Django==1.11.6
+execnet==1.5.0
+py==1.4.34
+python-dateutil==2.6.1
+pytz==2017.2
+six==1.11.0
