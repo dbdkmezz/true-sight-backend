@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError
 
 
-ALL_HERO_NAMES_URL = "http://www.dota2.com/heroes/"
 
 
 class HeroAndAdvantage:
@@ -171,16 +170,6 @@ def load_file(filename):
     with open(filename, "r") as content_file:
         return content_file.read()
 
-def load_url(url, retries=3):
-    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"}
-    try:
-        r = requests.get(url, headers=headers)
-    except ConnectionError:
-        if retries == 0:
-            raise
-        print("CONNECTION ERROR LOADING {}, retrying".format(url))
-        return load_url(url, retries - 1)
-    return r.text
 
 def get_hero_names_from_string(content):
     soup = BeautifulSoup(content, "html.parser")
