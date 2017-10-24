@@ -1,4 +1,7 @@
 *~
+*#*
 app-root/*
 __pycache__/*
 *.pyc
+db.sqlite3
+.cache

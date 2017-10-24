@@ -23,6 +23,12 @@ class Hero(models.Model):
             'is_roaming': self.is_roaming,
         }
 
+    @staticmethod
+    def update_from_web():
+        web_scraper = WebScraper()
+        heroes = web_scraper.get_hero_names()
+        pass
+
 
 class Advantage(models.Model):
     hero = models.ForeignKey(Hero, on_delete=models.CASCADE, related_name="hero_hero")
