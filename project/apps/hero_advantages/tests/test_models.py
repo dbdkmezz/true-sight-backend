@@ -8,7 +8,6 @@ from .factories import HeroFactory, AdvantageFactory
 
 class TestModels(TestCase):
     def setup_advantages(self):
-        connection.creation.create_test_db()
         joe = HeroFactory(name="Joe")
         sb = HeroFactory(name="Super-Bob", is_carry=True, is_jungler=False)
         sm = HeroFactory(name="Spacey Max", is_roaming=True)

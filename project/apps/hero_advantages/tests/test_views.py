@@ -10,7 +10,6 @@ from .factories import HeroFactory
 
 class TestViews(TestCase):
     def setup_heroes(self):
-        connection.creation.create_test_db()
         HeroFactory(name="Joe")
         HeroFactory(name="Super-Bob")
         HeroFactory(name="Spacey Max")
