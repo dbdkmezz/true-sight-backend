@@ -23,11 +23,10 @@ class Hero(models.Model):
             'is_roaming': self.is_roaming,
         }
 
-    @staticmethod
-    def update_from_web():
-        web_scraper = WebScraper()
-        heroes = web_scraper.get_hero_names()
-        pass
+    def update_from_web(self, web_scraper):
+        """Updates the hero's roles using the web scraper"""
+        
+        
 
 
 class Advantage(models.Model):
@@ -51,3 +50,15 @@ class Advantage(models.Model):
             results[h.name] = h.generate_info_dict()
             results[h.name]['advantage'] = advantage
         return results
+
+    @staticmethod
+    def update_from_web():
+        web_scraper = WebScraper()
+        hero_names = list(web_scraper.get_hero_names())
+        if len(hero_names) < 113:
+            raise Exception("too few heroes got from the web")
+        for name in heroes_names:
+            hero, _ = Hero.objects.get_or_create(name=name)
+            hero.update_from_web(web_scraper)
+        
+    

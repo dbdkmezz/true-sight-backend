@@ -166,10 +166,6 @@ class AdvantageDataForAHero:
         return float(string)
 
 
-def load_file(filename):
-    with open(filename, "r") as content_file:
-        return content_file.read()
-
 
 def get_hero_names_from_string(content):
     soup = BeautifulSoup(content, "html.parser")
