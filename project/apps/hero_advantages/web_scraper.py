@@ -10,7 +10,7 @@ class HeroRole(Enum):
     SUPPORT = 2
     OFF_LANE = 3
     JUNGLER = 4
-    MID = 5
+    MIDDLE = 5
     ROAMING = 6
 
 
@@ -19,8 +19,8 @@ class Lane(Enum):
     MIDDLE = 1
     SAFE = 2
     OFF_LANE = 3
-    TOP = 4
-    JUNGLE = 5
+    JUNGLE = 4
+    ROAMING = 5
 
 
 class WebScraper(object):
@@ -37,16 +37,38 @@ class WebScraper(object):
                 yield text
 
     def hero_is_role(self, hero, role):
-        pass
+        ROLE_TEST_MAP = {
+            HeroRole.CARRY: lambda h: (
+                self._hero_present_in_lane(h, Lane.SAFE) and
+                self._teamliquid_hero_is_role(h, HeroRole.CARRY)
+            ),
+            HeroRole.SUPPORT: lambda h: (
+                self._teamliquid_hero_is_role(h, HeroRole.SUPPORT)
+            ),
+            HeroRole.JUNGLER: lambda h: (
+                self._hero_present_in_lane(h, Lane.JUNGLE)
+            ),
+            HeroRole.OFF_LANE: lambda h: (
+                self._hero_present_in_lane(h, Lane.OFF_LANE)
+            ),
+            HeroRole.MIDDLE: lambda h: (
+                self._hero_present_in_lane(h, Lane.MIDDLE)
+            ),
+            HeroRole.ROAMING: lambda h: (
+                self._hero_present_in_lane(h, Lane.ROAMING)
+            ),
+        }
+        return ROLE_TEST_MAP[role](hero)
 
     def _hero_present_in_lane(self, hero_name, lane, min_presence=30):
-        lane_map = {
+        LANE_MAP = {
             Lane.SAFE: "http://www.dotabuff.com/heroes/lanes?lane=safe",
             Lane.MIDDLE: "http://www.dotabuff.com/heroes/lanes?lane=mid",
             Lane.OFF_LANE: "http://www.dotabuff.com/heroes/lanes?lane=off",
             Lane.JUNGLE: "http://www.dotabuff.com/heroes/lanes?lane=jungle",
+            Lane.ROAMING: "http://www.dotabuff.com/heroes/lanes?lane=roaming",
         }
-        soup = self.request_handler.get_soup(lane_map[lane])
+        soup = self.request_handler.get_soup(LANE_MAP[lane])
         table = soup.find("table", class_="sortable")
         for row in table.find_all("tr"):
             name_cell = row.find("td", class_="cell-xlarge", text=hero_name)
@@ -59,13 +81,10 @@ class WebScraper(object):
         return False
 
     def _teamliquid_hero_is_role(self, hero_name, role):
-        role_map = {
+        ROLE_MAP = {
             HeroRole.CARRY: "Carry",
             HeroRole.SUPPORT: "Support",
-            # OFF_LANE = 3
-            # JUNGLER = 4
-            # MID = 5
-            # ROAMING = 6
+            HeroRole.JUNGLER: "Jungler",
         }
 
         soup = self.request_handler.get_soup(
@@ -73,6 +92,6 @@ class WebScraper(object):
         # The first table with the role name in its table heading ("th")
         table = next((
             t for t in soup.find_all("table")
-            if t.find_all("th", text=re.compile(".*{}".format(role_map[role])))
+            if t.find_all("th", text=re.compile(".*{}".format(ROLE_MAP[role])))
         ))
         return hero_name in (i.get("title") for i in table.find_all("a"))

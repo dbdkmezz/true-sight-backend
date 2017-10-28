@@ -105,6 +105,24 @@ class TestGetHeroNames(unittest.TestCase):
         self.assertEqual(self.result.count("Disruptor"), 1)
 
 
+class TestHeroIsRole(unittest.TestCase):
+    def test_carry_requires_both(self):
+        class MockScraper(WebScraper):
+            def __init__(self):
+                pass
+
+            def _hero_present_in_lane(self, hero_name, lane):
+                return hero_name == "MR CARRY" and lane == Lane.SAFE
+
+            def _teamliquid_hero_is_role(self, hero_name, role):
+                return hero_name == "MR CARRY" and role == HeroRole.CARRY
+
+        scraper = MockScraper()
+        self.assertTrue(scraper.hero_is_role("MR CARRY", HeroRole.CARRY))
+        self.assertFalse(scraper.hero_is_role("SOMEONE", HeroRole.CARRY))
+        self.assertFalse(scraper.hero_is_role("MR CARRY", HeroRole.SUPPORT))
+
+
 class TestDotabuffLane(unittest.TestCase):
     def setUp(self):
         self.scraper = WebScraper(request_handler=MockRequestHandler())
