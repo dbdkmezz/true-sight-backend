@@ -1,7 +1,7 @@
 import py
 import unittest
-from bs4 import BeautifulSoup
 
+from ..request_handler import RequestHandler
 from ..web_scraper import WebScraper, Lane, HeroRole
 
 
@@ -76,21 +76,23 @@ from ..web_scraper import WebScraper, Lane, HeroRole
 #         self.assertEqual(scraper.AdvantageDataForAHero.is_roaming_hero("Gabe Newell"), 0)
 
 
-class MockRequestHandler(object):
+class MockRequestHandler(RequestHandler):
     url_map = {
         "http://www.dota2.com/heroes/": "Heroes_dota2.com.html",
         "http://wiki.teamliquid.net/dota2/Hero_Roles": "Hero Roles.html",
-        "http://www.dotabuff.com/heroes/lanes?lane=mid": "Dotabuff Middle Lane.html",
+        "http://www.dotabuff.com/heroes/lanes?lane=mid": (
+            "Dotabuff Middle Lane.html"),
     }
 
     @classmethod
     def get(cls, url):
         filename = cls.url_map[url]
-        path = str(py.path.local().join("project", "apps", "hero_advantages" , "tests", "data", filename))
+        path = str(py.path.local().join(
+            "project", "apps", "hero_advantages", "tests", "data", filename))
         with open(path, "r") as f:
             return f.read()
 
-        
+
 class TestGetHeroNames(unittest.TestCase):
     def setUp(self):
         scraper = WebScraper(request_handler=MockRequestHandler())
@@ -108,35 +110,48 @@ class TestDotabuffLane(unittest.TestCase):
         self.scraper = WebScraper(request_handler=MockRequestHandler())
 
     def test_high_presence(self):
-        self.assertTrue(self.scraper._hero_present_in_lane("Shadow Fiend", Lane.MIDDLE))
+        self.assertTrue(
+            self.scraper._hero_present_in_lane("Shadow Fiend", Lane.MIDDLE))
 
     def test_manual_presence(self):
-        self.assertFalse(self.scraper._hero_present_in_lane("Shadow Fiend", Lane.MIDDLE, 100))
+        self.assertFalse(
+            self.scraper._hero_present_in_lane(
+                "Shadow Fiend", Lane.MIDDLE, 100))
 
     def test_just_enough_presence(self):
-        self.assertTrue(self.scraper._hero_present_in_lane("Brewmaster", Lane.MIDDLE))
+        self.assertTrue(
+            self.scraper._hero_present_in_lane("Brewmaster", Lane.MIDDLE))
 
     def test_low_presence(self):
-        self.assertFalse(self.scraper._hero_present_in_lane("Drow Ranger", Lane.MIDDLE))
+        self.assertFalse(
+            self.scraper._hero_present_in_lane("Drow Ranger", Lane.MIDDLE))
 
     def test_not_on_page(self):
-        self.assertFalse(self.scraper._hero_present_in_lane("Anti-Mage", Lane.MIDDLE))
+        self.assertFalse(
+            self.scraper._hero_present_in_lane("Anti-Mage", Lane.MIDDLE))
+
 
 class TestTeamLiquidIsRole(unittest.TestCase):
     def setUp(self):
         self.scraper = WebScraper(request_handler=MockRequestHandler())
 
     def test_carry(self):
-         self.assertTrue(self.scraper._teamliquid_hero_is_role("Anti-Mage", HeroRole.CARRY))
+        self.assertTrue(
+            self.scraper._teamliquid_hero_is_role("Anti-Mage", HeroRole.CARRY))
 
     def test_not_carry(self):
-        self.assertFalse(self.scraper._teamliquid_hero_is_role("Disruptor", HeroRole.CARRY))
+        self.assertFalse(
+            self.scraper._teamliquid_hero_is_role("Disruptor", HeroRole.CARRY))
 
     def test_sub_string_not_carry(self):
-        self.assertFalse(self.scraper._teamliquid_hero_is_role("nt", HeroRole.CARRY))
+        self.assertFalse(
+            self.scraper._teamliquid_hero_is_role("nt", HeroRole.CARRY))
 
     def test_support(self):
-        self.assertTrue(self.scraper._teamliquid_hero_is_role("Disruptor", HeroRole.SUPPORT))
+        self.assertTrue(
+            self.scraper._teamliquid_hero_is_role(
+                "Disruptor", HeroRole.SUPPORT))
+
 # class TestGetNumFromPercent(unittest.TestCase):
 #     def test_get_num_from_percent(self):
 #         string = "1.8%"
