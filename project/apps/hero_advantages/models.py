@@ -68,11 +68,41 @@ class Advantage(models.Model):
     @staticmethod
     def update_from_web():
         web_scraper = WebScraper()
+        web_scraper.reset_cache()
         hero_names = list(web_scraper.get_hero_names())
         if len(hero_names) < 113:
             raise Exception("too few heroes got from the web")
+
+        extra_heroes = Hero.objects.exclude(name__in=hero_names)
+        for h in extra_heroes:
+            print("Deleting {}".format(h.name))
+            h.delete()
+
         for name in hero_names:
             print(name)
             hero, _ = Hero.objects.get_or_create(name=name)
             hero.update_from_web(web_scraper)
             hero.save()
+
+        assert len(hero_names) == Hero.objects.count()
+
+        print("\n\nLOADING ADVANTAGES\n")
+        for hero in Hero.objects.all():
+            print(hero.name)
+            advantages_data = web_scraper.load_advantages_for_hero(hero.name)
+            for advantage_data in advantages_data:
+                print(Hero.objects.get(name=advantage_data['enemy_name']))
+                try:
+                    advantage = Advantage.objects.get(
+                        hero=hero,
+                        enemy=Hero.objects.get(name=advantage_data['enemy_name']),
+                    )
+                except Advantage.DoesNotExist:
+                    Advantage.objects.create(
+                        hero=hero,
+                        enemy=Hero.objects.get(name=advantage_data['enemy_name']),
+                        advantage=advantage_data['advantage'],
+                    )
+                else:
+                    advantage.advantage = advantage_data['advantage']
+                    advantage.save()

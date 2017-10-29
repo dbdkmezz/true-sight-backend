@@ -10,5 +10,5 @@ urlpatterns = [
     # eg: /data/3/hero_name/
     url(r'^(?P<hero_id>[0-9]+)/hero_name/$', views.hero_name, name='hero_name'),
     # eg: /data/Axe/advantages/
-    url(r'^advantages/(?P<enemy_name>[a-z ]+)/$', views.single_advantage, name='single_advantage'),
+    url(r'^advantages/(?P<enemy_name>[a-zA-Z-\' ]+)/$', views.single_advantage, name='single_advantage'),
 ]

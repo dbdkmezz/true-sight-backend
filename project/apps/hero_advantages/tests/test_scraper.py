@@ -5,27 +5,6 @@ from ..request_handler import RequestHandler
 from ..web_scraper import WebScraper, Lane, HeroRole
 
 
-# class TestScrapingOfAdvantages(unittest.TestCase):
-#     def setUp(self):
-#         file_string = scraper.load_file(Helpers.get_path("Disruptor.html"))
-#         self.list = scraper.AdvantageDataForAHero.get_advantages_from_string(file_string)
-
-#     def test_first_name(self):
-#         self.assertEqual(self.list[0].name, "Axe")
-
-#     def test_first_advantage(self):
-#         self.assertEqual(self.list[0].advantage, 1.85)
-
-#     def test_last_name(self):
-#         self.assertEqual(self.list[-1].name, "Io")
-
-#     def test_last_advantage(self):
-#         self.assertEqual(self.list[-1].advantage, -2.1)
-
-#     def test_right_number_loaded(self):
-#         self.assertEqual(len(self.list), 110)
-
-
 # class TestScrapingOfCarryAndSupport(unittest.TestCase):
 #     def setUp(self):
 #         self.file_string = scraper.load_file(Helpers.get_path("Hero Roles.html"))
@@ -82,6 +61,7 @@ class MockRequestHandler(RequestHandler):
         "http://wiki.teamliquid.net/dota2/Hero_Roles": "Hero Roles.html",
         "http://www.dotabuff.com/heroes/lanes?lane=mid": (
             "Dotabuff Middle Lane.html"),
+        "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
     }
 
     @classmethod
@@ -169,6 +149,28 @@ class TestTeamLiquidIsRole(unittest.TestCase):
         self.assertTrue(
             self.scraper._teamliquid_hero_is_role(
                 "Disruptor", HeroRole.SUPPORT))
+
+
+class TestScrapingOfAdvantages(unittest.TestCase):
+    def setUp(self):
+        scraper = WebScraper(request_handler=MockRequestHandler())
+        self.result = list(scraper.load_advantages_for_hero("Disruptor"))
+
+    def test_first_name(self):
+        self.assertEqual(self.result[0]['enemy_name'], "Axe")
+
+    def test_first_advantage(self):
+        self.assertEqual(self.result[0]['advantage'], 1.85)
+
+    def test_last_name(self):
+        self.assertEqual(self.result[-1]['enemy_name'], "Io")
+
+    def test_last_advantage(self):
+        self.assertEqual(self.result[-1]['advantage'], -2.1)
+
+    def test_right_number_loaded(self):
+        self.assertEqual(len(self.result), 110)
+
 
 # class TestGetNumFromPercent(unittest.TestCase):
 #     def test_get_num_from_percent(self):

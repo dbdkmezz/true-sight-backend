@@ -27,6 +27,9 @@ class WebScraper(object):
     def __init__(self, request_handler=RequestHandler()):
         self.request_handler = request_handler
 
+    def reset_cache(self):
+        self.request_handler.reset_cache()
+
     def get_hero_names(self):
         soup = self.request_handler.get_soup("http://www.dota2.com/heroes/")
         soup = soup.find(id="filterName")
@@ -60,7 +63,31 @@ class WebScraper(object):
         }
         return ROLE_TEST_MAP[role](hero)
 
-    def _hero_present_in_lane(self, hero_name, lane, min_presence=30):
+    def load_advantages_for_hero(self, hero):
+        """Gets the advantages hero has over the other heroes in the game.
+
+        Yields dictionaries of the format:
+        {
+            'enemy_name': ENEMY_NAME,
+            'advantage': ADVANTAGE_FLOAT,
+        }
+        """
+        soup = self.request_handler.get_soup(
+            "http://www.dotabuff.com/heroes/{}/matchups".format(
+                hero.replace(' ', '-').replace("'", "").lower()
+            ))
+        soup = soup.find("table", class_="sortable")
+
+        for row in soup.find_all(lambda tag: tag.has_attr("data-link-to")):
+            enemy_name = row.find(class_="cell-xlarge").get_text()
+            advantage_cell = row.find(string=re.compile("[0-9]*%"))
+            advantage = advantage_cell.replace("%", "")
+            yield {
+                'enemy_name': enemy_name,
+                'advantage': float(advantage),
+            }
+
+    def _hero_present_in_lane(self, hero, lane, min_presence=30):
         LANE_MAP = {
             Lane.SAFE: "http://www.dotabuff.com/heroes/lanes?lane=safe",
             Lane.MIDDLE: "http://www.dotabuff.com/heroes/lanes?lane=mid",
@@ -71,8 +98,8 @@ class WebScraper(object):
         soup = self.request_handler.get_soup(LANE_MAP[lane])
         table = soup.find("table", class_="sortable")
         for row in table.find_all("tr"):
-            name_cell = row.find("td", class_="cell-xlarge", text=hero_name)
-            if name_cell and name_cell.get_text() == hero_name:
+            name_cell = row.find("td", class_="cell-xlarge", text=hero)
+            if name_cell and name_cell.get_text() == hero:
                 # Find the cell with a "%" character in the string
                 presence_cell = row.find(string=re.compile("%"))
                 presence = float(presence_cell.replace("%", ""))
@@ -80,7 +107,7 @@ class WebScraper(object):
 
         return False
 
-    def _teamliquid_hero_is_role(self, hero_name, role):
+    def _teamliquid_hero_is_role(self, hero, role):
         ROLE_MAP = {
             HeroRole.CARRY: "Carry",
             HeroRole.SUPPORT: "Support",
@@ -94,4 +121,4 @@ class WebScraper(object):
             t for t in soup.find_all("table")
             if t.find_all("th", text=re.compile(".*{}".format(ROLE_MAP[role])))
         ))
-        return hero_name in (i.get("title") for i in table.find_all("a"))
+        return hero in (i.get("title") for i in table.find_all("a"))

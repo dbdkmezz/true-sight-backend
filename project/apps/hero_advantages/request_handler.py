@@ -1,9 +1,15 @@
 import requests
+import requests_cache
 from requests.exceptions import ConnectionError
 from bs4 import BeautifulSoup
 
 
 class RequestHandler(object):
+    @staticmethod
+    def reset_cache():
+        requests_cache.install_cache()
+        requests_cache.clear()
+
     @classmethod
     def get(cls, url, retries=3):
         headers = {
