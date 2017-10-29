@@ -5,3 +5,5 @@ py==1.4.34
 python-dateutil==2.6.1
 pytz==2017.2
 six==1.11.0
+requests==2.18.4
+beautifulsoup4==4.6.0
