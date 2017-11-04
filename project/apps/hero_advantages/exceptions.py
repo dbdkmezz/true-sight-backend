@@ -1,0 +1,2 @@
+class InvalidEnemyNames(Exception):
+    pass

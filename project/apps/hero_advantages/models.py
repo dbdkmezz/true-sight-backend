@@ -1,5 +1,6 @@
 from django.db import models
 
+from .exceptions import InvalidEnemyNames
 from .web_scraper import WebScraper, HeroRole
 
 
@@ -56,11 +57,16 @@ class Advantage(models.Model):
 
     @staticmethod
     def generate_info_dict(enemy_names):
+        enemies = Hero.objects.filter(name__in=enemy_names)
+        if len(enemies) != len(enemy_names):
+            raise InvalidEnemyNames
         results = {}
-        for h in Hero.objects.exclude(name__in=enemy_names):
+        for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
             advantage = sum(a.advantage
-                            for a in Advantage.objects.filter(hero=h)
-                            if a.enemy.name in enemy_names)
+                            for a in Advantage.objects.filter(
+                                    hero=h,
+                                    enemy__in=enemies,
+                            ))
             results[h.name] = h.generate_info_dict()
             results[h.name]['advantage'] = advantage
         return results
@@ -70,9 +76,10 @@ class Advantage(models.Model):
         web_scraper = WebScraper()
         web_scraper.reset_cache()
         hero_names = list(web_scraper.get_hero_names())
-        if len(hero_names) < 113:
+        if len(hero_names) < 115:
             raise Exception("too few heroes got from the web")
 
+        # Remove any heroes from the database which aren't in the new list
         extra_heroes = Hero.objects.exclude(name__in=hero_names)
         for h in extra_heroes:
             print("Deleting {}".format(h.name))

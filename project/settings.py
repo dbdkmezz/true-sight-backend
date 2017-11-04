@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -111,6 +112,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+
+CRON_CLASSES = [
+    'project.apps.hero_advantages.cron_jobs.Update',
 ]
 
 
