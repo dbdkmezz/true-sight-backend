@@ -45,6 +45,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'project.apps.hero_advantages.apps.HeroAdvantagesConfig',
+    'project.apps.metadata.apps.MetadataConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

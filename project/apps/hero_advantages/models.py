@@ -1,4 +1,9 @@
+import datetime
+import threading
 from django.db import models
+from django.conf import settings
+
+from project.apps.metadata.models import AdvantagesUpdate
 
 from .exceptions import InvalidEnemyNames
 from .web_scraper import WebScraper, HeroRole
@@ -55,21 +60,35 @@ class Advantage(models.Model):
         return "{}'s advntage over {} is {}".format(
             self.hero.name, self.enemy.name, self.advantage)
 
-    @staticmethod
-    def generate_info_dict(enemy_names):
+    @classmethod
+    def generate_info_dict(cls, enemy_names):
+        if Hero.objects.count() == 0:
+            cls._start_update_if_due()
+
         enemies = Hero.objects.filter(name__in=enemy_names)
         if len(enemies) != len(enemy_names):
             raise InvalidEnemyNames
         results = {}
         for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
-            advantage = sum(a.advantage
-                            for a in Advantage.objects.filter(
-                                    hero=h,
-                                    enemy__in=enemies,
-                            ))
+            advantage = sum(a.advantage for a in Advantage.objects.filter(hero=h, enemy__in=enemies))
             results[h.name] = h.generate_info_dict()
             results[h.name]['advantage'] = advantage
+
+        if getattr(settings, 'DISABLE_THREADING', None):
+            cls._start_update_if_due()
+        else:
+            thread = threading.Thread(target=cls._start_update_if_due)
+            thread.start()
+
         return results
+
+    @classmethod
+    def _start_update_if_due(cls):
+        if not AdvantagesUpdate.update_in_progress():
+            if (datetime.datetime.now() - AdvantagesUpdate.last_update_time()).total_seconds() > 86400:
+                AdvantagesUpdate.start_new_update()
+                cls.update_from_web()
+                AdvantagesUpdate.finish_current_update()
 
     @staticmethod
     def update_from_web():

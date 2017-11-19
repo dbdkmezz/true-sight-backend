@@ -7,7 +7,8 @@ from project.apps.hero_advantages.models import Hero, Advantage
 
 
 def random_string(length=10, characters=string.ascii_letters):
-    return u''.join(random.choice(charactesrs) for x in range(length))
+    return u''.join(random.choice(characters) for x in range(length))
+
 
 def random_bool():
     return random.choice([True, False])
