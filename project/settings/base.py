@@ -10,35 +10,36 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
-import sys
+import json
+from unipath import Path
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    # safe value used for development when DJANGO_SECRET_KEY might not be set
-    '%7sf%%(xaen^!qmve%fth(clqk$jq7l&t)g7_2#!4eu91tk1e-',
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+from django.core.exceptions import ImproperlyConfigured
 
 
-from socket import gethostname
+BASE_DIR = Path(__file__).ancestor(2)
+SETTINGS_DIR = Path(__file__).ancestor(1)
+
+
+secrets_json = SETTINGS_DIR.child('secrets.json')
+with open(secrets_json) as f:
+    secrets = json.loads(f.read())
+
+
+def get_secret(setting):
+    try:
+        return secrets[setting]
+    except KeyError:
+        raise ImproperlyConfigured(
+            "Set the {} variable in {}".format(setting, secrets_json))
+
+
+SECRET_KEY = get_secret('SECRET_KEY')
+
+
 ALLOWED_HOSTS = [
     'localhost',
-    gethostname(), # For internal OpenShift load balancer security purposes.
-    os.environ.get('OPENSHIFT_APP_DNS'), # Dynamically map to the OpenShift gear name.
-    #'example.com', # First DNS alias (set up in the app)
-    #'www.example.com', # Second DNS alias (set up in the app)
+    get_secret('HOST_IP'),
 ]
-
 
 
 # Application definition
@@ -65,7 +66,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-TEST = ('py.test' in sys.argv[0])
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -90,10 +90,11 @@ WSGI_APPLICATION = 'wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-from . import database
-
 DATABASES = {
-    'default': database.config(TEST)
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR.child('db.sqlite3'),
+    }
 }
 
 
@@ -134,11 +135,10 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level': 'INFO',
         },
     },
 }
-
 
 
 # Internationalization
