@@ -34,13 +34,17 @@ class Hero(models.Model):
 
     def update_from_web(self, web_scraper):
         """Updates the hero's roles using the web scraper"""
+        t = time.time()
         scraper = WebScraper()
+        print("  update scraper {}".format(time.time() - t))
+        t = time.time()
         self.is_carry = scraper.hero_is_role(self.name, HeroRole.CARRY)
         self.is_support = scraper.hero_is_role(self.name, HeroRole.SUPPORT)
         self.is_off_lane = scraper.hero_is_role(self.name, HeroRole.OFF_LANE)
         self.is_jungler = scraper.hero_is_role(self.name, HeroRole.JUNGLER)
         self.is_mid = scraper.hero_is_role(self.name, HeroRole.MIDDLE)
         self.is_roaming = scraper.hero_is_role(self.name, HeroRole.ROAMING)
+        print("  load deatails {}".format(time.time() - t))
 
         if not (self.is_carry or self.is_support or self.is_off_lane
                 or self.is_jungler or self.is_mid or self.is_roaming):
@@ -107,9 +111,15 @@ class Advantage(models.Model):
 
         for name in hero_names:
             print(name)
+            t = time.time()
             hero, _ = Hero.objects.get_or_create(name=name)
+            print("  get_or_create {}".format(time.time() - t))
+            t = time.time()
             hero.update_from_web(web_scraper)
+            print("  update_from_web {}".format(time.time() - t))
+            t = time.time()
             hero.save()
+            print("  save {}".format(time.time() - t))
 
         assert len(hero_names) == Hero.objects.count()
 
