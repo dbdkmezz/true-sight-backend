@@ -1,3 +1,4 @@
+import time
 import datetime
 import threading
 from django.db import models
@@ -10,7 +11,7 @@ from .web_scraper import WebScraper, HeroRole
 
 
 class Hero(models.Model):
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64, unique=True, db_index=True)
     is_carry = models.BooleanField(default=False)
     is_support = models.BooleanField(default=False)
     is_off_lane = models.BooleanField(default=False)
@@ -48,9 +49,9 @@ class Hero(models.Model):
 
 class Advantage(models.Model):
     hero = models.ForeignKey(
-        Hero, on_delete=models.CASCADE, related_name="hero_hero")
+        Hero, on_delete=models.CASCADE, related_name="hero_hero", db_index=True)
     enemy = models.ForeignKey(
-        Hero, on_delete=models.CASCADE, related_name="enemy_hero")
+        Hero, on_delete=models.CASCADE, related_name="enemy_hero", db_index=True)
     advantage = models.FloatField()
 
     class Meta:
@@ -118,8 +119,17 @@ class Advantage(models.Model):
             advantages_data = web_scraper.load_advantages_for_hero(hero.name)
             for advantage_data in advantages_data:
                 print("  {}".format(advantage_data['enemy_name']))
+                t = time.time()
+                adv = advantage_data['advantage']
+                print("    get adv {}".format(time.time() - t))
+                t = time.time()
+                enemy = Hero.objects.get(name=advantage_data['enemy_name'])
+                print("    get enemy {} {}".format(enemy, time.time() - t))
+                t = time.time()
                 Advantage.objects.update_or_create(
                     hero=hero,
-                    enemy=Hero.objects.get(name=advantage_data['enemy_name']),
-                    defaults={'advantage': advantage_data['advantage']},
+                    enemy=enemy,
+                    defaults={'advantage': adv},
                 )
+                print("    update_or_create {}".format(time.time() - t))
+                t = time.time()
