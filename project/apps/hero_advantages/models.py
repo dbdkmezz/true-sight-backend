@@ -25,6 +25,7 @@ class Hero(models.Model):
     def generate_info_dict(self):
         return {
             'name': self.name,
+            'id_num': self.pk,
             'is_carry': self.is_carry,
             'is_support': self.is_support,
             'is_off_lane': self.is_off_lane,
