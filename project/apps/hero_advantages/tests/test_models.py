@@ -36,10 +36,12 @@ class TestModels(TestCase):
             result = Advantage.generate_info_dict(["Joe"])
             assert start_update.call_count == 1
         self.assertEqual(len(result), 2)
-        self.assertEqual(result["Super-Bob"]["advantage"], 1.1)
-        self.assertTrue(result["Super-Bob"]["is_carry"])
-        self.assertFalse(result["Super-Bob"]["is_jungler"])
-        self.assertEqual(result["Spacey Max"]["advantage"], -0.5)
+        sb = next(r for r in result if r['name'] == 'Super-Bob')
+        self.assertEqual(sb["advantages"][0], 1.1)
+        self.assertTrue(sb["is_carry"])
+        self.assertFalse(sb["is_jungler"])
+        sm = next(r for r in result if r['name'] == 'Spacey Max')
+        self.assertEqual(sm["advantages"][0], -0.5)
 
     def test_multi_hero_info_dict(self):
         self.setup_advantages()

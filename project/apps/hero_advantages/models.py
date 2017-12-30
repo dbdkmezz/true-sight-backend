@@ -24,6 +24,7 @@ class Hero(models.Model):
 
     def generate_info_dict(self):
         return {
+            'name': self.name,
             'is_carry': self.is_carry,
             'is_support': self.is_support,
             'is_off_lane': self.is_off_lane,
@@ -73,11 +74,12 @@ class Advantage(models.Model):
         enemies = Hero.objects.filter(name__in=enemy_names)
         if len(enemies) != len(enemy_names):
             raise InvalidEnemyNames
-        results = {}
+        results = []
         for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
             advantage = sum(a.advantage for a in Advantage.objects.filter(hero=h, enemy__in=enemies))
-            results[h.name] = h.generate_info_dict()
-            results[h.name]['advantage'] = advantage
+            info_dict = h.generate_info_dict()
+            info_dict['advantages'] = [advantage]  # this won't work for more than one!
+            results.append(info_dict)
 
         if getattr(settings, 'DISABLE_THREADING', None):
             cls._start_update_if_due()
