@@ -114,21 +114,12 @@ class Advantage(models.Model):
 
         print("\n\nLOADING ADVANTAGES\n")
         for hero in Hero.objects.all():
-            print(hero.name)
+            print(hero)
             advantages_data = web_scraper.load_advantages_for_hero(hero.name)
             for advantage_data in advantages_data:
-                print(Hero.objects.get(name=advantage_data['enemy_name']))
-                try:
-                    advantage = Advantage.objects.get(
-                        hero=hero,
-                        enemy=Hero.objects.get(name=advantage_data['enemy_name']),
-                    )
-                except Advantage.DoesNotExist:
-                    Advantage.objects.create(
-                        hero=hero,
-                        enemy=Hero.objects.get(name=advantage_data['enemy_name']),
-                        advantage=advantage_data['advantage'],
-                    )
-                else:
-                    advantage.advantage = advantage_data['advantage']
-                    advantage.save()
+                print("  {}".format(advantage_data['enemy_name']))
+                Advantage.objects.update_or_create(
+                    hero=hero,
+                    enemy=Hero.objects.get(name=advantage_data['enemy_name']),
+                    defaults={'advantage': advantage_data['advantage']},
+                )
