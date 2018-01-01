@@ -10,7 +10,7 @@ LOGGING['handlers']['file'] = {
 
 DATABASES['default'] = {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'true-sight',
+    'NAME': 'truesight',
     'USER': get_secret('DB_USER'),
     'PASSWORD': get_secret('DB_PASSWORD'),
     'HOST': 'localhost',
