@@ -5,62 +5,12 @@ from ..request_handler import RequestHandler
 from ..web_scraper import WebScraper, Lane, HeroRole
 
 
-# class TestScrapingOfCarryAndSupport(unittest.TestCase):
-#     def setUp(self):
-#         self.file_string = scraper.load_file(Helpers.get_path("Hero Roles.html"))
-
-#     def test_get_role_column_carry(self):
-#         soup = BeautifulSoup(self.file_string, "html.parser")
-#         self.assertEqual(scraper.AdvantageDataForAHero.get_role_column(soup, "Carry"), 1)
-
-#     def test_get_role_column_support(self):
-#         soup = BeautifulSoup(self.file_string, "html.parser")
-#         self.assertEqual(scraper.AdvantageDataForAHero.get_role_column(soup, scraper.AdvantageDataForAHero.SUPPORT_STRING), 5)
-
-#     def test_carry(self):
-#         soup = BeautifulSoup(self.file_string, "html.parser")
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_teamliquid(soup, "Antimage", scraper.AdvantageDataForAHero.CARRY_STRING), 1)
-
-#     def test_not_carry(self):
-#         soup = BeautifulSoup(self.file_string, "html.parser")
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_teamliquid(soup, "Disruptor", scraper.AdvantageDataForAHero.CARRY_STRING), 0)
-
-#     def test_sub_string_not_carry(self):
-#         soup = BeautifulSoup(self.file_string, "html.parser")
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_teamliquid(soup, "nt", scraper.AdvantageDataForAHero.CARRY_STRING), 0)
-
-# class TestScrapingOfMid(unittest.TestCase):
-#     def setUp(self):
-#         file_string = scraper.load_file(Helpers.get_path("Dotabuff Middle Lane.html"))
-#         self.soup = BeautifulSoup(file_string, "html.parser")
-
-#     def test_high_presence(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_dotabuff(self.soup, "Shadow Fiend"), 1)
-
-#     def test_just_enough_presence(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_dotabuff(self.soup, "Brewmaster"), 1)
-
-#     def test_low_presence(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_dotabuff(self.soup, "Drow Ranger"), 0)
-
-#     def test_not_on_page(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_role_from_dotabuff(self.soup, "Anti-Mage"), 0)
-
-
-# class TestRoaming(unittest.TestCase):
-#     def test_in_list(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_roaming_hero("Crystal Maiden"), 1)
-
-#     def test_not_in_list(self):
-#         self.assertEqual(scraper.AdvantageDataForAHero.is_roaming_hero("Gabe Newell"), 0)
-
-
 class MockRequestHandler(RequestHandler):
     url_map = {
         "http://www.dota2.com/heroes/": "Heroes_dota2.com.html",
         "http://wiki.teamliquid.net/dota2/Hero_Roles": "Hero Roles.html",
-        "http://www.dotabuff.com/heroes/lanes?lane=mid": (
-            "Dotabuff Middle Lane.html"),
+        "http://www.dotabuff.com/heroes/lanes?lane=mid": "Dotabuff Middle Lane.html",
+        "http://www.dotabuff.com/heroes/lanes?lane=roaming": "Dotabuff Roaming.html",
         "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
     }
 
@@ -111,11 +61,6 @@ class TestDotabuffLane(unittest.TestCase):
         self.assertTrue(
             self.scraper._hero_present_in_lane("Shadow Fiend", Lane.MIDDLE))
 
-    def test_manual_presence(self):
-        self.assertFalse(
-            self.scraper._hero_present_in_lane(
-                "Shadow Fiend", Lane.MIDDLE, 100))
-
     def test_just_enough_presence(self):
         self.assertTrue(
             self.scraper._hero_present_in_lane("Brewmaster", Lane.MIDDLE))
@@ -127,6 +72,10 @@ class TestDotabuffLane(unittest.TestCase):
     def test_not_on_page(self):
         self.assertFalse(
             self.scraper._hero_present_in_lane("Anti-Mage", Lane.MIDDLE))
+
+    def test_roaming(self):
+        self.assertTrue(
+            self.scraper._hero_present_in_lane("Riki", Lane.ROAMING))
 
 
 class TestTeamLiquidIsRole(unittest.TestCase):

@@ -87,7 +87,7 @@ class WebScraper(object):
                 'advantage': float(advantage),
             }
 
-    def _hero_present_in_lane(self, hero, lane, min_presence=30):
+    def _hero_present_in_lane(self, hero, lane):
         LANE_MAP = {
             Lane.SAFE: "http://www.dotabuff.com/heroes/lanes?lane=safe",
             Lane.MIDDLE: "http://www.dotabuff.com/heroes/lanes?lane=mid",
@@ -95,6 +95,7 @@ class WebScraper(object):
             Lane.JUNGLE: "http://www.dotabuff.com/heroes/lanes?lane=jungle",
             Lane.ROAMING: "http://www.dotabuff.com/heroes/lanes?lane=roaming",
         }
+        min_presence = 30 if lane != Lane.ROAMING else 5
         soup = self.request_handler.get_soup(LANE_MAP[lane])
         table = soup.find("table", class_="sortable")
         for row in table.find_all("tr"):
