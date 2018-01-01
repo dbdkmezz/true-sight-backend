@@ -1,4 +1,3 @@
-import time
 import pytest
 from unittest.mock import patch
 from django.test import TestCase
@@ -7,6 +6,7 @@ from django.conf import settings
 
 from project.apps.metadata.models import AdvantagesUpdate
 from project.apps.hero_advantages.models import Advantage, Hero
+from project.apps.hero_advantages.exceptions import InvalidEnemyNames
 
 from .factories import HeroFactory, AdvantageFactory
 
@@ -36,21 +36,38 @@ class TestModels(TestCase):
             result = Advantage.generate_info_dict(["Joe"])
             assert start_update.call_count == 1
         self.assertEqual(len(result), 2)
+
         sb = next(r for r in result if r['name'] == 'Super-Bob')
         self.assertEqual(sb["advantages"][0], 1.1)
         self.assertTrue(sb["is_carry"])
         self.assertFalse(sb["is_jungler"])
+
         sm = next(r for r in result if r['name'] == 'Spacey Max')
         self.assertEqual(sm["advantages"][0], -0.5)
 
+    def test_info_dict_raises_invalid_enemy_names(self):
+        self.setup_advantages()
+        with patch.object(Advantage, '_start_update_if_due'):
+            with self.assertRaises(InvalidEnemyNames):
+                Advantage.generate_info_dict(["MADE UP HERO"])
+
     def test_multi_hero_info_dict(self):
         self.setup_advantages()
-        with patch.object(Advantage, '_start_update_if_due') as start_update:
+        with patch.object(Advantage, '_start_update_if_due'):
             result = Advantage.generate_info_dict(["Joe", "Super-Bob"])
-            assert start_update.call_count == 1
         self.assertEqual(len(result), 1)
-        self.assertEqual(result["Spacey Max"]["advantage"], -0.6)
-        self.assertEqual(result["Spacey Max"]["is_roaming"], True)
+        sm = result[0]
+        self.assertListEqual(sm["advantages"], [-0.5, -0.1])
+        self.assertTrue(sm["is_roaming"], True)
+
+    def test_multi_hero_info_dict_order_matters(self):
+        self.setup_advantages()
+        with patch.object(Advantage, '_start_update_if_due'):
+            result = Advantage.generate_info_dict(["Super-Bob", "Joe"])
+        self.assertEqual(len(result), 1)
+        sm = result[0]
+        self.assertListEqual(sm["advantages"], [-0.1, -0.5])
+        self.assertTrue(sm["is_roaming"], True)
 
     def test_starts_update_if_no_heroes(self):
         with patch.object(Advantage, 'update_from_web', side_effect=self.setup_advantages) as update_from_web:

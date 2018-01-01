@@ -72,14 +72,19 @@ class Advantage(models.Model):
         if Hero.objects.count() == 0:
             cls._start_update_if_due()
 
-        enemies = Hero.objects.filter(name__in=enemy_names)
-        if len(enemies) != len(enemy_names):
+        try:
+            enemies = list(Hero.objects.get(name=enemy_name) for enemy_name in enemy_names)
+        except Hero.DoesNotExist:
             raise InvalidEnemyNames
+
         results = []
         for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
-            advantage = sum(a.advantage for a in Advantage.objects.filter(hero=h, enemy__in=enemies))
+            advantages = list(
+                Advantage.objects.get(hero=h, enemy=enemy).advantage
+                for enemy in enemies
+            )
             info_dict = h.generate_info_dict()
-            info_dict['advantages'] = [advantage]  # this won't work for more than one!
+            info_dict['advantages'] = advantages
             results.append(info_dict)
 
         if getattr(settings, 'DISABLE_THREADING', None):
