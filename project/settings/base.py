@@ -87,6 +87,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'wsgi.application'
 
 
+SETTINGS_URI_PATH = get_secret('SETTINGS_URI_PATH')
+
+
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
