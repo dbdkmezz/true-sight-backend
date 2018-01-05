@@ -1,13 +1,12 @@
 from .base import *  # noqa
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    }
+# Put log file in parent folder so looponfail doesn't run tests endlessly
+LOGGING['handlers']['file'] = {
+    'level': 'DEBUG',
+    'class': 'logging.FileHandler',
+    'filename': BASE_DIR.ancestor(2).child('debug.log'),
 }
