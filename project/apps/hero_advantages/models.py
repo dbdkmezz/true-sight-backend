@@ -73,6 +73,7 @@ class Advantage(models.Model):
                 'Attempting to generate_info_dict for invalid enemy names: %s', enemy_names)
             raise InvalidEnemyNames
 
+        result = []
         for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
             advantages = list(
                 Advantage.objects.get(hero=h, enemy=enemy).advantage
@@ -80,7 +81,8 @@ class Advantage(models.Model):
             )
             info_dict = h.generate_info_dict()
             info_dict['advantages'] = advantages
-            yield info_dict
+            result.append(info_dict)
+        return result
 
     @staticmethod
     def update_from_web():

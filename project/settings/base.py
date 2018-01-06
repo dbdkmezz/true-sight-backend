@@ -38,6 +38,7 @@ SECRET_KEY = get_secret('SECRET_KEY')
 
 ALLOWED_HOSTS = [
     'localhost',
+    '127.0.0.1',
     get_secret('HOST_IP'),
 ]
 

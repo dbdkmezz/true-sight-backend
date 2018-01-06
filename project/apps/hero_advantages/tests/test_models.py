@@ -32,8 +32,8 @@ class TestModels(TestCase):
 
     def test_single_info_dict(self):
         self.setup_advantages()
-        result = list(Advantage.generate_info_dict(["Joe"]))
-        self.assertEqual(len(list(result)), 2)
+        result = Advantage.generate_info_dict(["Joe"])
+        self.assertEqual(len(result), 2)
 
         sb = next(r for r in result if r['name'] == 'Super-Bob')
         self.assertEqual(sb["advantages"][0], 1.1)
@@ -46,11 +46,11 @@ class TestModels(TestCase):
     def test_info_dict_raises_invalid_enemy_names(self):
         self.setup_advantages()
         with self.assertRaises(InvalidEnemyNames):
-            next(Advantage.generate_info_dict(["MADE UP HERO"]))
+            Advantage.generate_info_dict(["MADE UP HERO"])
 
     def test_multi_hero_info_dict(self):
         self.setup_advantages()
-        result = list(Advantage.generate_info_dict(["Joe", "Super-Bob"]))
+        result = Advantage.generate_info_dict(["Joe", "Super-Bob"])
         self.assertEqual(len(result), 1)
         sm = result[0]
         self.assertListEqual(sm["advantages"], [-0.5, -0.1])
@@ -58,7 +58,7 @@ class TestModels(TestCase):
 
     def test_multi_hero_info_dict_order_matters(self):
         self.setup_advantages()
-        result = list(Advantage.generate_info_dict(["Super-Bob", "Joe"]))
+        result = Advantage.generate_info_dict(["Super-Bob", "Joe"])
         self.assertEqual(len(result), 1)
         sm = result[0]
         self.assertListEqual(sm["advantages"], [-0.1, -0.5])

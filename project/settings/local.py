@@ -1,6 +1,9 @@
 from .base import *  # noqa
 
 
+SETTINGS_URI_PATH = 'admin'
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
