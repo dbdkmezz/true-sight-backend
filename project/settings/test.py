@@ -1,12 +1,25 @@
-from .local import *  # noqa
+from .base import *  # noqa
 
 
 DEBUG = True
 
 
-# Put log file in parent folder so looponfail doesn't run tests endlessly
-LOGGING['handlers']['file'] = {
-    'level': 'DEBUG',
-    'class': 'logging.FileHandler',
-    'filename': BASE_DIR.ancestor(2).child('debug.log'),
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            # Put log file in parent folder so looponfail doesn't run tests endlessly
+            'filename': BASE_DIR.ancestor(2).child('debug.log'),
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
