@@ -1,13 +1,14 @@
-import time
-import datetime
-import threading
+import logging
+
 from django.db import models
-from django.conf import settings
 
 from project.apps.metadata.models import AdvantagesUpdate
 
 from .exceptions import InvalidEnemyNames
 from .web_scraper import WebScraper, HeroRole
+
+
+logger = logging.getLogger(__name__)
 
 
 class Hero(models.Model):
@@ -36,21 +37,17 @@ class Hero(models.Model):
 
     def update_from_web(self, web_scraper):
         """Updates the hero's roles using the web scraper"""
-        t = time.time()
         scraper = WebScraper()
-        print("  update scraper {}".format(time.time() - t))
-        t = time.time()
         self.is_carry = scraper.hero_is_role(self.name, HeroRole.CARRY)
         self.is_support = scraper.hero_is_role(self.name, HeroRole.SUPPORT)
         self.is_off_lane = scraper.hero_is_role(self.name, HeroRole.OFF_LANE)
         self.is_jungler = scraper.hero_is_role(self.name, HeroRole.JUNGLER)
         self.is_mid = scraper.hero_is_role(self.name, HeroRole.MIDDLE)
         self.is_roaming = scraper.hero_is_role(self.name, HeroRole.ROAMING)
-        print("  load deatails {}".format(time.time() - t))
 
         if not (self.is_carry or self.is_support or self.is_off_lane
                 or self.is_jungler or self.is_mid or self.is_roaming):
-            print("ERROR: {} has not role".format(self.name))
+            logger.warning('Hero %s has no role', self.name)
 
 
 class Advantage(models.Model):
@@ -69,15 +66,13 @@ class Advantage(models.Model):
 
     @classmethod
     def generate_info_dict(cls, enemy_names):
-        if Hero.objects.count() == 0:
-            cls._start_update_if_due()
-
         try:
             enemies = list(Hero.objects.get(name=enemy_name) for enemy_name in enemy_names)
         except Hero.DoesNotExist:
+            logger.debug(
+                'Attempting to generate_info_dict for invalid enemy names: %s', enemy_names)
             raise InvalidEnemyNames
 
-        results = []
         for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
             advantages = list(
                 Advantage.objects.get(hero=h, enemy=enemy).advantage
@@ -85,69 +80,38 @@ class Advantage(models.Model):
             )
             info_dict = h.generate_info_dict()
             info_dict['advantages'] = advantages
-            results.append(info_dict)
-
-        if getattr(settings, 'DISABLE_THREADING', None):
-            cls._start_update_if_due()
-        else:
-            thread = threading.Thread(target=cls._start_update_if_due)
-            thread.start()
-
-        return results
-
-    @classmethod
-    def _start_update_if_due(cls):
-        if not AdvantagesUpdate.update_in_progress():
-            if (datetime.datetime.now() - AdvantagesUpdate.last_update_time()).total_seconds() > 86400:
-                AdvantagesUpdate.start_new_update()
-                cls.update_from_web()
-                AdvantagesUpdate.finish_current_update()
+            yield info_dict
 
     @staticmethod
     def update_from_web():
+        AdvantagesUpdate.start_new_update()
         web_scraper = WebScraper()
         web_scraper.reset_cache()
         hero_names = list(web_scraper.get_hero_names())
         if len(hero_names) < 115:
-            raise Exception("too few heroes got from the web")
+            logger.warning('Got too few hero names from the web, only got %s', len(hero_names))
+            raise Exception
 
         # Remove any heroes from the database which aren't in the new list
         extra_heroes = Hero.objects.exclude(name__in=hero_names)
         for h in extra_heroes:
-            print("Deleting {}".format(h.name))
+            logger.warning('Removing %s from the heroes db', h.name)
             h.delete()
 
         for name in hero_names:
-            print(name)
-            t = time.time()
             hero, _ = Hero.objects.get_or_create(name=name)
-            print("  get_or_create {}".format(time.time() - t))
-            t = time.time()
             hero.update_from_web(web_scraper)
-            print("  update_from_web {}".format(time.time() - t))
-            t = time.time()
             hero.save()
-            print("  save {}".format(time.time() - t))
 
-        assert len(hero_names) == Hero.objects.count()
-
-        print("\n\nLOADING ADVANTAGES\n")
         for hero in Hero.objects.all():
-            print(hero)
             advantages_data = web_scraper.load_advantages_for_hero(hero.name)
             for advantage_data in advantages_data:
-                print("  {}".format(advantage_data['enemy_name']))
-                t = time.time()
                 adv = advantage_data['advantage']
-                print("    get adv {}".format(time.time() - t))
-                t = time.time()
                 enemy = Hero.objects.get(name=advantage_data['enemy_name'])
-                print("    get enemy {} {}".format(enemy, time.time() - t))
-                t = time.time()
                 Advantage.objects.update_or_create(
                     hero=hero,
                     enemy=enemy,
                     defaults={'advantage': adv},
                 )
-                print("    update_or_create {}".format(time.time() - t))
-                t = time.time()
+
+        AdvantagesUpdate.finish_current_update()

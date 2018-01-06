@@ -2,10 +2,23 @@ import os
 from .base import *
 
 
-LOGGING['handlers']['file'] = {
-    'level': 'DEBUG',
-    'class': 'logging.FileHandler',
-    'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
 
 DATABASES['default'] = {

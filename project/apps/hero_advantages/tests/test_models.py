@@ -32,10 +32,8 @@ class TestModels(TestCase):
 
     def test_single_info_dict(self):
         self.setup_advantages()
-        with patch.object(Advantage, '_start_update_if_due') as start_update:
-            result = Advantage.generate_info_dict(["Joe"])
-            assert start_update.call_count == 1
-        self.assertEqual(len(result), 2)
+        result = list(Advantage.generate_info_dict(["Joe"]))
+        self.assertEqual(len(list(result)), 2)
 
         sb = next(r for r in result if r['name'] == 'Super-Bob')
         self.assertEqual(sb["advantages"][0], 1.1)
@@ -47,14 +45,12 @@ class TestModels(TestCase):
 
     def test_info_dict_raises_invalid_enemy_names(self):
         self.setup_advantages()
-        with patch.object(Advantage, '_start_update_if_due'):
-            with self.assertRaises(InvalidEnemyNames):
-                Advantage.generate_info_dict(["MADE UP HERO"])
+        with self.assertRaises(InvalidEnemyNames):
+            next(Advantage.generate_info_dict(["MADE UP HERO"]))
 
     def test_multi_hero_info_dict(self):
         self.setup_advantages()
-        with patch.object(Advantage, '_start_update_if_due'):
-            result = Advantage.generate_info_dict(["Joe", "Super-Bob"])
+        result = list(Advantage.generate_info_dict(["Joe", "Super-Bob"]))
         self.assertEqual(len(result), 1)
         sm = result[0]
         self.assertListEqual(sm["advantages"], [-0.5, -0.1])
@@ -62,21 +58,8 @@ class TestModels(TestCase):
 
     def test_multi_hero_info_dict_order_matters(self):
         self.setup_advantages()
-        with patch.object(Advantage, '_start_update_if_due'):
-            result = Advantage.generate_info_dict(["Super-Bob", "Joe"])
+        result = list(Advantage.generate_info_dict(["Super-Bob", "Joe"]))
         self.assertEqual(len(result), 1)
         sm = result[0]
         self.assertListEqual(sm["advantages"], [-0.1, -0.5])
         self.assertTrue(sm["is_roaming"], True)
-
-    def test_starts_update_if_no_heroes(self):
-        with patch.object(Advantage, 'update_from_web', side_effect=self.setup_advantages) as update_from_web:
-            Advantage.generate_info_dict(["Joe"])
-            assert update_from_web.call_count == 1
-
-    def test_starts_if_never_updated(self):
-        settings.DISABLE_THREADING = True
-        self.setup_advantages()
-        with patch.object(Advantage, 'update_from_web') as update_from_web:
-            Advantage.generate_info_dict(["Joe"])
-            assert update_from_web.call_count == 1
