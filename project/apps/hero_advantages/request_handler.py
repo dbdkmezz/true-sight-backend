@@ -1,17 +1,21 @@
+import time
+import logging
 import requests
-import requests_cache
 from requests.exceptions import ConnectionError
+
 from bs4 import BeautifulSoup
 
 
+logger = logging.getLogger(__name__)
+
+
 class RequestHandler(object):
-    @staticmethod
-    def reset_cache():
-        requests_cache.install_cache()
-        requests_cache.clear()
+    @classmethod
+    def sleeps(self):
+        return [1, 5, 15]
 
     @classmethod
-    def get(cls, url, retries=3):
+    def get(cls, url, retry=0):
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)"
@@ -21,10 +25,16 @@ class RequestHandler(object):
         try:
             r = requests.get(url, headers=headers)
         except ConnectionError:
-            if retries == 0:
+            if retry == len(cls.sleeps()):
                 raise
-            print("CONNECTION ERROR LOADING {}, retrying".format(url))
-            return cls.get(url, retries - 1)
+            sleep_lenght = cls.sleeps()[retry]
+            logger.warning(
+                "CONNECTION ERROR LOADING %s, retrying after sleep of %s",
+                url,
+                sleep_lenght,
+            )
+            time.sleep(sleep_lenght)
+            return cls.get(url, retry + 1)
         return r.content
 
     @classmethod

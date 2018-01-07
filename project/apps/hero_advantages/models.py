@@ -37,13 +37,12 @@ class Hero(models.Model):
 
     def update_from_web(self, web_scraper):
         """Updates the hero's roles using the web scraper"""
-        scraper = WebScraper()
-        self.is_carry = scraper.hero_is_role(self.name, HeroRole.CARRY)
-        self.is_support = scraper.hero_is_role(self.name, HeroRole.SUPPORT)
-        self.is_off_lane = scraper.hero_is_role(self.name, HeroRole.OFF_LANE)
-        self.is_jungler = scraper.hero_is_role(self.name, HeroRole.JUNGLER)
-        self.is_mid = scraper.hero_is_role(self.name, HeroRole.MIDDLE)
-        self.is_roaming = scraper.hero_is_role(self.name, HeroRole.ROAMING)
+        self.is_carry = web_scraper.hero_is_role(self.name, HeroRole.CARRY)
+        self.is_support = web_scraper.hero_is_role(self.name, HeroRole.SUPPORT)
+        self.is_off_lane = web_scraper.hero_is_role(self.name, HeroRole.OFF_LANE)
+        self.is_jungler = web_scraper.hero_is_role(self.name, HeroRole.JUNGLER)
+        self.is_mid = web_scraper.hero_is_role(self.name, HeroRole.MIDDLE)
+        self.is_roaming = web_scraper.hero_is_role(self.name, HeroRole.ROAMING)
 
         if not (self.is_carry or self.is_support or self.is_off_lane
                 or self.is_jungler or self.is_mid or self.is_roaming):
@@ -88,7 +87,6 @@ class Advantage(models.Model):
     def update_from_web():
         AdvantagesUpdate.start_new_update()
         web_scraper = WebScraper()
-        web_scraper.reset_cache()
         hero_names = list(web_scraper.get_hero_names())
         if len(hero_names) < 115:
             logger.warning('Got too few hero names from the web, only got %s', len(hero_names))

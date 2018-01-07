@@ -41,11 +41,11 @@ class TestHeroIsRole(unittest.TestCase):
             def __init__(self):
                 pass
 
-            def _hero_present_in_lane(self, hero_name, lane):
-                return hero_name == "MR CARRY" and lane == Lane.SAFE
+            def _heroes_present_in_lane(self, lane):
+                return ["MR CARRY"] if lane == Lane.SAFE else []
 
-            def _teamliquid_hero_is_role(self, hero_name, role):
-                return hero_name == "MR CARRY" and role == HeroRole.CARRY
+            def _teamliquid_heroes_of_role(self, role):
+                return ["MR CARRY"] if role == HeroRole.CARRY else []
 
         scraper = MockScraper()
         self.assertTrue(scraper.hero_is_role("MR CARRY", HeroRole.CARRY))
@@ -59,23 +59,23 @@ class TestDotabuffLane(unittest.TestCase):
 
     def test_high_presence(self):
         self.assertTrue(
-            self.scraper._hero_present_in_lane("Shadow Fiend", Lane.MIDDLE))
+            self.scraper.hero_is_role("Shadow Fiend", HeroRole.MIDDLE))
 
     def test_just_enough_presence(self):
         self.assertTrue(
-            self.scraper._hero_present_in_lane("Brewmaster", Lane.MIDDLE))
+            self.scraper.hero_is_role("Brewmaster", HeroRole.MIDDLE))
 
     def test_low_presence(self):
         self.assertFalse(
-            self.scraper._hero_present_in_lane("Drow Ranger", Lane.MIDDLE))
+            self.scraper.hero_is_role("Drow Ranger", HeroRole.MIDDLE))
 
     def test_not_on_page(self):
         self.assertFalse(
-            self.scraper._hero_present_in_lane("Anti-Mage", Lane.MIDDLE))
+            self.scraper.hero_is_role("Anti-Mage", HeroRole.MIDDLE))
 
     def test_roaming(self):
         self.assertTrue(
-            self.scraper._hero_present_in_lane("Riki", Lane.ROAMING))
+            self.scraper.hero_is_role("Riki", HeroRole.ROAMING))
 
 
 class TestTeamLiquidIsRole(unittest.TestCase):
@@ -83,21 +83,25 @@ class TestTeamLiquidIsRole(unittest.TestCase):
         self.scraper = WebScraper(request_handler=MockRequestHandler())
 
     def test_carry(self):
-        self.assertTrue(
-            self.scraper._teamliquid_hero_is_role("Anti-Mage", HeroRole.CARRY))
+        self.assertIn(
+            "Anti-Mage",
+            self.scraper._teamliquid_heroes_of_role(HeroRole.CARRY))
 
     def test_not_carry(self):
-        self.assertFalse(
-            self.scraper._teamliquid_hero_is_role("Disruptor", HeroRole.CARRY))
+        self.assertNotIn(
+            "Disruptor",
+            self.scraper._teamliquid_heroes_of_role(HeroRole.CARRY))
 
     def test_sub_string_not_carry(self):
-        self.assertFalse(
-            self.scraper._teamliquid_hero_is_role("nt", HeroRole.CARRY))
+        self.assertNotIn(
+            "nt",
+            self.scraper._teamliquid_heroes_of_role(HeroRole.CARRY))
 
     def test_support(self):
-        self.assertTrue(
-            self.scraper._teamliquid_hero_is_role(
-                "Disruptor", HeroRole.SUPPORT))
+        self.assertIn(
+            "Disruptor",
+            self.scraper._teamliquid_heroes_of_role(HeroRole.SUPPORT)
+        )
 
 
 class TestScrapingOfAdvantages(unittest.TestCase):

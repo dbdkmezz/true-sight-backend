@@ -1,6 +1,8 @@
 import re
 from enum import Enum, unique
 
+from django.utils.functional import cached_property
+
 from .request_handler import RequestHandler
 
 
@@ -27,9 +29,6 @@ class WebScraper(object):
     def __init__(self, request_handler=RequestHandler()):
         self.request_handler = request_handler
 
-    def reset_cache(self):
-        self.request_handler.reset_cache()
-
     def get_hero_names(self):
         soup = self.request_handler.get_soup("http://www.dota2.com/heroes/")
         soup = soup.find(id="filterName")
@@ -42,23 +41,22 @@ class WebScraper(object):
     def hero_is_role(self, hero, role):
         ROLE_TEST_MAP = {
             HeroRole.CARRY: lambda h: (
-                self._hero_present_in_lane(h, Lane.SAFE) and
-                self._teamliquid_hero_is_role(h, HeroRole.CARRY)
+                h in self._carry_heroes
             ),
             HeroRole.SUPPORT: lambda h: (
-                self._teamliquid_hero_is_role(h, HeroRole.SUPPORT)
+                h in self._support_heroes
             ),
             HeroRole.JUNGLER: lambda h: (
-                self._hero_present_in_lane(h, Lane.JUNGLE)
+                h in self._jungle_heroes
             ),
             HeroRole.OFF_LANE: lambda h: (
-                self._hero_present_in_lane(h, Lane.OFF_LANE)
+                h in self._off_lane_heroes
             ),
             HeroRole.MIDDLE: lambda h: (
-                self._hero_present_in_lane(h, Lane.MIDDLE)
+                h in self._middle_lane_heroes
             ),
             HeroRole.ROAMING: lambda h: (
-                self._hero_present_in_lane(h, Lane.ROAMING)
+                h in self._roaming_heroes
             ),
         }
         return ROLE_TEST_MAP[role](hero)
@@ -87,7 +85,34 @@ class WebScraper(object):
                 'advantage': float(advantage),
             }
 
-    def _hero_present_in_lane(self, hero, lane):
+    @cached_property
+    def _middle_lane_heroes(self):
+        return self._heroes_present_in_lane(Lane.MIDDLE)
+
+    @cached_property
+    def _carry_heroes(self):
+        return list(
+            set(
+                self._heroes_present_in_lane(Lane.SAFE)
+            ).intersection(self._teamliquid_heroes_of_role(HeroRole.CARRY)))
+
+    @cached_property
+    def _off_lane_heroes(self):
+        return self._heroes_present_in_lane(Lane.OFF_LANE)
+
+    @cached_property
+    def _jungle_heroes(self):
+        return self._heroes_present_in_lane(Lane.JUNGLE)
+
+    @cached_property
+    def _roaming_heroes(self):
+        return self._heroes_present_in_lane(Lane.ROAMING)
+
+    @cached_property
+    def _support_heroes(self):
+        return self._teamliquid_heroes_of_role(HeroRole.SUPPORT)
+
+    def _heroes_present_in_lane(self, lane):
         LANE_MAP = {
             Lane.SAFE: "http://www.dotabuff.com/heroes/lanes?lane=safe",
             Lane.MIDDLE: "http://www.dotabuff.com/heroes/lanes?lane=mid",
@@ -98,28 +123,29 @@ class WebScraper(object):
         min_presence = 30 if lane != Lane.ROAMING else 5
         soup = self.request_handler.get_soup(LANE_MAP[lane])
         table = soup.find("table", class_="sortable")
+
+        result = []
         for row in table.find_all("tr"):
-            name_cell = row.find("td", class_="cell-xlarge", text=hero)
-            if name_cell and name_cell.get_text() == hero:
-                # Find the cell with a "%" character in the string
-                presence_cell = row.find(string=re.compile("%"))
-                presence = float(presence_cell.replace("%", ""))
-                return presence >= min_presence
+            columns = row.find_all("td")
+            if len(columns) == 0:
+                continue
+            hero_name = columns[1].get_text()
+            presence = float(columns[2].get_text().replace("%", ""))
+            if presence >= min_presence:
+                result.append(hero_name)
+        return result
 
-        return False
-
-    def _teamliquid_hero_is_role(self, hero, role):
+    def _teamliquid_heroes_of_role(self, role):
         ROLE_MAP = {
             HeroRole.CARRY: "Carry",
             HeroRole.SUPPORT: "Support",
-            HeroRole.JUNGLER: "Jungler",
+            # HeroRole.JUNGLER: "Jungler",
         }
 
-        soup = self.request_handler.get_soup(
-            "http://wiki.teamliquid.net/dota2/Hero_Roles")
+        soup = self.request_handler.get_soup("http://wiki.teamliquid.net/dota2/Hero_Roles")
         # The first table with the role name in its table heading ("th")
         table = next((
             t for t in soup.find_all("table")
             if t.find_all("th", text=re.compile(".*{}".format(ROLE_MAP[role])))
         ))
-        return hero in (i.get("title") for i in table.find_all("a"))
+        return [i.get("title") for i in table.find_all("a")]
