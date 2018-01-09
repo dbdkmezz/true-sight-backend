@@ -67,16 +67,19 @@ class Advantage(models.Model):
     def generate_info_dict(cls, enemy_names):
         enemy_names = cls._nature_bug_workaround(enemy_names)
         try:
-            enemies = list(Hero.objects.get(name=enemy_name) for enemy_name in enemy_names)
+            enemies = [
+                Hero.objects.get(name=enemy_name) if enemy_name != 'none' else None
+                for enemy_name in enemy_names
+            ]
         except Hero.DoesNotExist:
             logger.debug(
                 'Attempting to generate_info_dict for invalid enemy names: %s', enemy_names)
             raise InvalidEnemyNames
 
         result = []
-        for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies]):
+        for h in Hero.objects.exclude(pk__in=[e.pk for e in enemies if e]):
             advantages = list(
-                Advantage.objects.get(hero=h, enemy=enemy).advantage
+                Advantage.objects.get(hero=h, enemy=enemy).advantage if enemy else None
                 for enemy in enemies
             )
             info_dict = h.generate_info_dict()

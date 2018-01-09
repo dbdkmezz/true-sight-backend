@@ -48,6 +48,13 @@ class TestModels(TestCase):
         self.assertListEqual(sm["advantages"], [-0.1, -0.5])
         self.assertTrue(sm["is_roaming"], True)
 
+    def test_multi_hero_info_dict_with_none(self):
+        result = Advantage.generate_info_dict(["Joe", "none"])
+        sb = next(r for r in result if r['name'] == "Super-Bob")
+        self.assertEqual(sb["advantages"], [1.1, None])
+        sm = next(r for r in result if r['name'] == "Spacey Max")
+        self.assertListEqual(sm["advantages"], [-0.5, None])
+
 
 @pytest.mark.django_db
 class SimpleModelTestes(TestCase):
