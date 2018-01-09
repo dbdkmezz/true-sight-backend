@@ -47,3 +47,17 @@ class TestModels(TestCase):
         sm = result[0]
         self.assertListEqual(sm["advantages"], [-0.1, -0.5])
         self.assertTrue(sm["is_roaming"], True)
+
+
+@pytest.mark.django_db
+class SimpleModelTestes(TestCase):
+    """Tests which don't require the full db setup"""
+    def test_nature_work_around(self):
+        """There's a bug in the Android app which means that Nature's Prophet is just called Nature
+        This tests we still give the correct result.
+        """
+        qop = HeroFactory(name="Queen of Pain")
+        np = HeroFactory(name="Nature's Prophet")
+        AdvantageFactory(hero=qop, enemy=np, advantage=1.2)
+        result = Advantage.generate_info_dict(["Nature"])
+        self.assertEqual(result[0]['name'], "Queen of Pain")

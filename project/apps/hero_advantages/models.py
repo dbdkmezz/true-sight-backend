@@ -65,6 +65,7 @@ class Advantage(models.Model):
 
     @classmethod
     def generate_info_dict(cls, enemy_names):
+        enemy_names = cls._nature_bug_workaround(enemy_names)
         try:
             enemies = list(Hero.objects.get(name=enemy_name) for enemy_name in enemy_names)
         except Hero.DoesNotExist:
@@ -82,6 +83,13 @@ class Advantage(models.Model):
             info_dict['advantages'] = advantages
             result.append(info_dict)
         return result
+
+    @staticmethod
+    def _nature_bug_workaround(enemy_names):
+        return [
+            "Nature's Prophet" if e == "Nature" else e
+            for e in enemy_names
+        ]
 
     @staticmethod
     def update_from_web():
