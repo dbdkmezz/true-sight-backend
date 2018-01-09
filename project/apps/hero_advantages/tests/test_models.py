@@ -1,11 +1,7 @@
 import pytest
-from unittest.mock import patch
 from django.test import TestCase
-from django.conf import settings
 
-
-from project.apps.metadata.models import AdvantagesUpdate
-from project.apps.hero_advantages.models import Advantage, Hero
+from project.apps.hero_advantages.models import Advantage
 from project.apps.hero_advantages.exceptions import InvalidEnemyNames
 
 from .factories import HeroFactory, AdvantageFactory
@@ -13,14 +9,6 @@ from .factories import HeroFactory, AdvantageFactory
 
 @pytest.mark.django_db
 class TestModels(TestCase):
-    def setUp(self):
-        # don't know why I have to call this pytest should do this itself
-        # must be something wrong with my config
-        for h in Hero.objects.all():
-            h.delete()
-        for u in AdvantagesUpdate.objects.all():
-            u.delete()
-
     def setup_advantages(self):
         joe = HeroFactory(name="Joe")
         sb = HeroFactory(name="Super-Bob", is_carry=True, is_jungler=False)

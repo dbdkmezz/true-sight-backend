@@ -1,3 +1,4 @@
+import pytest
 from django.test import TestCase
 from django.utils.encoding import force_text
 
@@ -7,6 +8,7 @@ from project.apps.hero_advantages.views import hero_list, hero_name, advantages
 from .factories import HeroFactory, AdvantageFactory
 
 
+@pytest.mark.django_db
 class TestViews(TestCase):
     def setUp(self):
         joe = HeroFactory(name="Joe")
@@ -53,7 +55,6 @@ class TestViews(TestCase):
 
     def test_advantages(self):
         response = advantages(None, 'Joe/Super-Bob')
-        print(response.content)
         self.assertJSONEqual(
             force_text(response.content),
             {'data':
