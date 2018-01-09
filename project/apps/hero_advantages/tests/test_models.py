@@ -9,7 +9,7 @@ from .factories import HeroFactory, AdvantageFactory
 
 @pytest.mark.django_db
 class TestModels(TestCase):
-    def setup_advantages(self):
+    def setUp(self):
         joe = HeroFactory(name="Joe")
         sb = HeroFactory(name="Super-Bob", is_carry=True, is_jungler=False)
         sm = HeroFactory(name="Spacey Max", is_roaming=True)
@@ -19,7 +19,6 @@ class TestModels(TestCase):
         AdvantageFactory(hero=sm, enemy=sb, advantage=-0.1)
 
     def test_single_info_dict(self):
-        self.setup_advantages()
         result = Advantage.generate_info_dict(["Joe"])
         self.assertEqual(len(result), 2)
 
@@ -32,12 +31,10 @@ class TestModels(TestCase):
         self.assertEqual(sm["advantages"][0], -0.5)
 
     def test_info_dict_raises_invalid_enemy_names(self):
-        self.setup_advantages()
         with self.assertRaises(InvalidEnemyNames):
             Advantage.generate_info_dict(["MADE UP HERO"])
 
     def test_multi_hero_info_dict(self):
-        self.setup_advantages()
         result = Advantage.generate_info_dict(["Joe", "Super-Bob"])
         self.assertEqual(len(result), 1)
         sm = result[0]
@@ -45,7 +42,6 @@ class TestModels(TestCase):
         self.assertTrue(sm["is_roaming"], True)
 
     def test_multi_hero_info_dict_order_matters(self):
-        self.setup_advantages()
         result = Advantage.generate_info_dict(["Super-Bob", "Joe"])
         self.assertEqual(len(result), 1)
         sm = result[0]
