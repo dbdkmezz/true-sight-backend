@@ -3,7 +3,7 @@ from enum import Enum, unique
 
 from django.utils.functional import cached_property
 
-from .request_handler import RequestHandler
+from ..utils.request_handler import RequestHandler
 
 
 @unique
@@ -29,14 +29,18 @@ class WebScraper(object):
     def __init__(self, request_handler=RequestHandler()):
         self.request_handler = request_handler
 
-    def get_hero_names(self):
+    def get_hero_names(self, min_heroes=115):
         soup = self.request_handler.get_soup("http://www.dota2.com/heroes/")
         soup = soup.find(id="filterName")
 
+        result = []
         for row in soup.find_all("option"):
             text = row.get_text()
             if(text != "HERO NAME" and text != "All"):
-                yield text
+                result.append(text)
+        if len(result) < min_heroes:
+            raise Exception('Got too few hero names from the web, only got %s', len(result))
+        return result
 
     def hero_is_role(self, hero, role):
         ROLE_TEST_MAP = {

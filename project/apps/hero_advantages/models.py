@@ -5,7 +5,7 @@ from django.db import models
 from project.apps.metadata.models import AdvantagesUpdate
 
 from .exceptions import InvalidEnemyNames
-from .web_scraper import WebScraper, HeroRole
+from .web_scraper import HeroRole
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class Hero(models.Model):
             'is_roaming': self.is_roaming,
         }
 
-    def update_from_web(self, web_scraper):
+    def update_roles(self, web_scraper):
         """Updates the hero's roles using the web scraper"""
         self.is_carry = web_scraper.hero_is_role(self.name, HeroRole.CARRY)
         self.is_support = web_scraper.hero_is_role(self.name, HeroRole.SUPPORT)
@@ -47,6 +47,23 @@ class Hero(models.Model):
         if not (self.is_carry or self.is_support or self.is_off_lane
                 or self.is_jungler or self.is_mid or self.is_roaming):
             logger.warning('Hero %s has no role', self.name)
+
+    @staticmethod
+    def update_from_web(web_scraper):
+        # AdvantagesUpdate.start_new_update()  some equivalent
+
+        hero_names = list(web_scraper.get_hero_names())
+
+        # Remove any heroes from the database which aren't in the new list
+        extra_heroes = Hero.objects.exclude(name__in=hero_names)
+        for hero in extra_heroes:
+            logger.warning('Removing the hero %s from the database', hero)
+            hero.delete()
+
+        for name in hero_names:
+            hero, _ = Hero.objects.get_or_create(name=name)
+            hero.update_roles(web_scraper)
+            hero.save()
 
 
 class Advantage(models.Model):
@@ -95,24 +112,8 @@ class Advantage(models.Model):
         ]
 
     @staticmethod
-    def update_from_web():
+    def update_from_web(web_scraper):
         AdvantagesUpdate.start_new_update()
-        web_scraper = WebScraper()
-        hero_names = list(web_scraper.get_hero_names())
-        if len(hero_names) < 115:
-            logger.warning('Got too few hero names from the web, only got %s', len(hero_names))
-            raise Exception
-
-        # Remove any heroes from the database which aren't in the new list
-        extra_heroes = Hero.objects.exclude(name__in=hero_names)
-        for h in extra_heroes:
-            logger.warning('Removing %s from the heroes db', h.name)
-            h.delete()
-
-        for name in hero_names:
-            hero, _ = Hero.objects.get_or_create(name=name)
-            hero.update_from_web(web_scraper)
-            hero.save()
 
         for hero in Hero.objects.all():
             advantages_data = web_scraper.load_advantages_for_hero(hero.name)

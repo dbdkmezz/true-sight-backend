@@ -10,12 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class RequestHandler(object):
-    @classmethod
+    @property
     def sleeps(self):
         return [1, 5, 15]
 
-    @classmethod
-    def get(cls, url, retry=0):
+    def get(self, url, retry=0):
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1)"
@@ -25,9 +24,9 @@ class RequestHandler(object):
         try:
             r = requests.get(url, headers=headers)
         except ConnectionError:
-            if retry == len(cls.sleeps()):
+            if retry == len(self.sleeps):
                 raise
-            sleep_lenght = cls.sleeps()[retry]
+            sleep_lenght = self.sleeps[retry]
             logger.warning(
                 "CONNECTION ERROR LOADING %s, retrying after sleep of %s",
                 url,
@@ -37,6 +36,17 @@ class RequestHandler(object):
             return cls.get(url, retry + 1)
         return r.content
 
-    @classmethod
-    def get_soup(cls, url):
-        return BeautifulSoup(cls.get(url), "html.parser")
+    def get_soup(self, url):
+        return BeautifulSoup(self.get(url), "html.parser")
+
+
+class MockRequestHandler(RequestHandler):
+    def __init__(self, url_map, files_path):
+        self.url_map = url_map
+        self.files_path = files_path
+
+    def get(self, url):
+        filename = self.url_map[url]
+        path = str(self.files_path.join(filename))
+        with open(path, "r") as f:
+            return f.read()

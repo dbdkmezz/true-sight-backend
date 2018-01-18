@@ -1,6 +1,6 @@
 looptest:
 	find . -name '*.pyc' -delete
-	py.test --looponfail
+	pytest --ds=project.settings.test --looponfail
 
 test:
 	find . -name '*.pyc' -delete

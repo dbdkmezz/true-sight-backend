@@ -1,32 +1,26 @@
 import py
 import unittest
 
-from ..request_handler import RequestHandler
+from ...utils.request_handler import MockRequestHandler
 from ..web_scraper import WebScraper, Lane, HeroRole
 
 
-class MockRequestHandler(RequestHandler):
-    url_map = {
+mock_request_handler = MockRequestHandler(
+    url_map={
         "http://www.dota2.com/heroes/": "Heroes_dota2.com.html",
         "http://wiki.teamliquid.net/dota2/Hero_Roles": "Hero Roles.html",
         "http://www.dotabuff.com/heroes/lanes?lane=mid": "Dotabuff Middle Lane.html",
         "http://www.dotabuff.com/heroes/lanes?lane=roaming": "Dotabuff Roaming.html",
         "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
-    }
-
-    @classmethod
-    def get(cls, url):
-        filename = cls.url_map[url]
-        path = str(py.path.local().join(
-            "project", "apps", "hero_advantages", "tests", "data", filename))
-        with open(path, "r") as f:
-            return f.read()
+    },
+    files_path=py.path.local().join("project", "apps", "hero_advantages", "tests", "data"),
+)
 
 
 class TestGetHeroNames(unittest.TestCase):
     def setUp(self):
-        scraper = WebScraper(request_handler=MockRequestHandler())
-        self.result = list(scraper.get_hero_names())
+        scraper = WebScraper(request_handler=mock_request_handler)
+        self.result = list(scraper.get_hero_names(min_heroes=111))
 
     def test_correct_number_names_loaded(self):
         self.assertEqual(len(self.result), 111)
@@ -55,7 +49,7 @@ class TestHeroIsRole(unittest.TestCase):
 
 class TestDotabuffLane(unittest.TestCase):
     def setUp(self):
-        self.scraper = WebScraper(request_handler=MockRequestHandler())
+        self.scraper = WebScraper(request_handler=mock_request_handler)
 
     def test_high_presence(self):
         self.assertTrue(
@@ -80,7 +74,7 @@ class TestDotabuffLane(unittest.TestCase):
 
 class TestTeamLiquidIsRole(unittest.TestCase):
     def setUp(self):
-        self.scraper = WebScraper(request_handler=MockRequestHandler())
+        self.scraper = WebScraper(request_handler=mock_request_handler)
 
     def test_carry(self):
         self.assertIn(
@@ -106,7 +100,7 @@ class TestTeamLiquidIsRole(unittest.TestCase):
 
 class TestScrapingOfAdvantages(unittest.TestCase):
     def setUp(self):
-        scraper = WebScraper(request_handler=MockRequestHandler())
+        scraper = WebScraper(request_handler=mock_request_handler)
         self.result = list(scraper.load_advantages_for_hero("Disruptor"))
 
     def test_first_name(self):
