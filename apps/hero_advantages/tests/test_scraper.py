@@ -13,7 +13,7 @@ mock_request_handler = MockRequestHandler(
         "http://www.dotabuff.com/heroes/lanes?lane=roaming": "Dotabuff Roaming.html",
         "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
     },
-    files_path=py.path.local().join("project", "apps", "hero_advantages", "tests", "data"),
+    files_path=py.path.local().join("apps", "hero_advantages", "tests", "data"),
 )
 
 

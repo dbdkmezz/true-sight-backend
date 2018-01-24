@@ -3,7 +3,7 @@ import string
 
 import factory
 
-from project.apps.hero_advantages.models import Hero, Advantage
+from ..models import Hero, Advantage
 
 
 def random_string(length=10, characters=string.ascii_letters):

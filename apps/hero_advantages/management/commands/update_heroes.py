@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from project.apps.hero_advantages.models import Advantage
+from ...models import Advantage
 
 
 class Command(BaseCommand):

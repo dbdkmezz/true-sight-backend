@@ -1,8 +1,8 @@
 import pytest
 from django.test import TestCase
 
-from project.apps.hero_advantages.models import Advantage
-from project.apps.hero_advantages.exceptions import InvalidEnemyNames
+from ..models import Advantage
+from ..exceptions import InvalidEnemyNames
 
 from .factories import HeroFactory, AdvantageFactory
 

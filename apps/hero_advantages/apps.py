@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class HeroAdvantagesConfig(AppConfig):
-    name = 'project.apps.hero_advantages'
+    name = 'apps.hero_advantages'

@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from project.apps.metadata.models import AdvantagesUpdate
+from ..metadata.models import AdvantagesUpdate
 
 from .exceptions import InvalidEnemyNames
 from .web_scraper import HeroRole

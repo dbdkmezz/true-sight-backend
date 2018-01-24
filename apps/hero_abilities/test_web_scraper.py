@@ -13,7 +13,7 @@ mock_request_handler = MockRequestHandler(
     url_map={
         "https://dota2.gamepedia.com/Disruptor": "Disruptor - Dota 2 Wiki.html",
     },
-    files_path=py.path.local().join("project", "apps", "hero_abilities", "test_data"),
+    files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
 
 

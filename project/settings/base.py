@@ -46,16 +46,15 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'project.apps.hero_advantages.apps.HeroAdvantagesConfig',
-    'project.apps.hero_abilities.apps.HeroAbilitiesConfig',
-    'project.apps.metadata.apps.MetadataConfig',
+    'apps.hero_advantages.apps.HeroAdvantagesConfig',
+    'apps.hero_abilities.apps.HeroAbilitiesConfig',
+    'apps.metadata.apps.MetadataConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -119,11 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
-]
-
-
-CRON_CLASSES = [
-    'project.apps.hero_advantages.cron_jobs.Update',
 ]
 
 

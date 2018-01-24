@@ -18,6 +18,6 @@ from django.contrib import admin
 from django.conf import settings
 
 urlpatterns = [
-    url(r'^hero_advantages/', include('project.apps.hero_advantages.urls')),
+    url(r'^hero_advantages/', include('apps.hero_advantages.urls')),
     url(r'^{}/'.format(settings.SETTINGS_URI_PATH), admin.site.urls),
 ]

@@ -2,7 +2,7 @@ import pytest
 import datetime
 from django.test import TestCase
 
-from project.apps.metadata.models import AdvantagesUpdate
+from ..models import AdvantagesUpdate
 
 from .factories import AdvantagesUpdateFactory
 
