@@ -2,7 +2,7 @@ import pytest
 
 from django.test import TestCase
 
-from apps.hero_advantages.tests.factories import HeroFactory
+from apps.hero_advantages.factories import HeroFactory
 from apps.hero_abilities.factories import AbilityFactorty
 
 from .response import QuestionParser

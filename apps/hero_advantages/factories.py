@@ -4,7 +4,7 @@ import factory
 
 from apps.utils.factories import random_string, random_bool
 
-from ..models import Hero, Advantage
+from .models import Hero, Advantage
 
 
 class HeroFactory(factory.DjangoModelFactory):

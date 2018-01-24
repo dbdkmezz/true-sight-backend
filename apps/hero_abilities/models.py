@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..hero_advantages.models import Hero
+from apps.hero_advantages.models import Hero
 
 from .web_scraper import WebScraper
 

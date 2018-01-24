@@ -3,7 +3,7 @@ from enum import Enum, unique
 
 from django.utils.functional import cached_property
 
-from ..utils.request_handler import RequestHandler
+from apps.utils.request_handler import RequestHandler
 
 
 @unique

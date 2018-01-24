@@ -2,8 +2,8 @@ import pytest
 from django.test import TestCase
 from django.utils.encoding import force_text
 
-from ..models import Hero
-from ..views import hero_list, hero_name, advantages
+from .models import Hero
+from .views import hero_list, hero_name, advantages
 
 from .factories import HeroFactory, AdvantageFactory
 

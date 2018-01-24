@@ -2,7 +2,7 @@ import random
 import factory
 import datetime
 
-from ..models import AdvantagesUpdate
+from .models import AdvantagesUpdate
 
 
 def random_datetime(

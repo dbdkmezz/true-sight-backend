@@ -3,11 +3,11 @@ import pytest
 
 from django.test import TestCase
 
-from ..utils.request_handler import MockRequestHandler
-from ..hero_advantages.tests.factories import HeroFactory
+from apps.utils.request_handler import MockRequestHandler
+from apps.hero_advantages.factories import HeroFactory
 
-from .web_scraper import WebScraper
 from .models import Ability
+from .web_scraper import WebScraper
 
 mock_request_handler = MockRequestHandler(
     url_map={

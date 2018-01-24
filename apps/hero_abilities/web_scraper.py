@@ -1,6 +1,6 @@
 import re
 
-from ..utils.request_handler import RequestHandler
+from apps.utils.request_handler import RequestHandler
 
 
 class WebScraper(object):

@@ -2,8 +2,8 @@ import random
 import string
 import factory
 
+from apps.hero_advantages.factories import HeroFactory
 from apps.utils.factories import random_string, random_bool
-from apps.hero_advantages.tests.factories import HeroFactory
 
 from .models import Ability
 

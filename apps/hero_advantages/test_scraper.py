@@ -1,8 +1,8 @@
 import py
 import unittest
 
-from ...utils.request_handler import MockRequestHandler
-from ..web_scraper import WebScraper, Lane, HeroRole
+from apps.utils.request_handler import MockRequestHandler
+from .web_scraper import WebScraper, Lane, HeroRole
 
 
 mock_request_handler = MockRequestHandler(
@@ -13,7 +13,7 @@ mock_request_handler = MockRequestHandler(
         "http://www.dotabuff.com/heroes/lanes?lane=roaming": "Dotabuff Roaming.html",
         "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
     },
-    files_path=py.path.local().join("apps", "hero_advantages", "tests", "data"),
+    files_path=py.path.local().join("apps", "hero_advantages", "test_data"),
 )
 
 
