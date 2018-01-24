@@ -1,0 +1,2 @@
+class DoNotUnderstandQuestion(BaseException):
+    pass

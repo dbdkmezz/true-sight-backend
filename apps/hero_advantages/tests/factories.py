@@ -1,17 +1,10 @@
 import random
 import string
-
 import factory
 
+from apps.utils.factories import random_string, random_bool
+
 from ..models import Hero, Advantage
-
-
-def random_string(length=10, characters=string.ascii_letters):
-    return u''.join(random.choice(characters) for x in range(length))
-
-
-def random_bool():
-    return random.choice([True, False])
 
 
 class HeroFactory(factory.DjangoModelFactory):
