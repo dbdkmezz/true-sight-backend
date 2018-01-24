@@ -19,5 +19,6 @@ from django.conf import settings
 
 urlpatterns = [
     url(r'^hero_advantages/', include('apps.hero_advantages.urls')),
+    url(r'^google_assistant/', include('apps.google_assistant.urls')),
     url(r'^{}/'.format(settings.SETTINGS_URI_PATH), admin.site.urls),
 ]

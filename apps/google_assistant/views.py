@@ -15,7 +15,7 @@ def index(request):
     try:
         google_request = AppRequest(request)
     except NoJsonException:
-        return HttpResponse("Hello world.")
+        return HttpResponse("Hello there, I'm a Google Assistant App.")
 
     try:
         responder = QuestionParser(google_request.text).get_responder()

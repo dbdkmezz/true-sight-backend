@@ -25,7 +25,7 @@ class TestQuestionParser(TestCase):
 
 
 @pytest.mark.django_db
-class TestParserAndResponder(TestCase):
+class TestAbiltyParserAndResponders(TestCase):
     def setUp(self):
         disruptor = HeroFactory(name='Disruptor')
         AbilityFactorty(
