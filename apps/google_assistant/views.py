@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 # TODO
-# Better logging
 # Fix issues parsing abilities
 # More aliases
 # Ability aliases
 # Try it lots
 # Do I really want the Hero model in hero advanteages
 # Is the pattern for parsing and getting responder good?
+# Better logging
 
 
 def index(request):
@@ -36,5 +36,5 @@ def index(request):
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
     response = responder.generate_response()
-    logger.info("Question: %s, response: %s", google_request.text, response)
+    logger.info("Question: %s. Response: %s", google_request.text, response)
     return JsonResponse(AppResponse().ask(response))
