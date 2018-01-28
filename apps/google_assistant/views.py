@@ -36,4 +36,5 @@ def index(request):
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
     response = responder.generate_response()
+    logger.info("Question: %s, response: %s", google_request.text, response)
     return JsonResponse(AppResponse().ask(response))

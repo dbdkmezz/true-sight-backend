@@ -14,17 +14,15 @@ class TestQuestionParser(TestCase):
     def setUp(self):
         self.glimpse = AbilityFactory(name='Glimpse')
         self.disruptor = HeroFactory(name='Disruptor')
-        self.wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
 
     def test_identify_abilities(self):
         parser = QuestionParser("What's the cooldown of Glimpse?")
         assert parser.abilities == [self.glimpse]
 
-    def test_identify_abilities_name_collision(self):
+    def test_identify_abilities_name_substrings(self):
         AbilityFactory(name='Rage')
         chemical_rage = AbilityFactory(name='Chemical Rage')
         parser = QuestionParser("What's the cooldown of Chemical Rage?")
-        print(parser.abilities)
         assert parser.abilities == [chemical_rage]
 
     def test_identify_heroes(self):
@@ -32,8 +30,9 @@ class TestQuestionParser(TestCase):
         assert parser.heroes == [self.disruptor]
 
     def test_identify_heroes_with_alias(self):
+        wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
         parser = QuestionParser("What are Wind Rangers abilities?")
-        assert parser.heroes == [self.wind_ranger]
+        assert parser.heroes == [wind_ranger]
 
     def test_raises_does_not_understand(self):
         parser = QuestionParser("What is a pizza?")
