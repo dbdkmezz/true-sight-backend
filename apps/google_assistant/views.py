@@ -1,5 +1,4 @@
 import logging
-
 from django.http import HttpResponse, JsonResponse
 
 from libs.google_actions import AppResponse, AppRequest, NoJsonException
@@ -9,6 +8,16 @@ from .exceptions import DoNotUnderstandQuestion
 
 
 logger = logging.getLogger(__name__)
+
+
+# TODO
+# Better logging
+# Fix issues parsing abilities
+# More aliases
+# Ability aliases
+# Try it lots
+# Do I really want the Hero model in hero advanteages
+# Is the pattern for parsing and getting responder good?
 
 
 def index(request):

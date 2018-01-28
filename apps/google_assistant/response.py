@@ -1,4 +1,5 @@
 import re
+import logging
 
 from django.utils.functional import cached_property
 
@@ -9,16 +10,31 @@ from apps.hero_abilities.models import Ability
 from .exceptions import DoNotUnderstandQuestion
 
 
+logger = logging.getLogger(__name__)
+
+
 class QuestionParser(object):
     def __init__(self, question_text):
         self.text = question_text.lower()
 
     @cached_property
     def abilities(self):
-        return [
+        """Returns a list of all abilities found in the question.
+
+        Does not include the names of abilities found whose name is a substring of another ability
+        whose name is in the question.
+        E.g. if 'Chemical Rage' is in the question then this will not return the ability 'Rage'.
+        """
+        abilities_found = [
             a for a in Ability.objects.all()
             if a.name.lower() in self.text
         ]
+        result = []
+        for ability in abilities_found:
+            other_ability_names = [a.name for a in abilities_found if a != ability]
+            if not any((ability.name in n) for n in other_ability_names):
+                result.append(ability)
+        return result
 
     @cached_property
     def heroes(self):
@@ -80,7 +96,13 @@ class QuestionParser(object):
             return AbilityListResponse(self)
         if AbilityHotkeyResponse.matches_question(self):
             return AbilityHotkeyResponse(self)
+
+        logger.warning("Unable to parse question. %s", self)
         raise DoNotUnderstandQuestion
+
+    def __str__(self):
+        return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
+            self.text, self.abilities, self.heroes, self.role)
 
 
 class Response(object):

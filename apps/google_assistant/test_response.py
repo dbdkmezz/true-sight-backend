@@ -20,6 +20,13 @@ class TestQuestionParser(TestCase):
         parser = QuestionParser("What's the cooldown of Glimpse?")
         assert parser.abilities == [self.glimpse]
 
+    def test_identify_abilities_name_collision(self):
+        AbilityFactory(name='Rage')
+        chemical_rage = AbilityFactory(name='Chemical Rage')
+        parser = QuestionParser("What's the cooldown of Chemical Rage?")
+        print(parser.abilities)
+        assert parser.abilities == [chemical_rage]
+
     def test_identify_heroes(self):
         parser = QuestionParser("What are Disruptor's abilities?")
         assert parser.heroes == [self.disruptor]
@@ -78,7 +85,8 @@ class TestAbiltyParserAndResponders(TestCase):
         responder = QuestionParser("What is Disruptor's ultimate?").get_responder()
         response = responder.generate_response()
         assert (
-            response == "Disruptor's ultimate is Static Storm, it's cooldown is 90, 80, 70 seconds")
+            response == "Disruptor's ultimate is Static Storm, it's cooldown is 90, 80, 70 seconds"
+        )
 
     def test_ability_list_response(self):
         responder = QuestionParser("What are Disruptor's abilities?").get_responder()
