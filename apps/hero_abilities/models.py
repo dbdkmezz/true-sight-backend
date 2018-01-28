@@ -11,6 +11,7 @@ class Ability(models.Model):
     cooldown = models.CharField(max_length=64)
     hotkey = models.CharField(max_length=1)
     is_ultimate = models.BooleanField(default=False)
+    is_from_talent = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 

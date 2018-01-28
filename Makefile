@@ -4,4 +4,4 @@ looptest:
 
 test:
 	find . -name '*.pyc' -delete
-	./manage.py test --settings=project.settings.local
+	pytest --ds=project.settings.test

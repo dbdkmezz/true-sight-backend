@@ -15,4 +15,13 @@ class Command(BaseCommand):
         except Exception as exc:
             raise CommandError('ERROR: {}'.format(exc))
 
+        for h in Hero.objects.all():
+            if Ability.objects.filter(hero=h, is_from_talent=False).count() < 4:
+                print("{} doesn't have many abilities. The abilities I found are are: {}".format(
+                    h, Ability.objects.filter(hero=h)))
+
+        for h in Hero.objects.all():
+            if Ability.objects.filter(hero=h, is_from_talent=False).count() > 4:
+                print("{} has loads of abilities. The abilities I found are are: {}".format(
+                    h, Ability.objects.filter(hero=h)))
         self.stdout.write(self.style.SUCCESS('Successfully updated heros'))
