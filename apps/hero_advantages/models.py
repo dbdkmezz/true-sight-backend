@@ -5,7 +5,7 @@ from django.db import models
 from apps.metadata.models import AdvantagesUpdate
 
 from .exceptions import InvalidEnemyNames
-from .web_scraper import HeroRole
+from .web_scraper import WebScraper, HeroRole
 
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,8 @@ class Hero(models.Model):
     is_jungler = models.BooleanField(default=False)
     is_mid = models.BooleanField(default=False)
     is_roaming = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -49,9 +51,8 @@ class Hero(models.Model):
             logger.warning('Hero %s has no role', self.name)
 
     @staticmethod
-    def update_from_web(web_scraper):
-        # AdvantagesUpdate.start_new_update()  some equivalent
-
+    def update_from_web(request_handler=None):
+        web_scraper = WebScraper(request_handler)
         hero_names = list(web_scraper.get_hero_names())
 
         # Remove any heroes from the database which aren't in the new list
@@ -72,6 +73,8 @@ class Advantage(models.Model):
     enemy = models.ForeignKey(
         Hero, on_delete=models.CASCADE, related_name="enemy_hero", db_index=True)
     advantage = models.FloatField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("hero", "enemy")
@@ -112,9 +115,8 @@ class Advantage(models.Model):
         ]
 
     @staticmethod
-    def update_from_web(web_scraper):
-        AdvantagesUpdate.start_new_update()
-
+    def update_from_web(request_handler=None):
+        web_scraper = WebScraper(request_handler)
         for hero in Hero.objects.all():
             advantages_data = web_scraper.load_advantages_for_hero(hero.name)
             for advantage_data in advantages_data:

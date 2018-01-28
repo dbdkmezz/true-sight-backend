@@ -21,7 +21,7 @@ class Ability(models.Model):
         return self.name
 
     @staticmethod
-    def update_from_web(request_handler):
-        # AdvantagesUpdate.start_new_update() equivalent
+    def update_from_web(request_handler=None):
+        web_scraper = WebScraper(request_handler)
         for hero in Hero.objects.all():
-            WebScraper(request_handler).load_hero_abilities(hero)
+            web_scraper.load_hero_abilities(hero)

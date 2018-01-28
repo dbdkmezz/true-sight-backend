@@ -26,8 +26,8 @@ class Lane(Enum):
 
 
 class WebScraper(object):
-    def __init__(self, request_handler=RequestHandler()):
-        self.request_handler = request_handler
+    def __init__(self, request_handler=None):
+        self.request_handler = request_handler or RequestHandler()
 
     def get_hero_names(self, min_heroes=115):
         soup = self.request_handler.get_soup("http://www.dota2.com/heroes/")
