@@ -3,7 +3,7 @@ import pytest
 from django.test import TestCase
 
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
-from apps.hero_abilities.factories import AbilityFactorty
+from apps.hero_abilities.factories import AbilityFactory
 
 from .response import QuestionParser
 from .exceptions import DoNotUnderstandQuestion
@@ -12,7 +12,8 @@ from .exceptions import DoNotUnderstandQuestion
 @pytest.mark.django_db
 class TestQuestionParser(TestCase):
     def setUp(self):
-        self.glimpse = AbilityFactorty(name='Glimpse')
+        self.glimpse = AbilityFactory(name='Glimpse')
+        self.disruptor = HeroFactory(name='Disruptor')
 
     def test_identify_abilities(self):
         parser = QuestionParser("What's the cooldown of Glimpse?")
@@ -28,20 +29,20 @@ class TestQuestionParser(TestCase):
 class TestAbiltyParserAndResponders(TestCase):
     def setUp(self):
         disruptor = HeroFactory(name='Disruptor')
-        AbilityFactorty(
+        AbilityFactory(
             hero=disruptor,
             name='Thunder Strike',
             hotkey='Q',
             is_ultimate=False,
         )
-        AbilityFactorty(
+        AbilityFactory(
             hero=disruptor,
             name='Glimpse',
             cooldown='60/46/32/18',
             hotkey='W',
             is_ultimate=False,
         )
-        AbilityFactorty(
+        AbilityFactory(
             hero=disruptor,
             name='Static Storm',
             cooldown='90/80/70',

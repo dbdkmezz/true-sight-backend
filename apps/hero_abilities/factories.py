@@ -8,7 +8,7 @@ from apps.utils.factories import random_string, random_bool
 from .models import Ability
 
 
-class AbilityFactorty(factory.DjangoModelFactory):
+class AbilityFactory(factory.DjangoModelFactory):
     class Meta:
         model = Ability
 
