@@ -17,6 +17,9 @@ def index(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
+    if not google_request.text:
+        return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
+
     try:
         responder = QuestionParser(google_request.text).get_responder()
     except DoNotUnderstandQuestion:

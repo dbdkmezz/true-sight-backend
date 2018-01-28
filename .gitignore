@@ -5,4 +5,5 @@ __pycache__/*
 *.pyc
 db.sqlite3
 .cache
+project/static/
 project/settings/secrets.json

@@ -1,3 +1,4 @@
+import os
 from .base import *  # noqa
 
 
@@ -15,7 +16,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR.child('debug.log'),
+            'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
         },
     },
     'loggers': {
