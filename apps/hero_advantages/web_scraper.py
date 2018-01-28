@@ -5,15 +5,7 @@ from django.utils.functional import cached_property
 
 from apps.utils.request_handler import RequestHandler
 
-
-@unique
-class HeroRole(Enum):
-    CARRY = 1
-    SUPPORT = 2
-    OFF_LANE = 3
-    JUNGLER = 4
-    MIDDLE = 5
-    ROAMING = 6
+from .roles import HeroRole
 
 
 @unique

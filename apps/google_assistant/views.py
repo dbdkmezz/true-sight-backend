@@ -23,8 +23,8 @@ def index(request):
     try:
         responder = QuestionParser(google_request.text).get_responder()
     except DoNotUnderstandQuestion:
-        return JsonResponse(AppResponse().tell(
+        return JsonResponse(AppResponse().ask(
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
     response = responder.generate_response()
-    return JsonResponse(AppResponse().tell(response))
+    return JsonResponse(AppResponse().ask(response))
