@@ -4,6 +4,7 @@ from django.db import models
 
 from apps.metadata.models import AdvantagesUpdate
 
+from .aliases import hero_aliases
 from .exceptions import InvalidEnemyNames
 from .web_scraper import WebScraper, HeroRole
 
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Hero(models.Model):
     name = models.CharField(max_length=64, unique=True, db_index=True)
+    aliases_data = models.CharField(max_length=512, blank=True, default='')  # comma separated list
     is_carry = models.BooleanField(default=False)
     is_support = models.BooleanField(default=False)
     is_off_lane = models.BooleanField(default=False)
@@ -50,6 +52,25 @@ class Hero(models.Model):
                 or self.is_jungler or self.is_mid or self.is_roaming):
             logger.warning('Hero %s has no role', self.name)
 
+    @property
+    def aliases(self):
+        """All the various names for the hero"""
+        if not self.aliases_data:
+            return [self.name]
+        return [self.name] + self.aliases_data.split(',')
+
+    def load_aliases(self):
+        missing_aliases = [
+            a for a in hero_aliases.get(self.name)
+            if a not in self.aliases
+        ]
+        if missing_aliases:
+            additional_aliases_data = ','.join(missing_aliases)
+            if not self.aliases_data:
+                self.aliases_data = additional_aliases_data
+            else:
+                self.aliases_data += ',{}'.format(additional_aliases_data)
+
     @staticmethod
     def update_from_web(request_handler=None):
         web_scraper = WebScraper(request_handler)
@@ -64,6 +85,7 @@ class Hero(models.Model):
         for name in hero_names:
             hero, _ = Hero.objects.get_or_create(name=name)
             hero.update_roles(web_scraper)
+            hero.load_aliases()
             hero.save()
 
 

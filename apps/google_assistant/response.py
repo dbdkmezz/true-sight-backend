@@ -24,7 +24,7 @@ class QuestionParser(object):
     def heroes(self):
         return [
             h for h in Hero.objects.all()
-            if h.name.lower() in self.text
+            if self.contains_any_word(h.aliases)
         ]
 
     @cached_property
@@ -67,7 +67,7 @@ class QuestionParser(object):
 
     def contains_any_word(self, words):
         """Whether any of the words in words feature in the question text"""
-        return any((word in self.text) for word in words)
+        return any((word.lower() in self.text) for word in words)
 
     def get_responder(self):
         if SingleEnemyAdvantageResponse.matches_question(self):
@@ -236,7 +236,7 @@ class SingleEnemyAdvantageResponse(Response):
             enemy=self.enemy, advantage__gte=0).order_by('-advantage')
         counters = self._filter_by_role(counters, self.role)
         hard_counters = counters.filter(advantage__gte=2)
-        soft_counters = (c for c in counters if c not in hard_counters)
+        soft_counters = (c for c in counters[:8] if c not in hard_counters)
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
