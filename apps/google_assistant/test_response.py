@@ -75,6 +75,16 @@ class TestAbiltyParserAndResponders(TestCase):
         response = responder.generate_response()
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
 
+    def test_when_no_cooldown(self):
+        AbilityFactory(
+            hero=HeroFactory(name='Pangolier'),
+            name='Swashbuckle',
+            cooldown='',
+        )
+        responder = QuestionParser("What's the cool down of Swashbuckle?").get_responder()
+        response = responder.generate_response()
+        assert response == "Swashbuckle is a passive ability, with no cooldown"
+
     def test_ability_hotkey_response(self):
         responder = QuestionParser("What is Disruptor's W?").get_responder()
         response = responder.generate_response()

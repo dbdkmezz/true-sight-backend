@@ -11,13 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 # TODO
-# Fix issues parsing abilities
-# More aliases
+# Fix issues parsing abilities, lots of heroes have too many
+# More ability info
+# More hero aliases
 # Ability aliases
 # Try it lots
 # Do I really want the Hero model in hero advanteages
 # Is the pattern for parsing and getting responder good?
-# Better logging
+# Think about what logging I need to deploy
 
 
 def index(request):

@@ -105,6 +105,10 @@ class QuestionParser(object):
             self.text, self.abilities, self.heroes, self.role)
 
 
+class PassiveAbilityError(BaseException):
+    pass
+
+
 class Response(object):
     def __init__(self):
         raise NotImplemented
@@ -130,6 +134,8 @@ class Response(object):
 
     @staticmethod
     def parse_cooldown(cooldown):
+        if not cooldown:
+            raise PassiveAbilityError
         return cooldown.replace('/', ', ')
 
 
@@ -171,11 +177,14 @@ class AbilityUltimateResponse(Response):
         return 'ultimate' in question.text and len(question.heroes) == 1
 
     def generate_response(self):
-        return "{}'s ultimate is {}, it's cooldown is {} seconds".format(
-            self.ability.hero.name,
-            self.ability.name,
-            self.parse_cooldown(self.ability.cooldown),
-        )
+        try:
+            return "{}'s ultimate is {}, it's cooldown is {} seconds".format(
+                self.ability.hero.name,
+                self.ability.name,
+                self.parse_cooldown(self.ability.cooldown),
+            )
+        except PassiveAbilityError:
+            return "{}'s ultimate is {}"
 
 
 class AbilityHotkeyResponse(Response):
@@ -206,10 +215,15 @@ class AbilityCooldownResponse(Response):
         )
 
     def generate_response(self):
-        return "The cooldown of {} is {} seconds".format(
-            self.ability.name,
-            self.parse_cooldown(self.ability.cooldown),
-        )
+        try:
+            return "The cooldown of {} is {} seconds".format(
+                self.ability.name,
+                self.parse_cooldown(self.ability.cooldown),
+            )
+        except PassiveAbilityError:
+            return "{} is a passive ability, with no cooldown".format(
+                self.ability.name,
+            )
 
 
 class SingleEnemyAdvantageResponse(Response):
