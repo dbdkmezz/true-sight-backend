@@ -61,7 +61,7 @@ class Hero(models.Model):
 
     def load_aliases(self):
         missing_aliases = [
-            a for a in hero_aliases.get(self.name)
+            a for a in hero_aliases.get(self.name.lower(), [])
             if a not in self.aliases
         ]
         if missing_aliases:

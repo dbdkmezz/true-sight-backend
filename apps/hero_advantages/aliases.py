@@ -1,4 +1,6 @@
 hero_aliases = {
-    'Windranger': ['Wind Ranger', 'Lyralei'],
-    "Nature's Prophet": ['Furion'],
+    'disruptor': ['Disrupter'],
+    "nature's prophet": ['Furion'],
+    'queen of pain': ['QOP', 'co-op'],
+    'windranger': ['Wind Ranger', 'Lyralei'],
 }
