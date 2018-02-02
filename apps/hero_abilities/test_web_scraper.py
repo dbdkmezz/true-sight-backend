@@ -6,14 +6,15 @@ from django.test import TestCase
 from apps.utils.request_handler import MockRequestHandler
 from apps.hero_advantages.factories import HeroFactory
 
-from .models import Ability
+from .models import Ability, SpellImmunity
 from .web_scraper import WebScraper
 
 mock_request_handler = MockRequestHandler(
     url_map={
-        "https://dota2.gamepedia.com/Disruptor": "Disruptor - Dota 2 Wiki.html",
-        "https://dota2.gamepedia.com/Phantom_Lancer": "Phantom Lancer - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Dark_Willow": "Dark Willow - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Disruptor": "Disruptor - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Pangolier": "Pangolier - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Phantom_Lancer": "Phantom Lancer - Dota 2 Wiki.html",
     },
     files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
@@ -39,9 +40,18 @@ class TestWebScraper(TestCase):
         self.scraper.load_hero_abilities(HeroFactory(name='Disruptor'))
 
         kinetic_field = Ability.objects.get(name='Kinetic Field')
+        self.assertEqual(
+            kinetic_field.description,
+            "After a short formation time, creates a circular barrier of kinetic energy that "
+            "enemies can't pass."
+        )
         self.assertEqual(kinetic_field.cooldown, '13/12/11/10')
         self.assertEqual(kinetic_field.hotkey, 'E')
         self.assertFalse(kinetic_field.is_ultimate)
+        self.assertEqual(kinetic_field.spell_immunity, SpellImmunity.DOES_NOT_PIERCE)
+        self.assertEqual(
+            kinetic_field.spell_immunity_detail,
+            "The Barrier's modifier persists if it was placed before spell immunity.")
 
     def test_loads_ultimate(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Disruptor'))
@@ -60,3 +70,10 @@ class TestWebScraper(TestCase):
         self.scraper.load_hero_abilities(HeroFactory(name='Dark Willow'))
         for ability in Ability.objects.all():
             assert len(ability.hotkey) == 1
+
+    def test_ignores_second_ability_with_same_hotkey(self):
+        self.scraper.load_hero_abilities(HeroFactory(name='Pangolier'))
+        assert Ability.objects.count() == 4
+        assert Ability.objects.get(name='Rolling Thunder')
+        with self.assertRaises(Ability.DoesNotExist):
+            assert Ability.objects.get(name='Stop Rolling')

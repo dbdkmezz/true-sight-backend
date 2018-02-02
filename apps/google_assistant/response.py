@@ -133,10 +133,10 @@ class Response(object):
             ', '.join(words))
 
     @staticmethod
-    def parse_cooldown(cooldown):
-        if not cooldown:
+    def parse_cooldown(ability):
+        if not ability.cooldown:
             raise PassiveAbilityError
-        return cooldown.replace('/', ', ')
+        return ability.cooldown.replace('/', ', ')
 
 
 class AbilityListResponse(Response):
@@ -181,7 +181,7 @@ class AbilityUltimateResponse(Response):
             return "{}'s ultimate is {}, it's cooldown is {} seconds".format(
                 self.ability.hero.name,
                 self.ability.name,
-                self.parse_cooldown(self.ability.cooldown),
+                self.parse_cooldown(self.ability),
             )
         except PassiveAbilityError:
             return "{}'s ultimate is {}"
@@ -218,7 +218,7 @@ class AbilityCooldownResponse(Response):
         try:
             return "The cooldown of {} is {} seconds".format(
                 self.ability.name,
-                self.parse_cooldown(self.ability.cooldown),
+                self.parse_cooldown(self.ability),
             )
         except PassiveAbilityError:
             return "{} is a passive ability, with no cooldown".format(

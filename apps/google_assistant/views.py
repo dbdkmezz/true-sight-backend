@@ -11,14 +11,25 @@ logger = logging.getLogger(__name__)
 
 
 # TODO
-# Fix issues parsing abilities, lots of heroes have too many
+# abilities with the same name, hex, blink
+# Fix issues parsing abilities, lots of heroes have too many, e.g. two Rs
 # More ability info
+# BKB and magic resistance
+# context - responding to follow on questions
 # More hero aliases
 # Ability aliases
 # Try it lots
-# Do I really want the Hero model in hero advanteages
+# Upgrade to Django 2
+# Do I really want the Hero model in hero advanteages?
 # Is the pattern for parsing and getting responder good?
 # Think about what logging I need to deploy
+
+# v2
+# Removable by types of dispel
+# Linkens sphere
+# Range
+# Talents
+# All details of spell
 
 
 def index(request):

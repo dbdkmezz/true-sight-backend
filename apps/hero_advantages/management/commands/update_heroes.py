@@ -9,8 +9,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            Hero.update_from_web()
-            Advantage.update_from_web()
+            # Hero.update_from_web()
+            # Advantage.update_from_web()
             Ability.update_from_web()
         except Exception as exc:
             raise CommandError('ERROR: {}'.format(exc))
