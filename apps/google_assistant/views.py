@@ -1,6 +1,7 @@
 import logging
 from django.http import HttpResponse, JsonResponse
 
+from apps.metadata.models import User, DailyUse
 from libs.google_actions import AppResponse, AppRequest, NoJsonException
 
 from .response import ResponseGenerator, QuestionParser
@@ -14,17 +15,12 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # General
+# Squish all the migrations
 # Hero role accuracy
 # More hero aliases
 # Ability aliases
 # Try it lots
 # Do I really want the Hero model in hero advanteages?
-#
-# # Logging
-# log if we have to use the fallback advantage response
-# Track unique users and individual usage
-# Track popularity of each question type
-# Track daily activity
 #
 # Questions
 # Multiple ultimates (Dark Willow)
@@ -53,21 +49,19 @@ def index(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
+    User.log_user(google_request.user_id)
+    if not google_request.text:
+        return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
+
     try:
-        if not google_request.text:
-            return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
-
-        try:
-            response = ResponseGenerator.respond(google_request.text)
-        except DoNotUnderstandQuestion:
-            return JsonResponse(AppResponse().ask(
-                "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
-
-        good_response_logger.info("%s Response: %s",
-                                  QuestionParser(google_request.text),
-                                  response)
-        return JsonResponse(AppResponse().ask(response))
-    except:
-        logger.exception('Uncaught exception')
+        response = ResponseGenerator.respond(google_request.text)
+    except DoNotUnderstandQuestion:
+        DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
-            "I'm sorry, something went wrong, please try again."))
+            "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
+
+    DailyUse.log_use(success=True)
+    good_response_logger.info("%s Response: %s",
+                              QuestionParser(google_request.text),
+                              response)
+    return JsonResponse(AppResponse().ask(response))

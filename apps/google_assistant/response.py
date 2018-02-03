@@ -3,8 +3,9 @@ import logging
 
 from django.utils.functional import cached_property
 
-from apps.hero_advantages.models import Hero, Advantage
+from apps.metadata.models import ResponderUse
 from apps.hero_advantages.roles import HeroRole
+from apps.hero_advantages.models import Hero, Advantage
 from apps.hero_abilities.models import Ability, SpellImmunity
 
 from .exceptions import DoNotUnderstandQuestion
@@ -15,35 +16,42 @@ failed_response_logger = logging.getLogger('failed_response')
 
 
 class ResponseGenerator(object):
-    @staticmethod
-    def respond(question_text):
+    @classmethod
+    def respond(cls, question_text):
         question = QuestionParser(question_text)
 
+        responder = cls._get_responder(question)
+        if not responder:
+            failed_response_logger.warning("Unable to respond to question. %s", question)
+            raise DoNotUnderstandQuestion
+
+        ResponderUse.log_use(responder.__name__)
+        return responder.respond(question)
+
+    @staticmethod
+    def _get_responder(question):
         if len(question.abilities) == 1:
             if question.contains_any_word(('cool down', 'cooldown')):
-                return AbilityCooldownResponse.respond(question)
+                return AbilityCooldownResponse
             if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
-                return AbilitySpellImmunityResponse.respond(question)
+                return AbilitySpellImmunityResponse
 
         if len(question.heroes) == 1:
             if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
-                return SingleEnemyAdvantageResponse.respond(question)
+                return SingleEnemyAdvantageResponse
             if question.contains_any_word(('ultimate', )):
-                return AbilityUltimateResponse.respond(question)
+                return AbilityUltimateResponse
             if question.contains_any_word(('abilities', )):
-                return AbilityListResponse.respond(question)
+                return AbilityListResponse
             if question.ability_hotkey:
-                return AbilityHotkeyResponse.respond(question)
+                return AbilityHotkeyResponse
 
         if len(question.abilities) == 1:
-            return AbilityDescriptionResponse.respond(question)
+            return AbilityDescriptionResponse
 
         if len(question.heroes) == 1:
             # log this in some way
-            return SingleEnemyAdvantageResponse.respond(question)
-
-        failed_response_logger.warning("Unable to respond to question. %s", question)
-        raise DoNotUnderstandQuestion
+            return SingleEnemyAdvantageResponse
 
 
 class QuestionParser(object):
