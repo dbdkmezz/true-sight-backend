@@ -11,6 +11,7 @@ from .exceptions import DoNotUnderstandQuestion
 
 
 logger = logging.getLogger(__name__)
+failed_response_logger = logging.getLogger('failed_response')
 
 
 class ResponseGenerator(object):
@@ -41,13 +42,17 @@ class ResponseGenerator(object):
             # log this in some way
             return SingleEnemyAdvantageResponse.respond(question)
 
-        logger.warning("Unable to parse question. %s", question)
+        failed_response_logger.warning("Unable to respond to question. %s", question)
         raise DoNotUnderstandQuestion
 
 
 class QuestionParser(object):
     def __init__(self, question_text):
         self.text = question_text.lower()
+
+    def __str__(self):
+        return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
+            self.text, self.abilities, self.heroes, self.role)
 
     @cached_property
     def abilities(self):
@@ -117,11 +122,6 @@ class QuestionParser(object):
         """Whether any of the words in words feature in the question text"""
         return any((word.lower() in self.text) for word in words)
 
-    def __str__(self):
-        return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
-            self.text, self.abilities, self.heroes, self.role)
-
-
 class PassiveAbilityError(BaseException):
     pass
 
@@ -177,6 +177,7 @@ class AbilityResponse(Response):
     def append_cooldown_to_response(cls, response, ability):
         if not ability.cooldown:
             return response
+
         if not response[-1:] in ('.', ','):
             response += ','
         return "{} its cooldown is {} seconds".format(

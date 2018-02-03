@@ -3,11 +3,12 @@ from django.http import HttpResponse, JsonResponse
 
 from libs.google_actions import AppResponse, AppRequest, NoJsonException
 
-from .response import ResponseGenerator
+from .response import ResponseGenerator, QuestionParser
 from .exceptions import DoNotUnderstandQuestion
 
 
 logger = logging.getLogger(__name__)
+good_response_logger = logging.getLogger('good_response')
 
 
 # # TODO
@@ -21,13 +22,12 @@ logger = logging.getLogger(__name__)
 #
 # # Logging
 # log if we have to use the fallback advantage response
-# Fix issues parsing abilities, there are still those which have too many
 # Track unique users and individual usage
 # Track popularity of each question type
 # Track daily activity
-# Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
 #
 # Questions
+# Multiple ultimates (Dark Willow)
 # Is X good/strong against Y?
 
 # # V2
@@ -63,9 +63,11 @@ def index(request):
             return JsonResponse(AppResponse().ask(
                 "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
-        logger.info("Question: %s. Response: %s", google_request.text, response)
+        good_response_logger.info("%s Response: %s",
+                                  QuestionParser(google_request.text),
+                                  response)
         return JsonResponse(AppResponse().ask(response))
     except:
-        logger.exception()
+        logger.exception('Uncaught exception')
         return JsonResponse(AppResponse().ask(
             "I'm sorry, something went wrong, please try again."))
