@@ -28,12 +28,17 @@ class WebScraper(object):
                 ).text.replace('\n', '')
                 if description == '':
                     raise Exception("Could not load description")
-                is_ultimate = bool(  # there must be an easier way
-                    header.parent.find(style=re.compile('.*background-color: #414141.*')))
-                is_from_talent = bool(
-                    header.parent.find(style=re.compile('.*background-color: #BDB76B.*')))
-                is_from_aghanims = bool(
-                    header.parent.find(style=re.compile('.*background-color: #5B388F.*')))
+
+                header_background_colour = re.match(
+                    r'.*background-color: (.*?);.*',
+                    header['style']
+                ).group(1)
+                is_ultimate = (header_background_colour == '#414141')
+                is_from_talent = (header_background_colour == '#BDB76B')
+                is_from_aghanims = (header_background_colour == '#5B388F')
+                if not (is_ultimate or is_from_talent or is_from_aghanims):
+                    assert header_background_colour == '#B44335'
+
                 spell_immunity = self._get_spell_immunity(header)
                 spell_immunity_detail = self._get_spell_immunity_detail(ability)
 

@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 # # TODO
 #
 # # General
-# Better parsing of bg colour
 # Hero role accuracy
 # abilities with the same name, hex, blink
 # More hero aliases
