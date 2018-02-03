@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 # # TODO
 #
 # # General
-# Big 'ol try catch around the view with an error response
 # List of normal hero abilities from the models
 # (Make default ability objects exclude aghs and talent abilities?)
 # Better parsing of bg colour
@@ -56,14 +55,19 @@ def index(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
-    if not google_request.text:
-        return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
-
     try:
-        response = ResponseGenerator.respond(google_request.text)
-    except DoNotUnderstandQuestion:
-        return JsonResponse(AppResponse().ask(
-            "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
+        if not google_request.text:
+            return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
 
-    logger.info("Question: %s. Response: %s", google_request.text, response)
-    return JsonResponse(AppResponse().ask(response))
+        try:
+            response = ResponseGenerator.respond(google_request.text)
+        except DoNotUnderstandQuestion:
+            return JsonResponse(AppResponse().ask(
+                "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
+
+        logger.info("Question: %s. Response: %s", google_request.text, response)
+        return JsonResponse(AppResponse().ask(response))
+    except:
+        logger.exception()
+        return JsonResponse(AppResponse().ask(
+            "I'm sorry, something went wrong, please try again."))
