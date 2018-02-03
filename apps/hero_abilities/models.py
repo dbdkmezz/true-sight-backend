@@ -19,6 +19,7 @@ class Ability(models.Model):
     hotkey = models.CharField(max_length=1)
     is_ultimate = models.BooleanField(default=False)
     is_from_talent = models.BooleanField(default=False)
+    is_from_aghanims = models.BooleanField(default=False)
     spell_immunity_int = models.IntegerField(null=True, blank=True, default=None)
     spell_immunity_detail = models.CharField(max_length=512, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)

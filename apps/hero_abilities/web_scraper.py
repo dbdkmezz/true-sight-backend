@@ -32,6 +32,8 @@ class WebScraper(object):
                     header.parent.find(style=re.compile('.*background-color: #414141.*')))
                 is_from_talent = bool(
                     header.parent.find(style=re.compile('.*background-color: #BDB76B.*')))
+                is_from_aghanims = bool(
+                    header.parent.find(style=re.compile('.*background-color: #5B388F.*')))
                 spell_immunity = self._get_spell_immunity(header)
                 spell_immunity_detail = self._get_spell_immunity_detail(ability)
 
@@ -60,6 +62,7 @@ class WebScraper(object):
                         'hotkey': hotkey,
                         'is_ultimate': is_ultimate,
                         'is_from_talent': is_from_talent,
+                        'is_from_aghanims': is_from_aghanims,
                         'spell_immunity_int': spell_immunity,
                         'spell_immunity_detail': spell_immunity_detail,
                     })
