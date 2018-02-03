@@ -120,7 +120,8 @@ class Response(object):
     def __init__(self):
         raise NotImplemented
 
-    def respond(self):
+    @classmethod
+    def respond(cls, question):
         raise NotImplemented
 
     @staticmethod
@@ -135,14 +136,8 @@ class Response(object):
             r'\1, and \2',
             ', '.join(words))
 
-    @staticmethod
-    def parse_cooldown(ability):
-        if not ability.cooldown:
-            raise PassiveAbilityError
-        return ability.cooldown.replace('/', ', ')
 
-
-class AbilityListResponse(Response):
+class AbilityResponse(Response):
     @staticmethod
     def order_abilities(abilities):
         """Orders the abilities by the posistion of the hotkey on the keyboard"""
@@ -156,6 +151,30 @@ class AbilityListResponse(Response):
         ordered_abilities += [a for a in abilities if a not in ordered_abilities]
         return ordered_abilities
 
+    @staticmethod
+    def parse_cooldown(ability):
+        if not ability.cooldown:
+            raise PassiveAbilityError
+        return ability.cooldown.replace('/', ', ')
+
+    @staticmethod
+    def append_description_to_response(response, ability, only_if_short):
+        if not ability.description or (only_if_short and len(ability.description) > 120):
+            return response
+        return "{}. {}".format(response, ability.description)
+
+    @classmethod
+    def append_cooldown_to_response(cls, response, ability):
+        try:
+            return "{}, it's cooldown is {} seconds".format(
+                response,
+                cls.parse_cooldown(ability),
+            )
+        except PassiveAbilityError:
+            return response
+
+
+class AbilityListResponse(AbilityResponse):
     @classmethod
     def respond(cls, question):
         hero = question.heroes[0]
@@ -167,36 +186,32 @@ class AbilityListResponse(Response):
         )
 
 
-class AbilityUltimateResponse(Response):
+class AbilityUltimateResponse(AbilityResponse):
     @classmethod
     def respond(cls, question):
         ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
-        try:
-            return "{}'s ultimate is {}, it's cooldown is {} seconds".format(
-                ability.hero.name,
-                ability.name,
-                cls.parse_cooldown(ability),
-            )
-        except PassiveAbilityError:
-            return "{}'s ultimate is {}".format(
+        response = "{}'s ultimate is {}".format(
                 ability.hero.name,
                 ability.name,
             )
+        response = cls.append_cooldown_to_response(response, ability)
+        return cls.append_description_to_response(response, ability, True)
 
 
-class AbilityHotkeyResponse(Response):
+class AbilityHotkeyResponse(AbilityResponse):
     @classmethod
     def respond(cls, question):
         hero = question.heroes[0]
         ability = Ability.objects.get(hero=hero, hotkey=question.ability_hotkey)
-        return "{}'s {} is {}".format(
+        response = "{}'s {} is {}".format(
             hero.name,
             ability.hotkey,
             ability.name,
         )
+        return cls.append_description_to_response(response, ability, True)
 
 
-class AbilityCooldownResponse(Response):
+class AbilityCooldownResponse(AbilityResponse):
     @classmethod
     def respond(cls, question):
         ability = question.abilities[0]

@@ -49,6 +49,9 @@ class TestAbiltyParserAndResponders(TestCase):
             hero=disruptor,
             name='Glimpse',
             cooldown='60/46/32/18',
+            description=(
+                'Teleports the target hero back to where it was 4 seconds ago. Instantly kills '
+                'illusions.'),
             hotkey='W',
             is_ultimate=False,
         )
@@ -83,7 +86,9 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_ability_hotkey_response(self):
         response = ResponseGenerator.respond("What is Disruptor's W?")
-        assert response == "Disruptor's W is Glimpse"
+        assert response == (
+            "Disruptor's W is Glimpse. Teleports the target hero back to where it was 4 seconds "
+            "ago. Instantly kills illusions.")
 
     def test_hero_ultimate_response(self):
         response = ResponseGenerator.respond("What is Disruptor's ultimate?")
