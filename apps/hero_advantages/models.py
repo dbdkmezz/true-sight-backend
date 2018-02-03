@@ -2,8 +2,6 @@ import logging
 
 from django.db import models
 
-from apps.metadata.models import AdvantagesUpdate
-
 from .aliases import hero_aliases
 from .exceptions import InvalidEnemyNames
 from .web_scraper import WebScraper, HeroRole
@@ -149,5 +147,3 @@ class Advantage(models.Model):
                     enemy=enemy,
                     defaults={'advantage': adv},
                 )
-
-        AdvantagesUpdate.finish_current_update()

@@ -34,6 +34,13 @@ class ResponseGenerator(object):
             if question.ability_hotkey:
                 return AbilityHotkeyResponse.respond(question)
 
+        if len(question.abilities) == 1:
+            pass  # general ability resonse
+
+        if len(question.heroes) == 1:
+            # log this in some way
+            return SingleEnemyAdvantageResponse.respond(question)
+
         logger.warning("Unable to parse question. %s", question)
         raise DoNotUnderstandQuestion
 

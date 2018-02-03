@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Do I really want the Hero model in hero advanteages?
 #
 # # Logging
+# log if we have to use the fallback advantage response
 # Fix issues parsing abilities, there are still those which have too many
 # Track unique users and individual usage
 # Track popularity of each question type
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
 #
 # Questions
+# General ability questions, e.g., what does Glimpse do?
 # Is X good/strong against Y?
 
 # # V2
