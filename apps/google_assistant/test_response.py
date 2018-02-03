@@ -77,6 +77,12 @@ class TestAbiltyParserAndResponders(TestCase):
         with self.assertRaises(DoNotUnderstandQuestion):
             ResponseGenerator.respond("What is a pizza?")
 
+    def test_fallback_ability_response(self):
+        response = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
+        assert response == (
+            "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
+            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds")
+
     def test_cooldown_response(self):
         response = ResponseGenerator.respond("What's the cooldown of Glimpse?")
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
@@ -103,7 +109,7 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_hero_ultimate_response(self):
         response = ResponseGenerator.respond("What is Disruptor's ultimate?")
         assert (
-            response == "Disruptor's ultimate is Static Storm, it's cooldown is 90, 80, 70 seconds"
+            response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds"
         )
 
     def test_ability_list_response(self):

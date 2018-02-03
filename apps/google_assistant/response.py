@@ -35,7 +35,7 @@ class ResponseGenerator(object):
                 return AbilityHotkeyResponse.respond(question)
 
         if len(question.abilities) == 1:
-            pass  # general ability resonse
+            return AbilityDescriptionResponse.respond(question)
 
         if len(question.heroes) == 1:
             # log this in some way
@@ -175,13 +175,23 @@ class AbilityResponse(Response):
 
     @classmethod
     def append_cooldown_to_response(cls, response, ability):
-        try:
-            return "{}, it's cooldown is {} seconds".format(
-                response,
-                cls.parse_cooldown(ability),
-            )
-        except PassiveAbilityError:
+        if not ability.cooldown:
             return response
+        if not response[-1:] in ('.', ','):
+            response += ','
+        return "{} its cooldown is {} seconds".format(
+            response,
+            cls.parse_cooldown(ability),
+        )
+
+
+class AbilityDescriptionResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, question):
+        ability = question.abilities[0]
+        response = "{}'s ability {}".format(ability.hero, ability.name)
+        response = cls.append_description_to_response(response, ability, False)
+        return cls.append_cooldown_to_response(response, ability)
 
 
 class AbilityListResponse(AbilityResponse):

@@ -28,12 +28,11 @@ logger = logging.getLogger(__name__)
 # Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
 #
 # Questions
-# General ability questions, e.g., what does Glimpse do?
 # Is X good/strong against Y?
 
 # # V2
-# Abilities with the same name, hex, blink
 # Context and follow up questions
+# Abilities with the same name, hex, blink
 # Warn if an ability was not found this time when loading them (e.g. name change)
 # Damage type
 # Add the abilities of heroes summoned units
