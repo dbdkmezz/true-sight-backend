@@ -17,18 +17,14 @@ good_response_logger = logging.getLogger('good_response')
 # # General
 # Squish all the migrations
 # Hero role accuracy
-# More hero aliases
-# Ability aliases
 # Try it lots
-# Do I really want the Hero model in hero advanteages?
-#
-# Questions
-# Multiple ultimates (Dark Willow)
-# Is X good/strong against Y?
 
 # # V2
 # Context and follow up questions
 # Abilities with the same name, hex, blink
+# Do I really want the Hero model in hero advanteages?
+# Advantage against multiple heroes
+# Ability aliases
 # Warn if an ability was not found this time when loading them (e.g. name change)
 # Damage type
 # Add the abilities of heroes summoned units
@@ -40,6 +36,7 @@ good_response_logger = logging.getLogger('good_response')
 # Ability Range
 # All details of spell
 # Vision range of heroes
+# Better response for multiple ultimates? (Dark Willow)
 # Cast range
 
 

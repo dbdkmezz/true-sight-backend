@@ -46,11 +46,13 @@ class ResponseGenerator(object):
             if question.ability_hotkey:
                 return AbilityHotkeyResponse
 
+        if len(question.heroes) == 2:
+            return TwoHeroAdvantageResponse
+
         if len(question.abilities) == 1:
             return AbilityDescriptionResponse
 
         if len(question.heroes) == 1:
-            # log this in some way
             return SingleEnemyAdvantageResponse
 
 
@@ -83,10 +85,22 @@ class QuestionParser(object):
 
     @cached_property
     def heroes(self):
-        return [
+        result = [
             h for h in Hero.objects.all()
             if self.contains_any_word(h.aliases)
         ]
+        if len(result) < 1:
+            return result
+
+        # We need to order them in the order they are in the text
+        positions = {}
+        for hero in result:
+            for alias in hero.aliases:
+                position = self.text.find(alias.lower())
+                if position != -1:
+                    if not positions.get(hero) or position < positions['hero']:
+                        positions[hero] = position
+        return [k for k in sorted(positions, key=positions.get)]
 
     @cached_property
     def role(self):
@@ -129,6 +143,7 @@ class QuestionParser(object):
     def contains_any_word(self, words):
         """Whether any of the words in words feature in the question text"""
         return any((word.lower() in self.text) for word in words)
+
 
 class PassiveAbilityError(BaseException):
     pass
@@ -218,9 +233,19 @@ class AbilityListResponse(AbilityResponse):
 class AbilityUltimateResponse(AbilityResponse):
     @classmethod
     def respond(cls, question):
-        ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
+        hero = question.heroes[0]
+        try:
+            ability = Ability.objects.get(hero=hero, is_ultimate=True)
+        except Ability.MultipleObjectsReturned:
+            logger.warn("Multiple ultimate response.")
+            abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
+            return "{} has multiple ultimates: {}".format(
+                hero.name,
+                cls.comma_separate_with_final_and([a.name for a in abilities]),
+            )
+
         response = "{}'s ultimate is {}".format(
-                ability.hero.name,
+                hero.name,
                 ability.name,
             )
         response = cls.append_cooldown_to_response(response, ability)
@@ -277,7 +302,11 @@ class AbilitySpellImmunityResponse(AbilityResponse):
         return "{}. {}".format(response, ability.spell_immunity_detail)
 
 
-class SingleEnemyAdvantageResponse(Response):
+class AdvantageResponse(Response):
+    STRONG_ADVANTAGE = 2
+
+
+class SingleEnemyAdvantageResponse(AdvantageResponse):
     @classmethod
     def _advantage_hero_list(cls, heroes):
         names = [h.hero.name for h in heroes]
@@ -314,7 +343,7 @@ class SingleEnemyAdvantageResponse(Response):
         counters = Advantage.objects.filter(
             enemy=enemy, advantage__gte=0).order_by('-advantage')
         counters = cls._filter_by_role(counters, role)
-        hard_counters = counters.filter(advantage__gte=2)
+        hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
         soft_counters = (c for c in counters[:8] if c not in hard_counters)
         response = None
         if hard_counters:
@@ -329,3 +358,28 @@ class SingleEnemyAdvantageResponse(Response):
                     cls._advantage_hero_list(soft_counters),
                     enemy.name)
         return response
+
+
+class TwoHeroAdvantageResponse(AdvantageResponse):
+    @classmethod
+    def respond(cls, question):
+        hero = question.heroes[0]
+        enemy = question.heroes[1]
+        advantage = Advantage.objects.get(hero=hero, enemy=enemy).advantage
+        return "{hero} is {description} against {enemy}. {hero}'s advantage is {advantage}".format(
+            hero=hero,
+            description=cls.get_advantage_description_text(advantage),
+            enemy=enemy,
+            advantage=advantage,
+        )
+
+    @classmethod
+    def get_advantage_description_text(cls, advantage):
+        if advantage > cls.STRONG_ADVANTAGE:
+            return 'very strong'
+        elif advantage > 0:
+            return 'not bad'
+        elif advantage > (-1 * cls.STRONG_ADVANTAGE):
+            return 'not great'
+        else:
+            return 'terrible'

@@ -26,9 +26,14 @@ class TestQuestionParser(TestCase):
         parser = QuestionParser("What's the cooldown of Chemical Rage?")
         assert parser.abilities == [chemical_rage]
 
-    def test_identify_heroes(self):
+    def test_identify_heroe(self):
         parser = QuestionParser("What are Disruptor's abilities?")
         assert parser.heroes == [self.disruptor]
+
+    def test_identify_heroes_in_order(self):
+        storm_spirit = HeroFactory(name='Storm Spirit')
+        parser = QuestionParser("Is Storm Spirit good against Disruptor?")
+        assert parser.heroes == [storm_spirit, self.disruptor]
 
     def test_identify_heroes_with_alias(self):
         wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
@@ -112,6 +117,23 @@ class TestAbiltyParserAndResponders(TestCase):
             response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds"
         )
 
+    def test_hero_ultimate_response_multiple_ultimates(self):
+        dark_willow = HeroFactory(name='Dark Willow')
+        AbilityFactory(
+            hero=dark_willow,
+            name='Bedlam',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        AbilityFactory(
+            hero=dark_willow,
+            name='Terrorize',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        response = ResponseGenerator.respond("What is Dark Willow's ultimate?")
+        assert response == "Dark Willow has multiple ultimates: Bedlam and Terrorize"
+
     def test_ability_list_response(self):
         response = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert response == (
@@ -188,3 +210,8 @@ class TestAdvantageParserAndResponders(TestCase):
             "Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good"
         )
+
+    def test_two_hero_advantage(self):
+        response = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
+        assert response == (
+            "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75")
