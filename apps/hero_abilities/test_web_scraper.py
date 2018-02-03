@@ -61,6 +61,7 @@ class TestWebScraper(TestCase):
         self.scraper.load_hero_abilities(HeroFactory(name='Phantom Lancer'))
         assert Ability.objects.get(name='Juxtapose').cooldown == ''
 
+    @pytest.mark.skip("Talent abilities not yet implemented")
     def test_talent_abilities(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Phantom Lancer'))
         assert Ability.objects.get(name='Critical Strike').is_from_talent

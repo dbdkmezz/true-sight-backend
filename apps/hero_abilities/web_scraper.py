@@ -18,7 +18,6 @@ class WebScraper(object):
                 hero.name.replace(' ', '_')))
         abilities = soup.find_all(style=re.compile('^flex: 0 1 450px;.*'))  # the lhs ability box
         hotkeys_loaded = []
-
         for ability in abilities:
             try:
                 header = ability.find(style=re.compile('.*font-size: 110%.*'))
@@ -35,10 +34,12 @@ class WebScraper(object):
                 ).group(1)
                 if header_background_colour == '#2277AA':
                     continue  # Ability of controlled unit
+                if header_background_colour == '#BDB76B':
+                    continue  # Talent ability
+                if header_background_colour == '#5B388F':
+                    continue  # Ability from aghanims
                 is_ultimate = (header_background_colour == '#414141')
-                is_from_talent = (header_background_colour == '#BDB76B')
-                is_from_aghanims = (header_background_colour == '#5B388F')
-                if not (is_ultimate or is_from_talent or is_from_aghanims):
+                if not is_ultimate:
                     assert header_background_colour == '#B44335'
 
                 spell_immunity = self._get_spell_immunity(header)
@@ -68,8 +69,8 @@ class WebScraper(object):
                         'cooldown': cooldown,
                         'hotkey': hotkey,
                         'is_ultimate': is_ultimate,
-                        'is_from_talent': is_from_talent,
-                        'is_from_aghanims': is_from_aghanims,
+                        # 'is_from_talent': is_from_talent,
+                        # 'is_from_aghanims': is_from_aghanims,
                         'spell_immunity': spell_immunity,
                         'spell_immunity_detail': spell_immunity_detail,
                     })

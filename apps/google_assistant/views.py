@@ -25,12 +25,17 @@ logger = logging.getLogger(__name__)
 # Track popularity of each question type
 # Track daily activity
 # Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
+#
+# Questions
+# Is X good/strong against Y?
 
 # # V2
 # Abilities with the same name, hex, blink
 # Context and follow up questions
 # Warn if an ability was not found this time when loading them (e.g. name change)
 # Damage type
+# Add the abilities of heroes summoned units
+# Add abilities from talents or aghanims (be careful they don't override existing abilities, e.g. Brewmaster's Drunken Haze)  # noqa
 # Talents
 # Removable by types of dispel
 # Linkens sphere interactions
