@@ -302,5 +302,4 @@ class SingleEnemyAdvantageResponse(Response):
                 response = '{} good against {}'.format(
                     cls._advantage_hero_list(soft_counters),
                     enemy.name)
-        print(response)
         return response

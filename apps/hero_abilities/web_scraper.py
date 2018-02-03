@@ -33,6 +33,8 @@ class WebScraper(object):
                     r'.*background-color: (.*?);.*',
                     header['style']
                 ).group(1)
+                if header_background_colour == '#2277AA':
+                    continue  # Ability of controlled unit
                 is_ultimate = (header_background_colour == '#414141')
                 is_from_talent = (header_background_colour == '#BDB76B')
                 is_from_aghanims = (header_background_colour == '#5B388F')
