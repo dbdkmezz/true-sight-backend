@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
+from apps.hero_abilities.models import SpellImmunity
 
 from .response import ResponseGenerator, QuestionParser
 from .exceptions import DoNotUnderstandQuestion
@@ -57,6 +58,15 @@ class TestAbiltyParserAndResponders(TestCase):
         )
         AbilityFactory(
             hero=disruptor,
+            name='Kinetic Field',
+            spell_immunity=SpellImmunity.DOES_NOT_PIERCE,
+            spell_immunity_detail=(
+                "The Barrier's modifier persists if it was placed before spell immunity."),
+            hotkey='E',
+            is_ultimate=False,
+        )
+        AbilityFactory(
+            hero=disruptor,
             name='Static Storm',
             cooldown='90/80/70',
             hotkey='R',
@@ -98,8 +108,8 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_ability_list_response(self):
         response = ResponseGenerator.respond("What are Disruptor's abilities?")
-        assert (
-            response == "Disruptor's abilities are Thunder Strike, Glimpse, and Static Storm")
+        assert response == (
+            "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm")
 
     def test_ability_list_response_excludes_talent_abilities(self):
         phantom_lancer = HeroFactory(name='Phantom Lancer')
@@ -116,6 +126,12 @@ class TestAbiltyParserAndResponders(TestCase):
         response = ResponseGenerator.respond("What are Phantom Lancer's abilities?")
         assert 'Juxtapose' in response
         assert 'Critical Strike' not in response
+
+    def test_spell_immunity_response(self):
+        response = ResponseGenerator.respond("Does spell immunity protect against Kinetic Field?")
+        assert response == (
+            "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
+            "was placed before spell immunity.")
 
 
 @pytest.mark.django_db

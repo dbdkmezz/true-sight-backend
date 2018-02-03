@@ -21,10 +21,6 @@ logger = logging.getLogger(__name__)
 # Upgrade to Django 2
 # Do I really want the Hero model in hero advanteages?
 #
-# # Questions and responses
-# Bkb questions
-# Ability description in response to questions (?cooldown where long?)
-#
 # # Logging
 # Fix issues parsing abilities, there are still those which have too many
 # Track unique users and individual usage

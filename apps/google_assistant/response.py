@@ -5,7 +5,7 @@ from django.utils.functional import cached_property
 
 from apps.hero_advantages.models import Hero, Advantage
 from apps.hero_advantages.roles import HeroRole
-from apps.hero_abilities.models import Ability
+from apps.hero_abilities.models import Ability, SpellImmunity
 
 from .exceptions import DoNotUnderstandQuestion
 
@@ -19,8 +19,10 @@ class ResponseGenerator(object):
         question = QuestionParser(question_text)
 
         if len(question.abilities) == 1:
-            if question.contains_any_word(('cool down' 'cooldown')):
+            if question.contains_any_word(('cool down', 'cooldown')):
                 return AbilityCooldownResponse.respond(question)
+            if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
+                return AbilitySpellImmunityResponse.respond(question)
 
         if len(question.heroes) == 1:
             if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
@@ -94,6 +96,7 @@ class QuestionParser(object):
             hotkeys = [
                 a.hotkey
                 for a in Ability.objects.filter(hero=self.heroes[0])
+                if a.hotkey
             ]
             hotkeys_in_question = [
                 hotkey for hotkey in hotkeys
@@ -224,6 +227,28 @@ class AbilityCooldownResponse(AbilityResponse):
             return "{} is a passive ability, with no cooldown".format(
                 ability.name,
             )
+
+
+class AbilitySpellImmunityResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, question):
+        ability = question.abilities[0]
+        spell_immunity_map = {
+            SpellImmunity.PIERCES: 'does pierce spell immunity',
+            SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
+            SpellImmunity.DOES_NOT_PIERCE: 'does not pierce spell immunity',
+        }
+        response = "{} {}".format(
+            ability.name,
+            spell_immunity_map[ability.spell_immunity],
+        )
+        return cls.append_spell_immunity_detail_to_response(response, ability)
+
+    @staticmethod
+    def append_spell_immunity_detail_to_response(response, ability):
+        if not ability.spell_immunity_detail:
+            return response
+        return "{}. {}".format(response, ability.spell_immunity_detail)
 
 
 class SingleEnemyAdvantageResponse(Response):

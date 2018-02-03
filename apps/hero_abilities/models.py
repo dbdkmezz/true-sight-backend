@@ -28,7 +28,7 @@ class Ability(models.Model):
     is_ultimate = models.BooleanField(default=False)
     is_from_talent = models.BooleanField(default=False)
     is_from_aghanims = models.BooleanField(default=False)
-    spell_immunity_int = models.IntegerField(null=True, blank=True, default=None)
+    spell_immunity = models.IntegerField(null=True, blank=True, default=None)
     spell_immunity_detail = models.CharField(max_length=512, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -48,7 +48,3 @@ class Ability(models.Model):
         web_scraper = WebScraper(request_handler)
         for hero in Hero.objects.all():
             web_scraper.load_hero_abilities(hero)
-
-    @property
-    def spell_immunity(self):
-        return SpellImmunity(self.spell_immunity_int)

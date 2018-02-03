@@ -68,7 +68,7 @@ class WebScraper(object):
                         'is_ultimate': is_ultimate,
                         'is_from_talent': is_from_talent,
                         'is_from_aghanims': is_from_aghanims,
-                        'spell_immunity_int': spell_immunity,
+                        'spell_immunity': spell_immunity,
                         'spell_immunity_detail': spell_immunity_detail,
                     })
             except Exception as e:
