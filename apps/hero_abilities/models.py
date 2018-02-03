@@ -11,6 +11,14 @@ class SpellImmunity(IntEnum):
     DOES_NOT_PIERCE = 3
 
 
+class StandardAbilityManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_from_talent=False,
+            is_from_aghanims=False,
+        )
+
+
 class Ability(models.Model):
     hero = models.ForeignKey(Hero, on_delete=models.CASCADE, db_index=True)
     name = models.CharField(max_length=64, db_index=True)
@@ -24,6 +32,9 @@ class Ability(models.Model):
     spell_immunity_detail = models.CharField(max_length=512, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    standard_objects = StandardAbilityManager()
 
     class Meta:
         unique_together = ('hero', 'name')

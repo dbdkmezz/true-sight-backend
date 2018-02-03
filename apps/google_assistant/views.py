@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 # # TODO
 #
 # # General
-# List of normal hero abilities from the models
-# (Make default ability objects exclude aghs and talent abilities?)
 # Better parsing of bg colour
 # Hero role accuracy
 # abilities with the same name, hex, blink

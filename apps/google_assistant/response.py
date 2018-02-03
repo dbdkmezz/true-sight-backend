@@ -159,7 +159,7 @@ class AbilityListResponse(Response):
     @classmethod
     def respond(cls, question):
         hero = question.heroes[0]
-        abilities = Ability.objects.filter(hero=hero)
+        abilities = Ability.standard_objects.filter(hero=hero)
         names = [a.name for a in cls.order_abilities(abilities)]
         return "{}'s abilities are {}".format(
             hero.name,

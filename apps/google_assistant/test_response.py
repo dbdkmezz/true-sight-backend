@@ -96,6 +96,22 @@ class TestAbiltyParserAndResponders(TestCase):
         assert (
             response == "Disruptor's abilities are Thunder Strike, Glimpse, and Static Storm")
 
+    def test_ability_list_response_excludes_talent_abilities(self):
+        phantom_lancer = HeroFactory(name='Phantom Lancer')
+        AbilityFactory(
+            hero=phantom_lancer,
+            name='Critical Strike',
+            is_from_talent=True,
+        )
+        AbilityFactory(
+            hero=phantom_lancer,
+            name='Juxtapose',
+        )
+
+        response = ResponseGenerator.respond("What are Phantom Lancer's abilities?")
+        assert 'Juxtapose' in response
+        assert 'Critical Strike' not in response
+
 
 @pytest.mark.django_db
 class TestAdvantageParserAndResponders(TestCase):
