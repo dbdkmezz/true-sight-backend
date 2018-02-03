@@ -133,6 +133,23 @@ class TestAbiltyParserAndResponders(TestCase):
             "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
             "was placed before spell immunity.")
 
+    @pytest.mark.skip("Bug not fixed yet")
+    def test_abilities_with_the_same_name(self):
+        AbilityFactory(
+            hero=HeroFactory(name='Lion'),
+            name='Hex',
+            cooldown='30/24/18/12',
+        )
+        AbilityFactory(
+            hero=HeroFactory(name='Shadow Shaman'),
+            name='Hex',
+            cooldown='13',
+        )
+        response = ResponseGenerator.respond("What's the cooldown of Hex?")
+        assert response == (
+            "Both Lion and Shadow Shaman have the Hex ability. Lion's cooldown is 13, Shadow "
+            "Shaman's is 30, 24, 18, 12 seconds")
+
 
 @pytest.mark.django_db
 class TestAdvantageParserAndResponders(TestCase):

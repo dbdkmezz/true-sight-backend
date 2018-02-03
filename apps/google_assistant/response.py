@@ -52,7 +52,7 @@ class QuestionParser(object):
         """
         abilities_found = [
             a for a in Ability.objects.all()
-            if a.name.lower() in self.text
+            if a.name and a.name.lower() in self.text
         ]
         result = []
         for ability in abilities_found:

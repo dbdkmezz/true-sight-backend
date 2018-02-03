@@ -14,11 +14,9 @@ logger = logging.getLogger(__name__)
 #
 # # General
 # Hero role accuracy
-# abilities with the same name, hex, blink
 # More hero aliases
 # Ability aliases
 # Try it lots
-# Upgrade to Django 2
 # Do I really want the Hero model in hero advanteages?
 #
 # # Logging
@@ -29,6 +27,7 @@ logger = logging.getLogger(__name__)
 # Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
 
 # # V2
+# Abilities with the same name, hex, blink
 # Context and follow up questions
 # Warn if an ability was not found this time when loading them (e.g. name change)
 # Damage type
