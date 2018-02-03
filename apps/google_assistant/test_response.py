@@ -5,7 +5,7 @@ from django.test import TestCase
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
 
-from .response import QuestionParser
+from .response import ResponseGenerator, QuestionParser
 from .exceptions import DoNotUnderstandQuestion
 
 
@@ -34,11 +34,6 @@ class TestQuestionParser(TestCase):
         parser = QuestionParser("What are Wind Rangers abilities?")
         assert parser.heroes == [wind_ranger]
 
-    def test_raises_does_not_understand(self):
-        parser = QuestionParser("What is a pizza?")
-        with self.assertRaises(DoNotUnderstandQuestion):
-            parser.get_responder()
-
 
 @pytest.mark.django_db
 class TestAbiltyParserAndResponders(TestCase):
@@ -65,14 +60,16 @@ class TestAbiltyParserAndResponders(TestCase):
             is_ultimate=True,
         )
 
+    def test_raises_does_not_understand(self):
+        with self.assertRaises(DoNotUnderstandQuestion):
+            ResponseGenerator.respond("What is a pizza?")
+
     def test_cooldown_response(self):
-        responder = QuestionParser("What's the cooldown of Glimpse?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What's the cooldown of Glimpse?")
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
 
     def test_cooldown_two_words(self):
-        responder = QuestionParser("What's the cool down of Glimpse?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What's the cool down of Glimpse?")
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
 
     def test_when_no_cooldown(self):
@@ -81,25 +78,21 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Swashbuckle',
             cooldown='',
         )
-        responder = QuestionParser("What's the cool down of Swashbuckle?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
         assert response == "Swashbuckle is a passive ability, with no cooldown"
 
     def test_ability_hotkey_response(self):
-        responder = QuestionParser("What is Disruptor's W?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What is Disruptor's W?")
         assert response == "Disruptor's W is Glimpse"
 
     def test_hero_ultimate_response(self):
-        responder = QuestionParser("What is Disruptor's ultimate?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What is Disruptor's ultimate?")
         assert (
             response == "Disruptor's ultimate is Static Storm, it's cooldown is 90, 80, 70 seconds"
         )
 
     def test_ability_list_response(self):
-        responder = QuestionParser("What are Disruptor's abilities?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert (
             response == "Disruptor's abilities are Thunder Strike, Glimpse, and Static Storm")
 
@@ -123,17 +116,14 @@ class TestAdvantageParserAndResponders(TestCase):
         AdvantageFactory(hero=disruptor, enemy=storm_spirit, advantage=1.75)
 
     def test_general_advantage(self):
-        responder = QuestionParser("Which heroes are good against Storm Spirit?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good"
         )
 
     def test_mid_advantage(self):
-        responder = QuestionParser(
-            "Which mid heroes are good against Storm Spirit?").get_responder()
-        response = responder.generate_response()
+        response = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good"

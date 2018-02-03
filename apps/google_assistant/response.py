@@ -13,6 +13,29 @@ from .exceptions import DoNotUnderstandQuestion
 logger = logging.getLogger(__name__)
 
 
+class ResponseGenerator(object):
+    @staticmethod
+    def respond(question_text):
+        question = QuestionParser(question_text)
+
+        if len(question.abilities) == 1:
+            if question.contains_any_word(('cool down' 'cooldown')):
+                return AbilityCooldownResponse.respond(question)
+
+        if len(question.heroes) == 1:
+            if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
+                return SingleEnemyAdvantageResponse.respond(question)
+            if question.contains_any_word(('ultimate', )):
+                return AbilityUltimateResponse.respond(question)
+            if question.contains_any_word(('abilities', )):
+                return AbilityListResponse.respond(question)
+            if question.ability_hotkey:
+                return AbilityHotkeyResponse.respond(question)
+
+        logger.warning("Unable to parse question. %s", question)
+        raise DoNotUnderstandQuestion
+
+
 class QuestionParser(object):
     def __init__(self, question_text):
         self.text = question_text.lower()
@@ -76,7 +99,6 @@ class QuestionParser(object):
                 hotkey for hotkey in hotkeys
                 if hotkey.lower() in self.words
             ]
-            print(hotkeys_in_question)
             if len(hotkeys_in_question) == 1:
                 return hotkeys_in_question[0]
         return None
@@ -84,21 +106,6 @@ class QuestionParser(object):
     def contains_any_word(self, words):
         """Whether any of the words in words feature in the question text"""
         return any((word.lower() in self.text) for word in words)
-
-    def get_responder(self):
-        if SingleEnemyAdvantageResponse.matches_question(self):
-            return SingleEnemyAdvantageResponse(self)
-        if AbilityCooldownResponse.matches_question(self):
-            return AbilityCooldownResponse(self)
-        if AbilityUltimateResponse.matches_question(self):
-            return AbilityUltimateResponse(self)
-        if AbilityListResponse.matches_question(self):
-            return AbilityListResponse(self)
-        if AbilityHotkeyResponse.matches_question(self):
-            return AbilityHotkeyResponse(self)
-
-        logger.warning("Unable to parse question. %s", self)
-        raise DoNotUnderstandQuestion
 
     def __str__(self):
         return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
@@ -113,11 +120,7 @@ class Response(object):
     def __init__(self):
         raise NotImplemented
 
-    @staticmethod
-    def matches_question(question):
-        raise NotImplemented
-
-    def generate_response(self):
+    def respond(self):
         raise NotImplemented
 
     @staticmethod
@@ -140,13 +143,6 @@ class Response(object):
 
 
 class AbilityListResponse(Response):
-    def __init__(self, question):
-        self.hero = question.heroes[0]
-
-    @staticmethod
-    def matches_question(question):
-        return 'abilities' in question.text and len(question.heroes) == 1
-
     @staticmethod
     def order_abilities(abilities):
         """Orders the abilities by the posistion of the hotkey on the keyboard"""
@@ -160,84 +156,62 @@ class AbilityListResponse(Response):
         ordered_abilities += [a for a in abilities if a not in ordered_abilities]
         return ordered_abilities
 
-    def generate_response(self):
-        abilities = Ability.objects.filter(hero=self.hero)
-        names = [a.name for a in self.order_abilities(abilities)]
+    @classmethod
+    def respond(cls, question):
+        hero = question.heroes[0]
+        abilities = Ability.objects.filter(hero=hero)
+        names = [a.name for a in cls.order_abilities(abilities)]
         return "{}'s abilities are {}".format(
-            self.hero.name,
-            self.comma_separate_with_final_and(names)
+            hero.name,
+            cls.comma_separate_with_final_and(names)
         )
 
 
 class AbilityUltimateResponse(Response):
-    def __init__(self, question):
-        self.ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
-
-    def matches_question(question):
-        return 'ultimate' in question.text and len(question.heroes) == 1
-
-    def generate_response(self):
+    @classmethod
+    def respond(cls, question):
+        ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
         try:
             return "{}'s ultimate is {}, it's cooldown is {} seconds".format(
-                self.ability.hero.name,
-                self.ability.name,
-                self.parse_cooldown(self.ability),
+                ability.hero.name,
+                ability.name,
+                cls.parse_cooldown(ability),
             )
         except PassiveAbilityError:
-            return "{}'s ultimate is {}"
+            return "{}'s ultimate is {}".format(
+                ability.hero.name,
+                ability.name,
+            )
 
 
 class AbilityHotkeyResponse(Response):
-    def __init__(self, question):
-        self.hero = question.heroes[0]
-        self.ability = Ability.objects.get(hero=self.hero, hotkey=question.ability_hotkey)
-
-    def matches_question(question):
-        return len(question.heroes) == 1 and question.ability_hotkey is not None
-
-    def generate_response(self):
+    @classmethod
+    def respond(cls, question):
+        hero = question.heroes[0]
+        ability = Ability.objects.get(hero=hero, hotkey=question.ability_hotkey)
         return "{}'s {} is {}".format(
-            self.hero.name,
-            self.ability.hotkey,
-            self.ability.name,
+            hero.name,
+            ability.hotkey,
+            ability.name,
         )
 
 
 class AbilityCooldownResponse(Response):
-    def __init__(self, question):
-        self.ability = question.abilities[0]
-
-    @staticmethod
-    def matches_question(question):
-        return (
-            question.contains_any_word(('cool down' 'cooldown'))
-            and len(question.abilities) == 1
-        )
-
-    def generate_response(self):
+    @classmethod
+    def respond(cls, question):
+        ability = question.abilities[0]
         try:
             return "The cooldown of {} is {} seconds".format(
-                self.ability.name,
-                self.parse_cooldown(self.ability),
+                ability.name,
+                cls.parse_cooldown(ability),
             )
         except PassiveAbilityError:
             return "{} is a passive ability, with no cooldown".format(
-                self.ability.name,
+                ability.name,
             )
 
 
 class SingleEnemyAdvantageResponse(Response):
-    def __init__(self, question):
-        self.enemy = question.heroes[0]
-        self.role = question.role
-
-    @staticmethod
-    def matches_question(question):
-        return (
-            question.contains_any_word(('strong', 'against', 'counter', 'counters'))
-            and len(question.heroes) == 1
-        )
-
     @classmethod
     def _advantage_hero_list(cls, heroes):
         names = [h.hero.name for h in heroes]
@@ -267,23 +241,26 @@ class SingleEnemyAdvantageResponse(Response):
             heroes = Hero.objects.filter(is_roaming=True)
         return counters.filter(hero__in=heroes)
 
-    def generate_response(self):
+    @classmethod
+    def respond(cls, question):
+        enemy = question.heroes[0]
+        role = question.role
         counters = Advantage.objects.filter(
-            enemy=self.enemy, advantage__gte=0).order_by('-advantage')
-        counters = self._filter_by_role(counters, self.role)
+            enemy=enemy, advantage__gte=0).order_by('-advantage')
+        counters = cls._filter_by_role(counters, role)
         hard_counters = counters.filter(advantage__gte=2)
         soft_counters = (c for c in counters[:8] if c not in hard_counters)
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
-                self._advantage_hero_list(hard_counters),
-                self.enemy.name)
+                cls._advantage_hero_list(hard_counters),
+                enemy.name)
         if soft_counters:
             if response:
-                response += '. {} also good'.format(self._advantage_hero_list(soft_counters))
+                response += '. {} also good'.format(cls._advantage_hero_list(soft_counters))
             else:
                 response = '{} good against {}'.format(
-                    self._advantage_hero_list(soft_counters),
-                    self.enemy.name)
+                    cls._advantage_hero_list(soft_counters),
+                    enemy.name)
         print(response)
         return response

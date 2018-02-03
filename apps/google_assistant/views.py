@@ -3,33 +3,51 @@ from django.http import HttpResponse, JsonResponse
 
 from libs.google_actions import AppResponse, AppRequest, NoJsonException
 
-from .response import QuestionParser
+from .response import ResponseGenerator
 from .exceptions import DoNotUnderstandQuestion
 
 
 logger = logging.getLogger(__name__)
 
 
-# TODO
+# # TODO
+#
+# # General
+# Big 'ol try catch around the view with an error response
+# List of normal hero abilities from the models
+# (Make default ability objects exclude aghs and talent abilities?)
+# Better parsing of bg colour
+# Hero role accuracy
 # abilities with the same name, hex, blink
-# Fix issues parsing abilities, lots of heroes have too many, e.g. two Rs
-# More ability info
-# BKB and magic resistance
-# context - responding to follow on questions
 # More hero aliases
 # Ability aliases
 # Try it lots
 # Upgrade to Django 2
 # Do I really want the Hero model in hero advanteages?
-# Is the pattern for parsing and getting responder good?
-# Think about what logging I need to deploy
+#
+# # Questions and responses
+# Bkb questions
+# Ability description in response to questions (?cooldown where long?)
+#
+# # Logging
+# Fix issues parsing abilities, there are still those which have too many
+# Track unique users and individual usage
+# Track popularity of each question type
+# Track daily activity
+# Log failures to parse separately (not the __name__ logger?). Log all questions separately too.
 
-# v2
-# Removable by types of dispel
-# Linkens sphere
-# Range
+# # V2
+# Context and follow up questions
+# Warn if an ability was not found this time when loading them (e.g. name change)
+# Damage type
 # Talents
+# Removable by types of dispel
+# Linkens sphere interactions
+# Ability duration
+# Ability Range
 # All details of spell
+# Vision range of heroes
+# Cast range
 
 
 def index(request):
@@ -42,11 +60,10 @@ def index(request):
         return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
 
     try:
-        responder = QuestionParser(google_request.text).get_responder()
+        response = ResponseGenerator.respond(google_request.text)
     except DoNotUnderstandQuestion:
         return JsonResponse(AppResponse().ask(
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
-    response = responder.generate_response()
     logger.info("Question: %s. Response: %s", google_request.text, response)
     return JsonResponse(AppResponse().ask(response))
