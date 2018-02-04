@@ -83,17 +83,17 @@ class TestAbiltyParserAndResponders(TestCase):
             ResponseGenerator.respond("What is a pizza?")
 
     def test_fallback_ability_response(self):
-        response = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
+        response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
         assert response == (
             "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
             "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds")
 
     def test_cooldown_response(self):
-        response = ResponseGenerator.respond("What's the cooldown of Glimpse?")
+        response, _ = ResponseGenerator.respond("What's the cooldown of Glimpse?")
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
 
     def test_cooldown_two_words(self):
-        response = ResponseGenerator.respond("What's the cool down of Glimpse?")
+        response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
         assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
 
     def test_when_no_cooldown(self):
@@ -102,17 +102,17 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Swashbuckle',
             cooldown='',
         )
-        response = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
+        response, _ = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
         assert response == "Swashbuckle is a passive ability, with no cooldown"
 
     def test_ability_hotkey_response(self):
-        response = ResponseGenerator.respond("What is Disruptor's W?")
+        response, _ = ResponseGenerator.respond("What is Disruptor's W?")
         assert response == (
             "Disruptor's W is Glimpse. Teleports the target hero back to where it was 4 seconds "
             "ago. Instantly kills illusions.")
 
     def test_hero_ultimate_response(self):
-        response = ResponseGenerator.respond("What is Disruptor's ultimate?")
+        response, _ = ResponseGenerator.respond("What is Disruptor's ultimate?")
         assert (
             response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds"
         )
@@ -131,11 +131,11 @@ class TestAbiltyParserAndResponders(TestCase):
             cooldown='40,30,20',
             is_ultimate=True,
         )
-        response = ResponseGenerator.respond("What is Dark Willow's ultimate?")
+        response, _ = ResponseGenerator.respond("What is Dark Willow's ultimate?")
         assert response == "Dark Willow has multiple ultimates: Bedlam and Terrorize"
 
     def test_ability_list_response(self):
-        response = ResponseGenerator.respond("What are Disruptor's abilities?")
+        response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert response == (
             "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm")
 
@@ -151,12 +151,12 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Juxtapose',
         )
 
-        response = ResponseGenerator.respond("What are Phantom Lancer's abilities?")
+        response, _ = ResponseGenerator.respond("What are Phantom Lancer's abilities?")
         assert 'Juxtapose' in response
         assert 'Critical Strike' not in response
 
     def test_spell_immunity_response(self):
-        response = ResponseGenerator.respond("Does spell immunity protect against Kinetic Field?")
+        response, _ = ResponseGenerator.respond("Does spell immunity protect against Kinetic Field?")
         assert response == (
             "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
             "was placed before spell immunity.")
@@ -173,7 +173,7 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Hex',
             cooldown='13',
         )
-        response = ResponseGenerator.respond("What's the cooldown of Hex?")
+        response, _ = ResponseGenerator.respond("What's the cooldown of Hex?")
         assert response == (
             "Both Lion and Shadow Shaman have the Hex ability. Lion's cooldown is 13, Shadow "
             "Shaman's is 30, 24, 18, 12 seconds")
@@ -198,20 +198,20 @@ class TestAdvantageParserAndResponders(TestCase):
         AdvantageFactory(hero=disruptor, enemy=storm_spirit, advantage=1.75)
 
     def test_general_advantage(self):
-        response = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good"
         )
 
     def test_mid_advantage(self):
-        response = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good"
         )
 
     def test_two_hero_advantage(self):
-        response = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
             "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75")

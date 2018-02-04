@@ -17,7 +17,7 @@ failed_response_logger = logging.getLogger('failed_response')
 
 class ResponseGenerator(object):
     @classmethod
-    def respond(cls, question_text):
+    def respond(cls, question_text, context=None):
         question = QuestionParser(question_text)
 
         responder = cls._get_responder(question)
@@ -25,35 +25,35 @@ class ResponseGenerator(object):
             failed_response_logger.warning("Unable to respond to question. %s", question)
             raise DoNotUnderstandQuestion
 
-        ResponderUse.log_use(responder.__name__)
-        return responder.respond(question)
+        ResponderUse.log_use(type(responder).__name__)
+        return responder.respond(), responder.generate_context()
 
     @staticmethod
     def _get_responder(question):
         if len(question.abilities) == 1:
             if question.contains_any_word(('cool down', 'cooldown')):
-                return AbilityCooldownResponse
+                return AbilityCooldownResponse(question)
             if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
-                return AbilitySpellImmunityResponse
+                return AbilitySpellImmunityResponse(question)
 
         if len(question.heroes) == 1:
             if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
-                return SingleEnemyAdvantageResponse
+                return SingleEnemyAdvantageResponse(question)
             if question.contains_any_word(('ultimate', )):
-                return AbilityUltimateResponse
+                return AbilityUltimateResponse(question)
             if question.contains_any_word(('abilities', )):
-                return AbilityListResponse
+                return AbilityListResponse(question)
             if question.ability_hotkey:
-                return AbilityHotkeyResponse
+                return AbilityHotkeyResponse(question)
 
         if len(question.heroes) == 2:
-            return TwoHeroAdvantageResponse
+            return TwoHeroAdvantageResponse(question)
 
         if len(question.abilities) == 1:
-            return AbilityDescriptionResponse
+            return AbilityDescriptionResponse(question)
 
         if len(question.heroes) == 1:
-            return SingleEnemyAdvantageResponse
+            return SingleEnemyAdvantageResponse(question)
 
 
 class QuestionParser(object):
@@ -145,16 +145,16 @@ class QuestionParser(object):
         return any((word.lower() in self.text) for word in words)
 
 
-class PassiveAbilityError(BaseException):
-    pass
-
-
 class Response(object):
-    def __init__(self):
+    def respond(self):
         raise NotImplemented
 
-    @classmethod
-    def respond(cls, question):
+    def generate_context(self):
+        context = self._generate_context()
+        context['responder-class'] = type(self).__name__
+        return context
+
+    def _generate_context(self):
         raise NotImplemented
 
     @staticmethod
@@ -168,6 +168,10 @@ class Response(object):
             r'^(.*), (.*?)$',
             r'\1, and \2',
             ', '.join(words))
+
+
+class PassiveAbilityError(BaseException):
+    pass
 
 
 class AbilityResponse(Response):
@@ -210,90 +214,133 @@ class AbilityResponse(Response):
 
 
 class AbilityDescriptionResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        ability = question.abilities[0]
-        response = "{}'s ability {}".format(ability.hero, ability.name)
-        response = cls.append_description_to_response(response, ability, False)
-        return cls.append_cooldown_to_response(response, ability)
+    def __init__(self, question):
+        self.ability = question.abilities[0]
+
+    def _generate_context(self):
+        return {
+            'ability': self.ability.name,
+        }
+
+    def respond(self):
+        response = "{}'s ability {}".format(self.ability.hero, self.ability.name)
+        response = self.append_description_to_response(response, self.ability, False)
+        return self.append_cooldown_to_response(response, self.ability)
 
 
 class AbilityListResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        hero = question.heroes[0]
-        abilities = Ability.standard_objects.filter(hero=hero)
-        names = [a.name for a in cls.order_abilities(abilities)]
+    def __init__(self, question):
+        self.hero = question.heroes[0]
+
+    def _generate_context(self):
+        return {
+            'hero': self.hero.name,
+        }
+
+    def respond(self):
+        abilities = Ability.standard_objects.filter(hero=self.hero)
+        names = [a.name for a in self.order_abilities(abilities)]
         return "{}'s abilities are {}".format(
-            hero.name,
-            cls.comma_separate_with_final_and(names)
+            self.hero.name,
+            self.comma_separate_with_final_and(names)
         )
 
 
 class AbilityUltimateResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        hero = question.heroes[0]
+    def __init__(self, question):
+        self.hero = question.heroes[0]
+
+    def _generate_context(self):
         try:
-            ability = Ability.objects.get(hero=hero, is_ultimate=True)
+            return {
+                'hero': self.hero.name,
+                'ability': self.ability.name,
+            }
+        except AttributeError:
+            return {
+                'hero': self.hero.name,
+                'ability': None,
+            }
+
+    def respond(self):
+        try:
+            self.ability = Ability.objects.get(hero=self.hero, is_ultimate=True)
         except Ability.MultipleObjectsReturned:
-            logger.warn("Multiple ultimate response.")
-            abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
+            abilities = Ability.objects.filter(hero=self.hero, is_ultimate=True)
             return "{} has multiple ultimates: {}".format(
-                hero.name,
-                cls.comma_separate_with_final_and([a.name for a in abilities]),
+                self.hero.name,
+                self.comma_separate_with_final_and([a.name for a in abilities]),
             )
 
         response = "{}'s ultimate is {}".format(
-                hero.name,
-                ability.name,
+                self.hero.name,
+                self.ability.name,
             )
-        response = cls.append_cooldown_to_response(response, ability)
-        return cls.append_description_to_response(response, ability, True)
+        response = self.append_cooldown_to_response(response, self.ability)
+        return self.append_description_to_response(response, self.ability, True)
 
 
 class AbilityHotkeyResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        hero = question.heroes[0]
-        ability = Ability.objects.get(hero=hero, hotkey=question.ability_hotkey)
+    def __init__(self, question):
+        self.hero = question.heroes[0]
+        self.ability = Ability.objects.get(hero=self.hero, hotkey=question.ability_hotkey)
+
+    def _generate_context(self):
+        return {
+            'hero': self.hero.name,
+            'ability': self.ability.name,
+        }
+
+    def respond(self):
         response = "{}'s {} is {}".format(
-            hero.name,
-            ability.hotkey,
-            ability.name,
+            self.hero.name,
+            self.ability.hotkey,
+            self.ability.name,
         )
-        return cls.append_description_to_response(response, ability, True)
+        return self.append_description_to_response(response, self.ability, True)
 
 
 class AbilityCooldownResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        ability = question.abilities[0]
+    def __init__(self, question):
+        self.ability = question.abilities[0]
+
+    def _generate_context(self):
+        return {
+            'ability': self.ability.name,
+        }
+
+    def respond(self):
         try:
             return "The cooldown of {} is {} seconds".format(
-                ability.name,
-                cls.parse_cooldown(ability),
+                self.ability.name,
+                self.parse_cooldown(self.ability),
             )
         except PassiveAbilityError:
             return "{} is a passive ability, with no cooldown".format(
-                ability.name,
+                self.ability.name,
             )
 
 
 class AbilitySpellImmunityResponse(AbilityResponse):
-    @classmethod
-    def respond(cls, question):
-        ability = question.abilities[0]
+    def __init__(self, question):
+        self.ability = question.abilities[0]
+
+    def _generate_context(self):
+        return {
+            'ability': self.ability.name,
+        }
+
+    def respond(self):
         spell_immunity_map = {
             SpellImmunity.PIERCES: 'does pierce spell immunity',
             SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
             SpellImmunity.DOES_NOT_PIERCE: 'does not pierce spell immunity',
         }
         response = "{} {}".format(
-            ability.name,
-            spell_immunity_map[ability.spell_immunity],
+            self.ability.name,
+            spell_immunity_map[self.ability.spell_immunity],
         )
-        return cls.append_spell_immunity_detail_to_response(response, ability)
+        return self.append_spell_immunity_detail_to_response(response, self.ability)
 
     @staticmethod
     def append_spell_immunity_detail_to_response(response, ability):
@@ -307,6 +354,16 @@ class AdvantageResponse(Response):
 
 
 class SingleEnemyAdvantageResponse(AdvantageResponse):
+    def __init__(self, question):
+        self.enemy = question.heroes[0]
+        self.role = question.role
+
+    def _generate_context(self):
+        return {
+            'enemy': self.enemy.name,
+            'role': self.role,
+        }
+
     @classmethod
     def _advantage_hero_list(cls, heroes):
         names = [h.hero.name for h in heroes]
@@ -336,40 +393,44 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
             heroes = Hero.objects.filter(is_roaming=True)
         return counters.filter(hero__in=heroes)
 
-    @classmethod
-    def respond(cls, question):
-        enemy = question.heroes[0]
-        role = question.role
+    def respond(self):
         counters = Advantage.objects.filter(
-            enemy=enemy, advantage__gte=0).order_by('-advantage')
-        counters = cls._filter_by_role(counters, role)
-        hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
+            enemy=self.enemy, advantage__gte=0).order_by('-advantage')
+        counters = self._filter_by_role(counters, self.role)
+        hard_counters = counters.filter(advantage__gte=self.STRONG_ADVANTAGE)
         soft_counters = (c for c in counters[:8] if c not in hard_counters)
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
-                cls._advantage_hero_list(hard_counters),
-                enemy.name)
+                self._advantage_hero_list(hard_counters),
+                self.enemy.name)
         if soft_counters:
             if response:
-                response += '. {} also good'.format(cls._advantage_hero_list(soft_counters))
+                response += '. {} also good'.format(self._advantage_hero_list(soft_counters))
             else:
                 response = '{} good against {}'.format(
-                    cls._advantage_hero_list(soft_counters),
-                    enemy.name)
+                    self._advantage_hero_list(soft_counters),
+                    self.enemy.name)
         return response
 
 
 class TwoHeroAdvantageResponse(AdvantageResponse):
-    @classmethod
-    def respond(cls, question):
-        hero = question.heroes[0]
-        enemy = question.heroes[1]
-        advantage = Advantage.objects.get(hero=hero, enemy=enemy).advantage
+    def __init__(self, question):
+        self.hero = question.heroes[0]
+        self.enemy = question.heroes[1]
+
+    def _generate_context(self):
+        return {
+            'hero': self.hero.name,
+            'enemy': self.enemy.name,
+        }
+
+    def respond(self):
+        advantage = Advantage.objects.get(hero=self.hero, enemy=self.enemy).advantage
         return "{hero} is {description} against {enemy}. {hero}'s advantage is {advantage}".format(
-            hero=hero,
-            description=cls.get_advantage_description_text(advantage),
-            enemy=enemy,
+            hero=self.hero,
+            description=self.get_advantage_description_text(advantage),
+            enemy=self.enemy,
             advantage=advantage,
         )
 

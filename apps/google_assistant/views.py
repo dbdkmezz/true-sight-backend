@@ -1,3 +1,4 @@
+import json
 import logging
 from django.http import HttpResponse, JsonResponse
 
@@ -50,15 +51,21 @@ def index(request):
     if not google_request.text:
         return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
 
+    context = None
+    if google_request.conversation_token:
+        context = json.loads(google_request.conversation_token)
+
     try:
-        response = ResponseGenerator.respond(google_request.text)
+        response, context = ResponseGenerator.respond(google_request.text, context)
     except DoNotUnderstandQuestion:
         DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
 
+    json_context = json.dumps(context)
+    logger.info("context: %s", json_context)
     DailyUse.log_use(success=True)
     good_response_logger.info("%s Response: %s",
                               QuestionParser(google_request.text),
                               response)
-    return JsonResponse(AppResponse().ask(response))
+    return JsonResponse(AppResponse().ask(response, json_context))
