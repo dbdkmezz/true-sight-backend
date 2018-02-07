@@ -20,19 +20,22 @@ class ResponseGenerator(object):
     def respond(cls, question_text, context=None):
         question = QuestionParser(question_text)
 
-        responder = cls._get_responder(question)
+        responder, context = cls._get_responder(question, context)
         if not responder:
             failed_response_logger.warning("Unable to respond to question. %s", question)
             raise DoNotUnderstandQuestion
 
         ResponderUse.log_use(type(responder).__name__)
-        return responder.respond(), responder.generate_context()
+        return responder.respond(), context.serialise()
 
     @staticmethod
-    def _get_responder(question):
+    def _get_responder(question, context):
         if len(question.abilities) == 1:
-            if question.contains_any_word(('cool down', 'cooldown')):
-                return AbilityCooldownResponse(question)
+            if (
+                    question.contains_any_word(('cool down', 'cooldown'))
+                    or context == AbilityCooldownContext()
+            ):
+                return AbilityCooldownResponse(question), AbilityCooldownContext(question)
             if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
                 return AbilitySpellImmunityResponse(question)
 
@@ -149,14 +152,6 @@ class Response(object):
     def respond(self):
         raise NotImplemented
 
-    def generate_context(self):
-        context = self._generate_context()
-        context['responder-class'] = type(self).__name__
-        return context
-
-    def _generate_context(self):
-        raise NotImplemented
-
     @staticmethod
     def comma_separate_with_final_and(words):
         """Returns a string with a ',' between each word, and an 'and' at the end
@@ -217,11 +212,6 @@ class AbilityDescriptionResponse(AbilityResponse):
     def __init__(self, question):
         self.ability = question.abilities[0]
 
-    def _generate_context(self):
-        return {
-            'ability': self.ability.name,
-        }
-
     def respond(self):
         response = "{}'s ability {}".format(self.ability.hero, self.ability.name)
         response = self.append_description_to_response(response, self.ability, False)
@@ -231,11 +221,6 @@ class AbilityDescriptionResponse(AbilityResponse):
 class AbilityListResponse(AbilityResponse):
     def __init__(self, question):
         self.hero = question.heroes[0]
-
-    def _generate_context(self):
-        return {
-            'hero': self.hero.name,
-        }
 
     def respond(self):
         abilities = Ability.standard_objects.filter(hero=self.hero)
@@ -249,18 +234,6 @@ class AbilityListResponse(AbilityResponse):
 class AbilityUltimateResponse(AbilityResponse):
     def __init__(self, question):
         self.hero = question.heroes[0]
-
-    def _generate_context(self):
-        try:
-            return {
-                'hero': self.hero.name,
-                'ability': self.ability.name,
-            }
-        except AttributeError:
-            return {
-                'hero': self.hero.name,
-                'ability': None,
-            }
 
     def respond(self):
         try:
@@ -285,12 +258,6 @@ class AbilityHotkeyResponse(AbilityResponse):
         self.hero = question.heroes[0]
         self.ability = Ability.objects.get(hero=self.hero, hotkey=question.ability_hotkey)
 
-    def _generate_context(self):
-        return {
-            'hero': self.hero.name,
-            'ability': self.ability.name,
-        }
-
     def respond(self):
         response = "{}'s {} is {}".format(
             self.hero.name,
@@ -303,11 +270,6 @@ class AbilityHotkeyResponse(AbilityResponse):
 class AbilityCooldownResponse(AbilityResponse):
     def __init__(self, question):
         self.ability = question.abilities[0]
-
-    def _generate_context(self):
-        return {
-            'ability': self.ability.name,
-        }
 
     def respond(self):
         try:
@@ -324,11 +286,6 @@ class AbilityCooldownResponse(AbilityResponse):
 class AbilitySpellImmunityResponse(AbilityResponse):
     def __init__(self, question):
         self.ability = question.abilities[0]
-
-    def _generate_context(self):
-        return {
-            'ability': self.ability.name,
-        }
 
     def respond(self):
         spell_immunity_map = {
@@ -357,12 +314,6 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
     def __init__(self, question):
         self.enemy = question.heroes[0]
         self.role = question.role
-
-    def _generate_context(self):
-        return {
-            'enemy': self.enemy.name,
-            'role': self.role,
-        }
 
     @classmethod
     def _advantage_hero_list(cls, heroes):
@@ -419,12 +370,6 @@ class TwoHeroAdvantageResponse(AdvantageResponse):
         self.hero = question.heroes[0]
         self.enemy = question.heroes[1]
 
-    def _generate_context(self):
-        return {
-            'hero': self.hero.name,
-            'enemy': self.enemy.name,
-        }
-
     def respond(self):
         advantage = Advantage.objects.get(hero=self.hero, enemy=self.enemy).advantage
         return "{hero} is {description} against {enemy}. {hero}'s advantage is {advantage}".format(
@@ -444,3 +389,27 @@ class TwoHeroAdvantageResponse(AdvantageResponse):
             return 'not great'
         else:
             return 'terrible'
+
+
+class Context(object):
+    def __init__(self, question):
+        raise NotImplemented
+
+    def __eq__(self, serialised_other):
+        return serialised_other['context-class'] == type(self).__name__
+
+    def serialise(self):
+        result = self._serialise
+        result['context-class'] = type(self).__name__
+        return result
+
+    # this or eq override
+    def deserialise(self): 
+
+
+class AbilityCooldownContext(Context):
+    def __init__(self, question):
+        pass
+
+    def _serialise(self):
+        return {}
