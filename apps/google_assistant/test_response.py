@@ -86,15 +86,20 @@ class TestAbiltyParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
         assert response == (
             "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
-            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds")
+            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds.")
 
     def test_cooldown_response(self):
-        response, _ = ResponseGenerator.respond("What's the cooldown of Glimpse?")
-        assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
+        response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
+        assert response == (
+            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Would you like to know the "
+            "cooldown of another ability?")
+        assert conversation_token == {'context-class': 'AbilityCooldownContext'}
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
-        assert response == "The cooldown of Glimpse is 60, 46, 32, 18 seconds"
+        assert response == (
+            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Would you like to know the "
+            "cooldown of another ability?")
 
     def test_when_no_cooldown(self):
         AbilityFactory(
@@ -102,8 +107,11 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Swashbuckle',
             cooldown='',
         )
-        response, _ = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
-        assert response == "Swashbuckle is a passive ability, with no cooldown"
+        response, conversation_token = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
+        assert response == (
+            "Swashbuckle is a passive ability, with no cooldown. Would you like to know the "
+            "cooldown of another ability?")
+        assert conversation_token == {'context-class': 'AbilityCooldownContext'}
 
     def test_ability_hotkey_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's W?")
@@ -114,7 +122,7 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_hero_ultimate_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's ultimate?")
         assert (
-            response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds"
+            response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds."
         )
 
     def test_hero_ultimate_response_multiple_ultimates(self):
@@ -132,12 +140,12 @@ class TestAbiltyParserAndResponders(TestCase):
             is_ultimate=True,
         )
         response, _ = ResponseGenerator.respond("What is Dark Willow's ultimate?")
-        assert response == "Dark Willow has multiple ultimates: Bedlam and Terrorize"
+        assert response == "Dark Willow has multiple ultimates: Bedlam and Terrorize."
 
     def test_ability_list_response(self):
         response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert response == (
-            "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm")
+            "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm.")
 
     def test_ability_list_response_excludes_talent_abilities(self):
         phantom_lancer = HeroFactory(name='Phantom Lancer')
@@ -156,7 +164,8 @@ class TestAbiltyParserAndResponders(TestCase):
         assert 'Critical Strike' not in response
 
     def test_spell_immunity_response(self):
-        response, _ = ResponseGenerator.respond("Does spell immunity protect against Kinetic Field?")
+        response, _ = ResponseGenerator.respond(
+            "Does spell immunity protect against Kinetic Field?")
         assert response == (
             "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
             "was placed before spell immunity.")
@@ -176,7 +185,7 @@ class TestAbiltyParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("What's the cooldown of Hex?")
         assert response == (
             "Both Lion and Shadow Shaman have the Hex ability. Lion's cooldown is 13, Shadow "
-            "Shaman's is 30, 24, 18, 12 seconds")
+            "Shaman's is 30, 24, 18, 12 seconds.")
 
 
 @pytest.mark.django_db
