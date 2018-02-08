@@ -93,7 +93,7 @@ class TestAbiltyParserAndResponders(TestCase):
         assert response == (
             "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Would you like to know the "
             "cooldown of another ability?")
-        assert conversation_token == {'context-class': 'AbilityCooldownContext'}
+        assert conversation_token['context-class'] == 'AbilityCooldownContext'
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
@@ -107,11 +107,10 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Swashbuckle',
             cooldown='',
         )
-        response, conversation_token = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
+        response, _ = ResponseGenerator.respond("What's the cool down of Swashbuckle?")
         assert response == (
             "Swashbuckle is a passive ability, with no cooldown. Would you like to know the "
             "cooldown of another ability?")
-        assert conversation_token == {'context-class': 'AbilityCooldownContext'}
 
     def test_ability_hotkey_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's W?")
@@ -187,6 +186,16 @@ class TestAbiltyParserAndResponders(TestCase):
             "Both Lion and Shadow Shaman have the Hex ability. Lion's cooldown is 13, Shadow "
             "Shaman's is 30, 24, 18, 12 seconds.")
 
+    def test_context_increments_useage_conunt(self):
+        response, conversation_token = ResponseGenerator.respond(
+            "What's the cooldown of Thunder Strike?")
+        assert response.endswith('Would you like to know the cooldown of another ability?')
+        assert conversation_token['useage_count'] == 0
+        response, conversation_token = ResponseGenerator.respond(
+            "What's the cooldown of Thunder Strike?", conversation_token)
+        assert response.endswith('Any other abilities?')
+        assert conversation_token['useage_count'] == 1
+        
 
 @pytest.mark.django_db
 class TestAdvantageParserAndResponders(TestCase):
@@ -224,3 +233,6 @@ class TestAdvantageParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
             "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75")
+
+
+       

@@ -28,12 +28,11 @@ class ResponseGenerator(object):
             raise DoNotUnderstandQuestion
 
         response = responder.response
-        if responder.follow_up_question:
-            response += " {}".format(responder.follow_up_question)
-
         new_converstaion_token = None
-        if responder.follow_up_context:
-            new_converstaion_token = responder.follow_up_context.serialise()
+        follow_up_context = responder.follow_up_context
+        if follow_up_context:
+            response = follow_up_context.append_follow_up_question(response)
+            new_converstaion_token = follow_up_context.serialise()
 
         ResponderUse.log_use(type(responder).__name__)
         return response, new_converstaion_token
@@ -266,8 +265,9 @@ class AbilityHotkeyResponder(AbilityResponder):
 
 
 class AbilityCooldownResponder(AbilityResponder):
-    def __init__(self, ability):
+    def __init__(self, ability, context=None):
         self.ability = ability
+        self.context = context
 
     @property
     def response(self):
@@ -282,12 +282,8 @@ class AbilityCooldownResponder(AbilityResponder):
             )
 
     @property
-    def follow_up_question(self):
-        return "Would you like to know the cooldown of another ability?"
-
-    @property
     def follow_up_context(self):
-        return AbilityCooldownContext()
+        return AbilityCooldownContext(self.context)
 
 
 class AbilitySpellImmunityResponder(AbilityResponder):
@@ -410,9 +406,16 @@ class TwoHeroAdvantageResponder(AdvantageResponder):
 
 
 class Context(object):
+    def __init__(self, previous_context=None):
+        if previous_context:
+            self.useage_count = previous_context.useage_count + 1
+        else:
+            self.useage_count = 0
+
     def serialise(self):
         result = self._serialise()
         result['context-class'] = type(self).__name__
+        result['useage_count'] = self.useage_count
         return result
 
     def _serialise(self):
@@ -434,6 +437,15 @@ class Context(object):
     @classmethod
     def _deserialise(cls, data):
         return cls()
+
+    def append_follow_up_question(self, response):
+        follow_up = self._follow_up_question()
+        if not follow_up:
+            return response
+        return "{} {}".format(response, follow_up)
+
+    def _follow_up_question(self):
+        return None
 
 
 class CleanContext(Context):
@@ -469,5 +481,10 @@ class CleanContext(Context):
 class AbilityCooldownContext(Context):
     def build_responder(self, question):
         if len(question.abilities) == 1:
-            return AbilityCooldownResponder(question.abilities[0])
+            return AbilityCooldownResponder(question.abilities[0], self)
         return CleanContext(question)
+
+    def _follow_up_question(self):
+        if self.useage_count == 0:
+            return "Would you like to know the cooldown of another ability?"
+        return "Any other abilities?"
