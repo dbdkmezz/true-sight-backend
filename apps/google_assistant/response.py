@@ -21,20 +21,16 @@ class ResponseGenerator(object):
         question = QuestionParser(question_text)
 
         context = Context.deserialise(conversation_token)
-        responder = context.build_responder(question)
-
-        if not responder:
-            failed_response_logger.warning("Unable to respond to question. %s", question)
-            raise DoNotUnderstandQuestion
-
-        response = responder.response
+        response, follow_up_context = context.generate_response(question)
         new_converstaion_token = None
-        follow_up_context = responder.follow_up_context
         if follow_up_context:
-            response = follow_up_context.append_follow_up_question(response)
             new_converstaion_token = follow_up_context.serialise()
 
-        ResponderUse.log_use(type(responder).__name__)
+        # if not responder:
+        #     failed_response_logger.warning("Unable to respond to question. %s", question)
+        #     raise DoNotUnderstandQuestion
+
+        # ResponderUse.log_use(type(responder).__name__)
         return response, new_converstaion_token
 
 
@@ -265,9 +261,8 @@ class AbilityHotkeyResponder(AbilityResponder):
 
 
 class AbilityCooldownResponder(AbilityResponder):
-    def __init__(self, ability, context=None):
+    def __init__(self, ability):
         self.ability = ability
-        self.context = context
 
     @property
     def response(self):
@@ -280,10 +275,6 @@ class AbilityCooldownResponder(AbilityResponder):
             return "{} is a passive ability, with no cooldown.".format(
                 self.ability.name,
             )
-
-    @property
-    def follow_up_context(self):
-        return AbilityCooldownContext(self.context)
 
 
 class AbilitySpellImmunityResponder(AbilityResponder):
@@ -447,9 +438,23 @@ class Context(object):
     def _follow_up_question(self):
         return None
 
+    def generate_response(self, question):
+        responder = self._build_responder(question)
+        follow_up_context_map = {
+            AbilityCooldownResponder: AbilityCooldownContext,
+        }
+        # how does the context know about things from the question?
+        follow_up_context = follow_up_context_map[type(responder)](self)
+        # add follow up question in here
+        # serialise in here?
+        return responder.response(), follow_up_context
+
 
 class CleanContext(Context):
-    def build_responder(self, question):
+    def __init__(self, previous_context=None):
+        self.useage_count = 0
+
+    def _build_responder(self, question):
         if len(question.abilities) == 1:
             ability = question.abilities[0]
             if question.contains_any_word(('cool down', 'cooldown')):
@@ -479,9 +484,9 @@ class CleanContext(Context):
 
 
 class AbilityCooldownContext(Context):
-    def build_responder(self, question):
+    def _build_responder(self, question):
         if len(question.abilities) == 1:
-            return AbilityCooldownResponder(question.abilities[0], self)
+            return AbilityCooldownResponder(question.abilities[0])
         return CleanContext(question)
 
     def _follow_up_question(self):
