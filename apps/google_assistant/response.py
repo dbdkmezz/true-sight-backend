@@ -127,21 +127,13 @@ class PassiveAbilityError(BaseException):
     pass
 
 
-class Responder(object):
+class Response(object):
     def __init__(self):
         raise NotImplemented
 
-    @property
-    def response(self):
+    @classmethod
+    def respond(cls, question):
         raise NotImplemented
-
-    @property
-    def follow_up_question(self):
-        return None
-
-    @property
-    def follow_up_context(self):
-        return None
 
     @staticmethod
     def comma_separate_with_final_and(words):
@@ -156,7 +148,7 @@ class Responder(object):
             ', '.join(words))
 
 
-class AbilityResponder(Responder):
+class AbilityResponse(Response):
     @staticmethod
     def order_abilities(abilities):
         """Orders the abilities by the posistion of the hotkey on the keyboard"""
@@ -189,110 +181,91 @@ class AbilityResponder(Responder):
 
         if not response[-1:] in ('.', ','):
             response += ','
-        return "{} its cooldown is {} seconds.".format(
+        return "{} its cooldown is {} seconds".format(
             response,
             cls.parse_cooldown(ability),
         )
 
 
-class AbilityDescriptionResponder(AbilityResponder):
-    def __init__(self, ability):
-        self.ability = ability
-
-    @property
-    def response(self):
-        response = "{}'s ability {}".format(self.ability.hero, self.ability.name)
-        response = self.append_description_to_response(response, self.ability, False)
-        return self.append_cooldown_to_response(response, self.ability)
+class AbilityDescriptionResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, ability):
+        response = "{}'s ability {}".format(ability.hero, ability.name)
+        response = cls.append_description_to_response(response, ability, False)
+        return cls.append_cooldown_to_response(response, ability)
 
 
-class AbilityListResponder(AbilityResponder):
-    def __init__(self, hero):
-        self.hero = hero
-
-    @property
-    def response(self):
-        abilities = Ability.standard_objects.filter(hero=self.hero)
-        names = [a.name for a in self.order_abilities(abilities)]
-        return "{}'s abilities are {}.".format(
-            self.hero.name,
-            self.comma_separate_with_final_and(names)
+class AbilityListResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, hero):
+        abilities = Ability.standard_objects.filter(hero=hero)
+        names = [a.name for a in cls.order_abilities(abilities)]
+        return "{}'s abilities are {}".format(
+            hero.name,
+            cls.comma_separate_with_final_and(names)
         )
 
 
-class AbilityUltimateResponder(AbilityResponder):
-    def __init__(self, hero):
-        self.hero = hero
-
-    @property
-    def response(self):
+class AbilityUltimateResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, hero):
         try:
-            ability = Ability.objects.get(hero=self.hero, is_ultimate=True)
+            ability = Ability.objects.get(hero=hero, is_ultimate=True)
         except Ability.MultipleObjectsReturned:
             logger.warn("Multiple ultimate response.")
-            abilities = Ability.objects.filter(hero=self.hero, is_ultimate=True)
-            return "{} has multiple ultimates: {}.".format(
-                self.hero.name,
-                self.comma_separate_with_final_and([a.name for a in abilities]),
+            abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
+            return "{} has multiple ultimates: {}".format(
+                hero.name,
+                cls.comma_separate_with_final_and([a.name for a in abilities]),
             )
 
         response = "{}'s ultimate is {}".format(
-                self.hero.name,
+                hero.name,
                 ability.name,
             )
-        response = self.append_cooldown_to_response(response, ability)
-        return self.append_description_to_response(response, ability, True)
+        response = cls.append_cooldown_to_response(response, ability)
+        return cls.append_description_to_response(response, ability, True)
 
 
-class AbilityHotkeyResponder(AbilityResponder):
-    def __init__(self, hero, hotkey):
-        self.hero = hero
-        self.hotkey = hotkey
-
-    @property
-    def response(self):
-        ability = Ability.objects.get(hero=self.hero, hotkey=self.hotkey)
+class AbilityHotkeyResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, hero, ability_hotkey):
+        ability = Ability.objects.get(hero=hero, hotkey=ability_hotkey)
         response = "{}'s {} is {}".format(
-            self.hero.name,
+            hero.name,
             ability.hotkey,
             ability.name,
         )
-        return self.append_description_to_response(response, ability, True)
+        return cls.append_description_to_response(response, ability, True)
 
 
-class AbilityCooldownResponder(AbilityResponder):
-    def __init__(self, ability):
-        self.ability = ability
-
-    @property
-    def response(self):
+class AbilityCooldownResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, ability):
         try:
-            return "The cooldown of {} is {} seconds.".format(
-                self.ability.name,
-                self.parse_cooldown(self.ability),
+            return "The cooldown of {} is {} seconds".format(
+                ability.name,
+                cls.parse_cooldown(ability),
             )
         except PassiveAbilityError:
-            return "{} is a passive ability, with no cooldown.".format(
-                self.ability.name,
+            return "{} is a passive ability, with no cooldown".format(
+                ability.name,
             )
 
 
-class AbilitySpellImmunityResponder(AbilityResponder):
-    def __init__(self, ability):
-        self.ability = ability
-
-    @property
-    def response(self):
+class AbilitySpellImmunityResponse(AbilityResponse):
+    @classmethod
+    def respond(cls, ability):
         spell_immunity_map = {
             SpellImmunity.PIERCES: 'does pierce spell immunity',
             SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
             SpellImmunity.DOES_NOT_PIERCE: 'does not pierce spell immunity',
         }
         response = "{} {}".format(
-            self.ability.name,
-            spell_immunity_map[self.ability.spell_immunity],
+            ability.name,
+            spell_immunity_map[ability.spell_immunity],
         )
-        return self.append_spell_immunity_detail_to_response(response, self.ability)
+        return cls.append_spell_immunity_detail_to_response(response, ability)
 
     @staticmethod
     def append_spell_immunity_detail_to_response(response, ability):
@@ -301,15 +274,11 @@ class AbilitySpellImmunityResponder(AbilityResponder):
         return "{}. {}".format(response, ability.spell_immunity_detail)
 
 
-class AdvantageResponder(Responder):
+class AdvantageResponse(Response):
     STRONG_ADVANTAGE = 2
 
 
-class SingleEnemyAdvantageResponder(AdvantageResponder):
-    def __init__(self, enemy, role):
-        self.enemy = enemy
-        self.role = role
-
+class SingleEnemyAdvantageResponse(AdvantageResponse):
     @classmethod
     def _advantage_hero_list(cls, heroes):
         names = [h.hero.name for h in heroes]
@@ -339,50 +308,38 @@ class SingleEnemyAdvantageResponder(AdvantageResponder):
             heroes = Hero.objects.filter(is_roaming=True)
         return counters.filter(hero__in=heroes)
 
-    @property
-    def response(self):
+    @classmethod
+    def respond(cls, enemy, role):
         counters = Advantage.objects.filter(
-            enemy=self.enemy, advantage__gte=0).order_by('-advantage')
-        counters = self._filter_by_role(counters, self.role)
-        hard_counters = counters.filter(advantage__gte=self.STRONG_ADVANTAGE)
+            enemy=enemy, advantage__gte=0).order_by('-advantage')
+        counters = cls._filter_by_role(counters, role)
+        hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
         soft_counters = (c for c in counters[:8] if c not in hard_counters)
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
-                self._advantage_hero_list(hard_counters),
-                self.enemy.name)
+                cls._advantage_hero_list(hard_counters),
+                enemy.name)
         if soft_counters:
             if response:
-                response += '. {} also good'.format(self._advantage_hero_list(soft_counters))
+                response += '. {} also good'.format(cls._advantage_hero_list(soft_counters))
             else:
                 response = '{} good against {}'.format(
-                    self._advantage_hero_list(soft_counters),
-                    self.enemy.name)
+                    cls._advantage_hero_list(soft_counters),
+                    enemy.name)
         return response
 
 
-class TwoHeroAdvantageResponder(AdvantageResponder):
-    def __init__(self, hero, enemy):
-        self.hero = hero
-        self.enemy = enemy
-
-    @property
-    def response(self):
-        advantage = Advantage.objects.get(hero=self.hero, enemy=self.enemy).advantage
+class TwoHeroAdvantageResponse(AdvantageResponse):
+    @classmethod
+    def respond(cls, hero, enemy):
+        advantage = Advantage.objects.get(hero=hero, enemy=enemy).advantage
         return "{hero} is {description} against {enemy}. {hero}'s advantage is {advantage}".format(
-            hero=self.hero,
-            description=self.get_advantage_description_text(advantage),
-            enemy=self.enemy,
+            hero=hero,
+            description=cls.get_advantage_description_text(advantage),
+            enemy=enemy,
             advantage=advantage,
         )
-
-    @property
-    def follow_up_question(self):
-        return None
-
-    @property
-    def follow_up_context(self):
-        return None
 
     @classmethod
     def get_advantage_description_text(cls, advantage):
@@ -397,11 +354,8 @@ class TwoHeroAdvantageResponder(AdvantageResponder):
 
 
 class Context(object):
-    def __init__(self, previous_context=None):
-        if previous_context:
-            self.useage_count = previous_context.useage_count + 1
-        else:
-            self.useage_count = 0
+    def __init__(self, useage_count=0):
+        self.useage_count = useage_count
 
     def serialise(self):
         result = self._serialise()
@@ -429,6 +383,19 @@ class Context(object):
     def _deserialise(cls, data):
         return cls()
 
+    def generate_response(self, question):
+        response, follow_up_context = self._generate_direct_response(question)
+        if not response[-1:] == '.':
+            response += '.'
+        if follow_up_context:
+            follow_up_question = follow_up_context._follow_up_question()
+            if follow_up_question:
+                response += " {}".format(follow_up_question)
+        return response, follow_up_context
+
+    def _generate_direct_response(self, question):
+        raise NotImplemented
+
     def append_follow_up_question(self, response):
         follow_up = self._follow_up_question()
         if not follow_up:
@@ -438,58 +405,53 @@ class Context(object):
     def _follow_up_question(self):
         return None
 
-    def generate_response(self, question):
-        responder = self._build_responder(question)
-        follow_up_context_map = {
-            AbilityCooldownResponder: AbilityCooldownContext,
-        }
-        # how does the context know about things from the question?
-        follow_up_context = follow_up_context_map[type(responder)](self)
-        # add follow up question in here
-        # serialise in here?
-        return responder.response(), follow_up_context
-
 
 class CleanContext(Context):
-    def __init__(self, previous_context=None):
+    def __init__(self):
         self.useage_count = 0
 
-    def _build_responder(self, question):
+    def _generate_direct_response(self, question):
         if len(question.abilities) == 1:
             ability = question.abilities[0]
             if question.contains_any_word(('cool down', 'cooldown')):
-                return AbilityCooldownResponder(ability)
+                return AbilityCooldownResponse.respond(ability), AbilityCooldownContext()
             if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
-                return AbilitySpellImmunityResponder(ability)
+                return AbilitySpellImmunityResponse.respond(ability), None
 
         if len(question.heroes) == 1:
             hero = question.heroes[0]
             if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
-                return SingleEnemyAdvantageResponder(hero, question.role)
+                return SingleEnemyAdvantageResponse.respond(hero, question.role), None
             if question.contains_any_word(('ultimate', )):
-                return AbilityUltimateResponder(hero)
+                return AbilityUltimateResponse.respond(hero), None
             if question.contains_any_word(('abilities', )):
-                return AbilityListResponder(hero)
+                return AbilityListResponse.respond(hero), None
             if question.ability_hotkey:
-                return AbilityHotkeyResponder(hero, question.ability_hotkey)
+                return AbilityHotkeyResponse.respond(hero, question.ability_hotkey), None
 
         if len(question.heroes) == 2:
-            return TwoHeroAdvantageResponder(question.heroes[0], question.heroes[1])
+            return TwoHeroAdvantageResponse.respond(question.heroes[0], question.heroes[1]), None
 
         if len(question.abilities) == 1:
-            return AbilityDescriptionResponder(question.abilities[0])
+            return AbilityDescriptionResponse.respond(question.abilities[0]), None
 
         if len(question.heroes) == 1:
-            return SingleEnemyAdvantageResponder(question.heroes[0]. question.role)
+            return SingleEnemyAdvantageResponse.respond(question.heroes[0]. question.role), None
+
+        failed_response_logger.warning("Unable to respond to question. %s", question)
+        raise DoNotUnderstandQuestion
 
 
 class AbilityCooldownContext(Context):
-    def _build_responder(self, question):
+    def _generate_direct_response(self, question):
         if len(question.abilities) == 1:
-            return AbilityCooldownResponder(question.abilities[0])
-        return CleanContext(question)
+            return (
+                AbilityCooldownResponse.respond(question.abilities[0]),
+                AbilityCooldownContext(self.useage_count + 1))
+        return CleanContext._generate_direct_response(question)
 
     def _follow_up_question(self):
+        print(self.useage_count)
         if self.useage_count == 0:
             return "Would you like to know the cooldown of another ability?"
         return "Any other abilities?"

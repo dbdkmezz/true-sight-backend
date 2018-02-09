@@ -195,7 +195,7 @@ class TestAbiltyParserAndResponders(TestCase):
             "What's the cooldown of Thunder Strike?", conversation_token)
         assert response.endswith('Any other abilities?')
         assert conversation_token['useage_count'] == 1
-        
+
 
 @pytest.mark.django_db
 class TestAdvantageParserAndResponders(TestCase):
@@ -219,20 +219,20 @@ class TestAdvantageParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
-            "Disruptor, Razor, and Shadow Fiend are also good"
+            "Disruptor, Razor, and Shadow Fiend are also good."
         )
 
     def test_mid_advantage(self):
         response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
-            "Razor and Shadow Fiend are also good"
+            "Razor and Shadow Fiend are also good."
         )
 
     def test_two_hero_advantage(self):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
-            "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75")
+            "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75.")
 
 
        
