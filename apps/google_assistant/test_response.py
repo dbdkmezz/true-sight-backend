@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -78,9 +79,18 @@ class TestAbiltyParserAndResponders(TestCase):
             is_ultimate=True,
         )
 
-    def test_raises_does_not_understand(self):
+    @patch('apps.google_assistant.response.failed_response_logger')
+    def test_raises_does_not_understand_and_logs(self, failed_response_logger):
         with self.assertRaises(DoNotUnderstandQuestion):
             ResponseGenerator.respond("What is a pizza?")
+        assert failed_response_logger.warning.call_count == 1
+        assert failed_response_logger.warning.call_args[0][0].startswith(
+            'Unable to respond to question.')
+
+    @patch('apps.google_assistant.response.ResponderUse')
+    def test_logs_responder_use(self, ResponderUse):
+        ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
+        ResponderUse.log_use.assert_called_with('AbilityDescriptionResponse')
 
     def test_fallback_ability_response(self):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
@@ -186,7 +196,7 @@ class TestAbiltyParserAndResponders(TestCase):
             "Both Lion and Shadow Shaman have the Hex ability. Lion's cooldown is 13, Shadow "
             "Shaman's is 30, 24, 18, 12 seconds.")
 
-    def test_context_increments_useage_conunt(self):
+    def test_context_increments_useage_count(self):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
         assert response.endswith('Would you like to know the cooldown of another ability?')
@@ -233,6 +243,3 @@ class TestAdvantageParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
             "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75.")
-
-
-       

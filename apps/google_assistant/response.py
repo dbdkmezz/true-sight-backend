@@ -26,11 +26,6 @@ class ResponseGenerator(object):
         if follow_up_context:
             new_converstaion_token = follow_up_context.serialise()
 
-        # if not responder:
-        #     failed_response_logger.warning("Unable to respond to question. %s", question)
-        #     raise DoNotUnderstandQuestion
-
-        # ResponderUse.log_use(type(responder).__name__)
         return response, new_converstaion_token
 
 
@@ -132,8 +127,9 @@ class Response(object):
         raise NotImplemented
 
     @classmethod
-    def respond(cls, question):
-        raise NotImplemented
+    def respond(cls, *args, **kwargs):
+        ResponderUse.log_use(cls.__name__)
+        return cls._respond(*args, **kwargs)
 
     @staticmethod
     def comma_separate_with_final_and(words):
@@ -189,7 +185,7 @@ class AbilityResponse(Response):
 
 class AbilityDescriptionResponse(AbilityResponse):
     @classmethod
-    def respond(cls, ability):
+    def _respond(cls, ability):
         response = "{}'s ability {}".format(ability.hero, ability.name)
         response = cls.append_description_to_response(response, ability, False)
         return cls.append_cooldown_to_response(response, ability)
@@ -197,7 +193,7 @@ class AbilityDescriptionResponse(AbilityResponse):
 
 class AbilityListResponse(AbilityResponse):
     @classmethod
-    def respond(cls, hero):
+    def _respond(cls, hero):
         abilities = Ability.standard_objects.filter(hero=hero)
         names = [a.name for a in cls.order_abilities(abilities)]
         return "{}'s abilities are {}".format(
@@ -208,7 +204,7 @@ class AbilityListResponse(AbilityResponse):
 
 class AbilityUltimateResponse(AbilityResponse):
     @classmethod
-    def respond(cls, hero):
+    def _respond(cls, hero):
         try:
             ability = Ability.objects.get(hero=hero, is_ultimate=True)
         except Ability.MultipleObjectsReturned:
@@ -229,7 +225,7 @@ class AbilityUltimateResponse(AbilityResponse):
 
 class AbilityHotkeyResponse(AbilityResponse):
     @classmethod
-    def respond(cls, hero, ability_hotkey):
+    def _respond(cls, hero, ability_hotkey):
         ability = Ability.objects.get(hero=hero, hotkey=ability_hotkey)
         response = "{}'s {} is {}".format(
             hero.name,
@@ -241,7 +237,7 @@ class AbilityHotkeyResponse(AbilityResponse):
 
 class AbilityCooldownResponse(AbilityResponse):
     @classmethod
-    def respond(cls, ability):
+    def _respond(cls, ability):
         try:
             return "The cooldown of {} is {} seconds".format(
                 ability.name,
@@ -255,7 +251,7 @@ class AbilityCooldownResponse(AbilityResponse):
 
 class AbilitySpellImmunityResponse(AbilityResponse):
     @classmethod
-    def respond(cls, ability):
+    def _respond(cls, ability):
         spell_immunity_map = {
             SpellImmunity.PIERCES: 'does pierce spell immunity',
             SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
@@ -309,7 +305,7 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
         return counters.filter(hero__in=heroes)
 
     @classmethod
-    def respond(cls, enemy, role):
+    def _respond(cls, enemy, role):
         counters = Advantage.objects.filter(
             enemy=enemy, advantage__gte=0).order_by('-advantage')
         counters = cls._filter_by_role(counters, role)
@@ -332,7 +328,7 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
 
 class TwoHeroAdvantageResponse(AdvantageResponse):
     @classmethod
-    def respond(cls, hero, enemy):
+    def _respond(cls, hero, enemy):
         advantage = Advantage.objects.get(hero=hero, enemy=enemy).advantage
         return "{hero} is {description} against {enemy}. {hero}'s advantage is {advantage}".format(
             hero=hero,
