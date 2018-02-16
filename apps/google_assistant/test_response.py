@@ -7,10 +7,7 @@ from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
 from apps.hero_abilities.models import SpellImmunity
 
-from .response import (
-    ResponseGenerator, QuestionParser, AbilityCooldownResponse, AbilityUltimateResponse,
-    AbilityListResponse,
-)
+from .response import ResponseGenerator, QuestionParser
 from .exceptions import DoNotUnderstandQuestion
 
 
@@ -90,7 +87,7 @@ class TestAbiltyParserAndResponders(TestCase):
         assert failed_response_logger.warning.call_args[0][0].startswith(
             'Unable to respond to question.')
 
-    @patch('apps.google_assistant.response.ResponderUse')
+    @patch('apps.google_assistant.response_text.ResponderUse')
     def test_logs_responder_use(self, ResponderUse):
         ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
         ResponderUse.log_use.assert_called_with('AbilityDescriptionResponse')
@@ -202,48 +199,3 @@ class TestAdvantageParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
             "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75.")
-
-
-@pytest.mark.django_db
-class TestReponses(TestCase):
-    def test_when_no_cooldown(self):
-        ability = AbilityFactory(
-            hero=HeroFactory(name='Pangolier'),
-            name='Swashbuckle',
-            cooldown='',
-        )
-        response = AbilityCooldownResponse.respond(ability)
-        assert response == "Swashbuckle is a passive ability, with no cooldown"
-
-    def test_hero_ultimate_response_multiple_ultimates(self):
-        dark_willow = HeroFactory(name='Dark Willow')
-        AbilityFactory(
-            hero=dark_willow,
-            name='Bedlam',
-            cooldown='40,30,20',
-            is_ultimate=True,
-        )
-        AbilityFactory(
-            hero=dark_willow,
-            name='Terrorize',
-            cooldown='40,30,20',
-            is_ultimate=True,
-        )
-        response = AbilityUltimateResponse.respond(dark_willow)
-        assert response == "Dark Willow has multiple ultimates: Bedlam and Terrorize"
-
-    def test_ability_list_response_excludes_talent_abilities(self):
-        phantom_lancer = HeroFactory(name='Phantom Lancer')
-        AbilityFactory(
-            hero=phantom_lancer,
-            name='Critical Strike',
-            is_from_talent=True,
-        )
-        AbilityFactory(
-            hero=phantom_lancer,
-            name='Juxtapose',
-        )
-
-        response = AbilityListResponse.respond(phantom_lancer)
-        assert 'Juxtapose' in response
-        assert 'Critical Strike' not in response
