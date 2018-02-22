@@ -6,7 +6,7 @@ from apps.metadata.models import User, DailyUse
 from libs.google_actions import AppResponse, AppRequest, NoJsonException
 
 from .response import ResponseGenerator, QuestionParser
-from .exceptions import DoNotUnderstandQuestion
+from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,9 @@ good_response_logger = logging.getLogger('good_response')
 # Squish all the migrations
 # Hero role accuracy
 # Try it lots
+# Aghs upgrades
+# damange type
+# aghs damage type
 
 # # V2
 # Context and follow up questions
@@ -61,6 +64,8 @@ def index(request):
         DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
             "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
+    except Goodbye:
+        return JsonResponse(AppResponse().tell('Goodbye'))
 
     json_context = json.dumps(context)
     logger.info("context: %s", json_context)

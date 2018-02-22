@@ -8,7 +8,7 @@ from apps.hero_abilities.factories import AbilityFactory
 from apps.hero_abilities.models import SpellImmunity
 
 from .response import ResponseGenerator, QuestionParser
-from .exceptions import DoNotUnderstandQuestion
+from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 
 @pytest.mark.django_db
@@ -40,6 +40,10 @@ class TestQuestionParser(TestCase):
         wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
         parser = QuestionParser("What are Wind Rangers abilities?")
         assert parser.heroes == [wind_ranger]
+
+    def test_yes(self):
+        parser = QuestionParser("Yes.")
+        assert parser.yes
 
 
 @pytest.mark.django_db
@@ -199,3 +203,24 @@ class TestAdvantageParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
         assert response == (
             "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75.")
+
+
+@pytest.mark.django_db
+class TestFollowUpRespones(TestCase):
+    def test_yes(self):
+        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
+        AbilityFactory(name='Static Storm', cooldown='90/80/70')
+
+        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        response, token = ResponseGenerator.respond('Yes.', token)
+        assert response == 'Which ability?'
+        response, token = ResponseGenerator.respond('Static Storm', token)
+        assert '90' in response
+        assert 'Any other' in response
+
+    def test_no(self):
+        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
+
+        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        with self.assertRaises(Goodbye):
+            ResponseGenerator.respond('Nope.', token)

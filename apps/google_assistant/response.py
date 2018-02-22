@@ -6,7 +6,7 @@ from apps.hero_advantages.roles import HeroRole
 from apps.hero_advantages.models import Hero
 from apps.hero_abilities.models import Ability
 
-from .exceptions import DoNotUnderstandQuestion
+from .exceptions import DoNotUnderstandQuestion, Goodbye
 from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
@@ -63,7 +63,7 @@ class QuestionParser(object):
     def heroes(self):
         result = [
             h for h in Hero.objects.all()
-            if self.contains_any_word(h.aliases)
+            if self.contains_any_string(h.aliases)
         ]
         if len(result) < 1:
             return result
@@ -90,7 +90,7 @@ class QuestionParser(object):
         )
         matching_role = None
         for words, role in role_words_map:
-            if self.contains_any_word(words):
+            if self.contains_any_string(words):
                 if matching_role:
                     return None
                 matching_role = role
@@ -98,7 +98,7 @@ class QuestionParser(object):
 
     @cached_property
     def words(self):
-        return self.text.strip('?').split(' ')
+        return self.text.strip('?').strip('.').strip(',').split(' ')
 
     @cached_property
     def ability_hotkey(self):
@@ -116,14 +116,29 @@ class QuestionParser(object):
                 return hotkeys_in_question[0]
         return None
 
-    def contains_any_word(self, words):
-        """Whether any of the words in words feature in the question text"""
-        return any((word.lower() in self.text) for word in words)
+    def contains_any_string(self, strings_to_look_for):
+        """Whether any of strings in strings_to_look_for feature in the question text"""
+        return any((s.lower() in self.text) for s in strings_to_look_for)
+
+    def contains_any_word(self, words_to_look_for):
+        """Whether any of the words in words_to_look_for feature in the question as a whole word"""
+        print(self.words)
+        return any((w in self.words) for w in words_to_look_for)
+
+    @cached_property
+    def yes(self):
+        return self.contains_any_word(('yes', 'yep', 'yeah'))
+
+    @cached_property
+    def no(self):
+        return self.contains_any_word(('no', 'nope'))
 
 
 class Context(object):
     def __init__(self, useage_count=0):
         self.useage_count = useage_count
+
+    disable_follow_up_question = False
 
     def serialise(self):
         result = self._serialise()
@@ -153,9 +168,9 @@ class Context(object):
 
     def generate_response(self, question):
         response, follow_up_context = self._generate_direct_response(question)
-        if not response[-1:] == '.':
+        if not response[-1:] in ('.', '?'):
             response += '.'
-        if follow_up_context:
+        if follow_up_context and not follow_up_context.disable_follow_up_question:
             follow_up_question = follow_up_context._follow_up_question()
             if follow_up_question:
                 response += " {}".format(follow_up_question)
@@ -164,35 +179,26 @@ class Context(object):
     def _generate_direct_response(self, question):
         raise NotImplemented
 
-    def append_follow_up_question(self, response):
-        follow_up = self._follow_up_question()
-        if not follow_up:
-            return response
-        return "{} {}".format(response, follow_up)
-
     def _follow_up_question(self):
         return None
 
 
 class CleanContext(Context):
-    def __init__(self):
-        self.useage_count = 0
-
     def _generate_direct_response(self, question):
         if len(question.abilities) == 1:
             ability = question.abilities[0]
-            if question.contains_any_word(('cool down', 'cooldown')):
+            if question.contains_any_string(('cool down', 'cooldown')):
                 return AbilityCooldownResponse.respond(ability), AbilityCooldownContext()
-            if question.contains_any_word(('spell immunity', 'black king', 'king bar', 'bkb')):
+            if question.contains_any_string(('spell immunity', 'black king', 'king bar', 'bkb')):
                 return AbilitySpellImmunityResponse.respond(ability), None
 
         if len(question.heroes) == 1:
             hero = question.heroes[0]
-            if question.contains_any_word(('strong', 'against', 'counter', 'counters')):
+            if question.contains_any_string(('strong', 'against', 'counter', 'counters')):
                 return SingleEnemyAdvantageResponse.respond(hero, question.role), None
-            if question.contains_any_word(('ultimate', )):
+            if question.contains_any_string(('ultimate', )):
                 return AbilityUltimateResponse.respond(hero), None
-            if question.contains_any_word(('abilities', )):
+            if question.contains_any_string(('abilities', )):
                 return AbilityListResponse.respond(hero), None
             if question.ability_hotkey:
                 return AbilityHotkeyResponse.respond(hero, question.ability_hotkey), None
@@ -212,11 +218,21 @@ class CleanContext(Context):
 
 class AbilityCooldownContext(Context):
     def _generate_direct_response(self, question):
+        print(question)
         if len(question.abilities) == 1:
             return (
                 AbilityCooldownResponse.respond(question.abilities[0]),
                 AbilityCooldownContext(self.useage_count + 1))
-        return CleanContext._generate_direct_response(question)
+
+        try:
+            return CleanContext()._generate_direct_response(question)
+        except DoNotUnderstandQuestion:
+            if question.yes:
+                self.disable_follow_up_question = True
+                return "Which ability?", self
+            if question.no:
+                raise Goodbye
+            raise
 
     def _follow_up_question(self):
         if self.useage_count == 0:
