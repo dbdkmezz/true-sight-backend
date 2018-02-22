@@ -6,7 +6,7 @@ from django.test import TestCase
 from apps.utils.request_handler import MockRequestHandler
 from apps.hero_advantages.factories import HeroFactory
 
-from .models import Ability, SpellImmunity
+from .models import Ability, SpellImmunity, DamageType
 from .web_scraper import WebScraper
 
 mock_request_handler = MockRequestHandler(
@@ -15,6 +15,7 @@ mock_request_handler = MockRequestHandler(
         "https://dota2.gamepedia.com/Disruptor": "Disruptor - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Pangolier": "Pangolier - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Phantom_Lancer": "Phantom Lancer - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Sniper": "Sniper - Dota 2 Wiki.html",
     },
     files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
@@ -49,6 +50,8 @@ class TestWebScraper(TestCase):
         self.assertEqual(kinetic_field.hotkey, 'E')
         self.assertFalse(kinetic_field.is_ultimate)
         self.assertEqual(kinetic_field.spell_immunity, SpellImmunity.DOES_NOT_PIERCE)
+        self.assertEqual(kinetic_field.damage_type, None)
+        self.assertEqual(kinetic_field.aghanims_damage_type, None)
         self.assertEqual(
             kinetic_field.spell_immunity_detail,
             "The Barrier's modifier persists if it was placed before spell immunity.")
@@ -78,3 +81,9 @@ class TestWebScraper(TestCase):
         assert Ability.objects.get(name='Rolling Thunder')
         with self.assertRaises(Ability.DoesNotExist):
             assert Ability.objects.get(name='Stop Rolling')
+
+    def test_damage_type_with_aghs(self):
+        self.scraper.load_hero_abilities(HeroFactory(name='Sniper'))
+        assassinate = Ability.objects.get(name='Assassinate')
+        self.assertEqual(assassinate.damage_type, DamageType.MAGICAL)
+        self.assertEqual(assassinate.aghanims_damage_type, DamageType.PHYSICAL)

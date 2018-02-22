@@ -11,6 +11,13 @@ class SpellImmunity(IntEnum):
     DOES_NOT_PIERCE = 3
 
 
+@unique
+class DamageType(IntEnum):
+    MAGICAL = 1
+    PHYSICAL = 2
+    PURE = 3
+
+
 class StandardAbilityManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(
@@ -30,6 +37,8 @@ class Ability(models.Model):
     is_from_aghanims = models.BooleanField(default=False)  # not currently used
     spell_immunity = models.IntegerField(null=True, blank=True, default=None)
     spell_immunity_detail = models.CharField(max_length=512, blank=True)
+    damage_type = models.IntegerField(null=True, blank=True, default=None)
+    aghanims_damage_type = models.IntegerField(null=True, blank=True, default=None)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 

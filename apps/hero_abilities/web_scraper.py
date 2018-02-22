@@ -3,7 +3,7 @@ import logging
 
 from apps.utils.request_handler import RequestHandler
 
-from .models import Ability, SpellImmunity
+from .models import Ability, SpellImmunity, DamageType
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,8 @@ class WebScraper(object):
                 spell_immunity = self._get_spell_immunity(header)
                 spell_immunity_detail = self._get_spell_immunity_detail(ability)
 
+                damage_type, aghanims_damage_type = self._get_damange_type(ability)
+
                 try:
                     hotkey = header.find(title='Hotkey').text
                 except AttributeError:
@@ -73,21 +75,24 @@ class WebScraper(object):
                         # 'is_from_aghanims': is_from_aghanims,
                         'spell_immunity': spell_immunity,
                         'spell_immunity_detail': spell_immunity_detail,
+                        'damage_type': damage_type,
+                        'aghanims_damage_type': aghanims_damage_type,
                     })
             except Exception as e:
                 print("{}: {} {}".format(hero, type(e), e))
                 logger.exception('Error loading ability for %s', hero)
 
-    @staticmethod
-    def _get_spell_immunity(header):
-        spell_immunity_map = {
-            'Does not pierce spell immunity.': SpellImmunity.DOES_NOT_PIERCE,
-            'Partially pierces spell immunity.': SpellImmunity.PARTIALLY_PIERCES,
-            'Pierces spell immunity.': SpellImmunity.PIERCES,
-        }
+    _spell_immunity_map = {
+        'Does not pierce spell immunity.': SpellImmunity.DOES_NOT_PIERCE,
+        'Partially pierces spell immunity.': SpellImmunity.PARTIALLY_PIERCES,
+        'Pierces spell immunity.': SpellImmunity.PIERCES,
+    }
+
+    @classmethod
+    def _get_spell_immunity(cls, header):
         for img in header.find_all('img'):
-            if img['alt'] in spell_immunity_map.keys():
-                return spell_immunity_map[img['alt']]
+            if img['alt'] in cls._spell_immunity_map.keys():
+                return cls._spell_immunity_map[img['alt']]
 
     @staticmethod
     def _get_spell_immunity_detail(ability):
@@ -97,3 +102,25 @@ class WebScraper(object):
         elif len(spell_immunity_images) > 2:
             raise Exception("Unexpected number of spell immunity images")
         return ''
+
+    _damange_type_map = {
+        'Magical': DamageType.MAGICAL,
+        'Physical': DamageType.PHYSICAL,
+        'Pure': DamageType.PURE,
+    }
+
+    @classmethod
+    def _get_damange_type(cls, ability):
+        try:
+            damage_header = next(b for b in ability.find_all('b') if b.text == 'Damage')
+        except StopIteration:
+            return None, None
+
+        damage_info = damage_header.find_next_siblings('a')
+        damage_type = cls._damange_type_map[damage_info[0].text]
+        if len(damage_info) == 1:
+            return damage_type, None
+
+        assert damage_info[1].get('title') == "Upgradable by Aghanim's Scepter."
+        aghanims_damage_type = cls._damange_type_map[damage_info[2].text]
+        return damage_type, aghanims_damage_type
