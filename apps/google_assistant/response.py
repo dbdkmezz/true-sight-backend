@@ -31,7 +31,7 @@ class Context(object):
     def __init__(self, useage_count=0):
         self.useage_count = useage_count
 
-    disable_follow_up_question = False
+    _follow_up_question = None
 
     def serialise(self):
         result = self._serialise()
@@ -60,20 +60,15 @@ class Context(object):
         return cls()
 
     def generate_response(self, question):
-        response, follow_up_context = self._generate_direct_response(question)
+        response, next_context = self._generate_direct_response(question)
         if not response[-1:] in ('.', '?'):
             response += '.'
-        if follow_up_context and not follow_up_context.disable_follow_up_question:
-            follow_up_question = follow_up_context._follow_up_question()
-            if follow_up_question:
-                response += " {}".format(follow_up_question)
-        return response, follow_up_context
+        if next_context and next_context._follow_up_question:
+            response += " {}".format(next_context._follow_up_question)
+        return response, next_context
 
     def _generate_direct_response(self, question):
         raise NotImplemented
-
-    def _follow_up_question(self):
-        return None
 
 
 class CleanContext(Context):
@@ -110,23 +105,23 @@ class CleanContext(Context):
 
 
 class AbilityCooldownContext(Context):
+    _follow_up_question = "Any other ability?"
+
     def _generate_direct_response(self, question):
+        self.useage_count += 1
         if len(question.abilities) == 1:
-            return (
-                AbilityCooldownResponse.respond(question.abilities[0]),
-                AbilityCooldownContext(self.useage_count + 1))
+            if False and self.useage_count == 0:
+                self._follow_up_question = "Any other ability?"
+            else:
+                self._follow_up_question = "Any others?"
+            return AbilityCooldownResponse.respond(question.abilities[0]), self
 
         try:
             return CleanContext()._generate_direct_response(question)
         except DoNotUnderstandQuestion:
             if question.yes:
-                self.disable_follow_up_question = True
+                self._follow_up_question = None
                 return "Which ability?", self
             if question.no:
                 raise Goodbye
             raise
-
-    def _follow_up_question(self):
-        if self.useage_count == 0:
-            return "Would you like to know the cooldown of another ability?"
-        return "Any other abilities?"

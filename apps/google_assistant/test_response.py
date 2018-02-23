@@ -69,16 +69,14 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
+        print(response)
         assert response == (
-            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Would you like to know the "
-            "cooldown of another ability?")
+            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Any other ability?")
         assert conversation_token['context-class'] == 'AbilityCooldownContext'
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
-        assert response == (
-            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Would you like to know the "
-            "cooldown of another ability?")
+        assert response.startswith("The cooldown of Glimpse is")
 
     def test_ability_hotkey_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's W?")
@@ -124,11 +122,11 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_context_increments_useage_count(self):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
-        assert response.endswith('Would you like to know the cooldown of another ability?')
+        assert response.endswith('Any other ability?')
         assert conversation_token['useage_count'] == 0
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?", conversation_token)
-        assert response.endswith('Any other abilities?')
+        assert response.endswith('Any others?')
         assert conversation_token['useage_count'] == 1
 
 
