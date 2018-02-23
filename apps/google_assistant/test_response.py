@@ -7,43 +7,8 @@ from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
 from apps.hero_abilities.models import SpellImmunity
 
-from .response import ResponseGenerator, QuestionParser
+from .response import ResponseGenerator
 from .exceptions import DoNotUnderstandQuestion, Goodbye
-
-
-@pytest.mark.django_db
-class TestQuestionParser(TestCase):
-    def setUp(self):
-        self.glimpse = AbilityFactory(name='Glimpse')
-        self.disruptor = HeroFactory(name='Disruptor')
-
-    def test_identify_abilities(self):
-        parser = QuestionParser("What's the cooldown of Glimpse?")
-        assert parser.abilities == [self.glimpse]
-
-    def test_identify_abilities_name_substrings(self):
-        AbilityFactory(name='Rage')
-        chemical_rage = AbilityFactory(name='Chemical Rage')
-        parser = QuestionParser("What's the cooldown of Chemical Rage?")
-        assert parser.abilities == [chemical_rage]
-
-    def test_identify_heroe(self):
-        parser = QuestionParser("What are Disruptor's abilities?")
-        assert parser.heroes == [self.disruptor]
-
-    def test_identify_heroes_in_order(self):
-        storm_spirit = HeroFactory(name='Storm Spirit')
-        parser = QuestionParser("Is Storm Spirit good against Disruptor?")
-        assert parser.heroes == [storm_spirit, self.disruptor]
-
-    def test_identify_heroes_with_alias(self):
-        wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
-        parser = QuestionParser("What are Wind Rangers abilities?")
-        assert parser.heroes == [wind_ranger]
-
-    def test_yes(self):
-        parser = QuestionParser("Yes.")
-        assert parser.yes
 
 
 @pytest.mark.django_db
@@ -184,8 +149,9 @@ class TestAdvantageParserAndResponders(TestCase):
         AdvantageFactory(hero=razor, enemy=storm_spirit, advantage=0.66)
         AdvantageFactory(hero=zeus, enemy=storm_spirit, advantage=-4.50)
         AdvantageFactory(hero=disruptor, enemy=storm_spirit, advantage=1.75)
+        AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=1.75)
 
-    def test_general_advantage(self):
+    def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response == (
             "Queen of Pain is very strong against Storm Spirit. "
