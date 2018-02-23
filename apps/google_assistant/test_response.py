@@ -65,7 +65,8 @@ class TestAbiltyParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
         assert response == (
             "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
-            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds.")
+            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds. Any "
+            "other ability?")
 
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
@@ -86,21 +87,22 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_hero_ultimate_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's ultimate?")
-        assert (
-            response == "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds."
-        )
+        assert response == (
+            "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds. Any other "
+            "hero?")
 
     def test_ability_list_response(self):
         response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert response == (
-            "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm.")
+            "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm. "
+            "Any other hero?")
 
     def test_spell_immunity_response(self):
         response, _ = ResponseGenerator.respond(
             "Does spell immunity protect against Kinetic Field?")
         assert response == (
             "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
-            "was placed before spell immunity.")
+            "was placed before spell immunity. Any other ability?")
 
     @pytest.mark.skip("Bug not fixed yet")
     def test_abilities_with_the_same_name(self):
@@ -123,11 +125,11 @@ class TestAbiltyParserAndResponders(TestCase):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
         assert response.endswith('Any other ability?')
-        assert conversation_token['useage_count'] == 0
+        assert conversation_token['useage-count'] == 1
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?", conversation_token)
         assert response.endswith('Any others?')
-        assert conversation_token['useage_count'] == 1
+        assert conversation_token['useage-count'] == 2
 
 
 @pytest.mark.django_db
