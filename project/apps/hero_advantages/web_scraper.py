@@ -71,7 +71,7 @@ class WebScraper(object):
         }
         """
         soup = self.request_handler.get_soup(
-            "http://www.dotabuff.com/heroes/{}/matchups".format(
+            "http://www.dotabuff.com/heroes/{}/counters".format(
                 hero.replace(' ', '-').replace("'", "").lower()
             ))
         soup = soup.find("table", class_="sortable")
@@ -79,10 +79,12 @@ class WebScraper(object):
         for row in soup.find_all(lambda tag: tag.has_attr("data-link-to")):
             enemy_name = row.find(class_="cell-xlarge").get_text()
             advantage_cell = row.find(string=re.compile("[0-9]*%"))
-            advantage = advantage_cell.replace("%", "")
+            advantage = float(advantage_cell.replace("%", ""))
+            if "Disadvantage" in row.parent.parent.text[:50]:
+                advantage = advantage * -1
             yield {
                 'enemy_name': enemy_name,
-                'advantage': float(advantage),
+                'advantage': advantage,
             }
 
     @cached_property

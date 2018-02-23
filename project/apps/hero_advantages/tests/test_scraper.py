@@ -11,7 +11,7 @@ class MockRequestHandler(RequestHandler):
         "http://wiki.teamliquid.net/dota2/Hero_Roles": "Hero Roles.html",
         "http://www.dotabuff.com/heroes/lanes?lane=mid": "Dotabuff Middle Lane.html",
         "http://www.dotabuff.com/heroes/lanes?lane=roaming": "Dotabuff Roaming.html",
-        "http://www.dotabuff.com/heroes/disruptor/matchups": "Disruptor.html",
+        "http://www.dotabuff.com/heroes/disruptor/counters": "Disruptor.html",
     }
 
     @classmethod
@@ -21,6 +21,12 @@ class MockRequestHandler(RequestHandler):
             "project", "apps", "hero_advantages", "tests", "data", filename))
         with open(path, "r") as f:
             return f.read()
+
+
+class NewFormatMockRequestHandler(MockRequestHandler):
+    url_map = {
+        "http://www.dotabuff.com/heroes/disruptor/counters": "Disruptor - Counters - DOTABUFF - Dota 2 Stats.html",
+    }
 
 
 class TestGetHeroNames(unittest.TestCase):
@@ -123,6 +129,15 @@ class TestScrapingOfAdvantages(unittest.TestCase):
 
     def test_right_number_loaded(self):
         self.assertEqual(len(self.result), 110)
+
+
+class TestScrapingOfNewAdvantagesFormat(unittest.TestCase):
+    def test_new_disadvantage_format(self):
+        scraper = WebScraper(request_handler=NewFormatMockRequestHandler())
+        result = list(scraper.load_advantages_for_hero("Disruptor"))
+        top_disadvantage = result[0]
+        self.assertEqual(top_disadvantage['enemy_name'], 'Huskar')
+        self.assertEqual(top_disadvantage['advantage'], -3.67)
 
 
 # class TestGetNumFromPercent(unittest.TestCase):
