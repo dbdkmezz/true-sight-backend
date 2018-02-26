@@ -36,7 +36,7 @@ class ResponseGenerator(object):
 
 class Context(object):
     _can_be_used_for_next_context = False
-    _can_respond_to_yes_no_responses = False
+    _can_respond_to_yes_response = False
 
     def __init__(self):
         self.useage_count = 0
@@ -74,6 +74,7 @@ class Context(object):
 
     @staticmethod
     def get_context_from_question(question):
+        """Returns the context to be used answering the question"""
         if len(question.abilities) == 1:
             if question.contains_any_string(('cool down', 'cooldown')):
                 return AbilityCooldownContext()
@@ -118,11 +119,10 @@ class Context(object):
             except DoNotUnderstandQuestion:
                 # The question doesn't include enough to get a new context,
                 # But perhaps the response was yes or no and we can respond to that...
-                if self._can_respond_to_yes_no_responses:
-                    if question.yes:
-                        return self._yes_response, self
-                    if question.no:
-                        raise Goodbye
+                if question.no:
+                    raise Goodbye
+                if question.yes and self._can_respond_to_yes_response:
+                    return self._yes_response, self
                 raise
             else:
                 return new_context.generate_response(question)
@@ -152,7 +152,7 @@ class SingleAbilityContext(Context):
     _can_be_used_for_next_context = True
     _first_follow_up_question = "Any other ability?"
     _second_follow_up_question = "Any others?"
-    _can_respond_to_yes_no_responses = True
+    _can_respond_to_yes_response = True
     _yes_response = "Which ability?"
 
 
@@ -177,7 +177,7 @@ class SingleHeroContext(Context):
     _can_be_used_for_next_context = True
     _first_follow_up_question = "Any other hero?"
     _second_follow_up_question = "Any others?"
-    _can_respond_to_yes_no_responses = True
+    _can_respond_to_yes_response = True
     _yes_response = "Which hero?"
 
 
