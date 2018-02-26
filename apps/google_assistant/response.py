@@ -35,7 +35,8 @@ class ResponseGenerator(object):
 
 
 class Context(object):
-    _next_context = None
+    _can_be_used_for_next_context = False
+    _can_respond_to_yes_no_responses = False
 
     def __init__(self):
         self.useage_count = 0
@@ -115,7 +116,7 @@ class Context(object):
             try:
                 new_context = Context.get_context_from_question(question)
             except DoNotUnderstandQuestion:
-                # The question doesn't include enough to get a new context.
+                # The question doesn't include enough to get a new context,
                 # But perhaps the response was yes or no and we can respond to that...
                 if self._can_respond_to_yes_no_responses:
                     if question.yes:
@@ -143,30 +144,16 @@ class Context(object):
             follow_up_question = self._second_follow_up_question
         return "{} {}".format(response, follow_up_question)
 
-    @property
-    def _can_respond_to_yes_no_responses(self):
-        return False
-
-    @property
-    def _can_be_used_for_next_context(self):
-        return False
-
     def _generate_direct_response(self, question):
         raise NotImplemented
 
 
 class SingleAbilityContext(Context):
+    _can_be_used_for_next_context = True
     _first_follow_up_question = "Any other ability?"
     _second_follow_up_question = "Any others?"
+    _can_respond_to_yes_no_responses = True
     _yes_response = "Which ability?"
-
-    @property
-    def _can_respond_to_yes_no_responses(self):
-        return True
-
-    @property
-    def _can_be_used_for_next_context(self):
-        return True
 
 
 class AbilityCooldownContext(SingleAbilityContext):
@@ -187,17 +174,11 @@ class AbilitySpellImmunityContext(SingleAbilityContext):
 
 
 class SingleHeroContext(Context):
+    _can_be_used_for_next_context = True
     _first_follow_up_question = "Any other hero?"
     _second_follow_up_question = "Any others?"
+    _can_respond_to_yes_no_responses = True
     _yes_response = "Which hero?"
-
-    @property
-    def _can_respond_to_yes_no_responses(self):
-        return True
-
-    @property
-    def _can_be_used_for_next_context(self):
-        return True
 
 
 class AbilityUltimateContext(SingleHeroContext):
