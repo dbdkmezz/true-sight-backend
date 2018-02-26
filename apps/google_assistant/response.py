@@ -102,39 +102,46 @@ class Context(object):
         raise DoNotUnderstandQuestion
 
     def generate_response(self, question):
-        self.useage_count += 1
         try:
             response = self._generate_direct_response(question)
         except InnapropriateContextError:
+            if self.useage_count == 0:
+                # The current context is brand knew, and has just come from
+                # get_context_from_question. This should never happen.
+                raise
+
             # The current context is unable to answer the question,
             # let's get a new context from the question itself
             try:
                 new_context = Context.get_context_from_question(question)
-                assert type(self) != type(new_context)
-                return new_context._generate_direct_response(question)
             except DoNotUnderstandQuestion:
                 # The question doesn't include enough to get a new context.
-                # But perhaps the response was yes or no and we can respond to that?
+                # But perhaps the response was yes or no and we can respond to that...
                 if self._can_respond_to_yes_no_responses:
                     if question.yes:
                         return self._yes_response, self
                     if question.no:
                         raise Goodbye
                 raise
+            else:
+                return new_context.generate_response(question)
 
+        self.useage_count += 1
         if not response[-1:] in ('.', '?'):
             response += '.'
 
-        next_context = False
         if self._can_be_used_for_next_context:
-            next_context = self
-            if next_context.useage_count == 1:
-                follow_up_question = next_context._first_follow_up_question
-            else:
-                follow_up_question = next_context._second_follow_up_question
-            response = "{} {}".format(response, follow_up_question)
+            response = self._add_follow_up_question_to_response(response)
+            return response, self
+        else:
+            return response, None
 
-        return response, next_context
+    def _add_follow_up_question_to_response(self, response):
+        if self.useage_count == 1:
+            follow_up_question = self._first_follow_up_question
+        else:
+            follow_up_question = self._second_follow_up_question
+        return "{} {}".format(response, follow_up_question)
 
     @property
     def _can_respond_to_yes_no_responses(self):

@@ -190,3 +190,21 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
         with self.assertRaises(Goodbye):
             ResponseGenerator.respond('Nope.', token)
+
+    def test_changing_context(self):
+        AbilityFactory(
+            hero=HeroFactory(name='Disruptor'),
+            name='Static Storm',
+            cooldown='90/80/70',
+            hotkey='R',
+            is_ultimate=True,
+        )
+
+        _, token = ResponseGenerator.respond('What is the cooldown of Static Storm?')
+        assert token['context-class'] == 'AbilityCooldownContext'
+        assert token['useage-count'] == 1
+
+        response, token = ResponseGenerator.respond("What is Disruptor's ultimate?", token)
+        assert "ultimate" in response
+        assert token['context-class'] == 'AbilityUltimateContext'
+        assert token['useage-count'] == 1
