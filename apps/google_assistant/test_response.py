@@ -11,6 +11,17 @@ from .response import ResponseGenerator
 from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 
+class TestWelcomeAndIntroduction(TestCase):
+    def test_welcome_message(self):
+        response, _ = ResponseGenerator.respond("")
+        assert "True Sight" in response
+
+    def test_what_can_you_do(self):
+        response, _ = ResponseGenerator.respond("What can you do?")
+        assert "counters" in response
+        assert "abilities" in response
+
+
 @pytest.mark.django_db
 class TestAbiltyParserAndResponders(TestCase):
     def setUp(self):

@@ -1,4 +1,5 @@
 import re
+import random
 import logging
 
 from apps.hero_advantages.roles import HeroRole
@@ -34,6 +35,44 @@ class Response(object):
             r'^(.*), (.*?)$',
             r'\1, and \2',
             ', '.join(words))
+
+
+class IntroductionResponse(Response):
+    TRADEMARKS = (
+        "Dota 2 is a registered trademark of Valve Corporation, all Dota 2 content is "
+        "property of Valve Corporation, this Application is not affiliated with Valve "
+        "Corporation."
+    )
+
+    @classmethod
+    def _respond(cls):
+        return "{} {} {}".format(
+            cls.TRADEMARKS,
+            DescriptionResponse.sample_question(),
+            DescriptionResponse.DESCRIPTION,
+        )
+
+
+class DescriptionResponse(Response):
+    DESCRIPTION = (
+        "Hi, I'm the Gem of True Sight. "
+        "You can ask me about Dota hero counters, and abilities, such as their cooldown or "
+        "whether they are blocked by BKB."
+    )
+
+    @staticmethod
+    def sample_question():
+        return "For example, you could ask me '" + random.choice((
+            "Which mid heroes are good against Invoker?",
+            "What is the cooldown of Monkey King's ultimate?",
+            "Does Assassinate goes through BKB?",
+            "What are Dark Willow's abilities?",
+            "What is Disruptor's Q?",
+        )) + "'."
+
+    @classmethod
+    def _respond(cls):
+        return "{} {}".format(cls.DESCRIPTION, cls.sample_question())
 
 
 class AbilityResponse(Response):

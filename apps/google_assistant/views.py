@@ -15,15 +15,25 @@ good_response_logger = logging.getLogger('good_response')
 
 # # TODO
 #
-# # General
-# Squish all the migrations
-# Hero role accuracy
+# # Pre google
+# Introduction (with copywrite) (shorter if regular user)
 # Try it lots
+# don't log in the db if talking to me
+# persona?
+# fix logo
+# invocation phrases
+# no listening without a promt.
+# Think of phrasing for all prompts
+#
+# # Pre reddit
+# Try saying all heroes
+# fix cron
 # Aghs upgrades
 # damange type
 # aghs damage type
 
 # # V2
+# Linkens sphere interactions
 # Context and follow up questions
 # Abilities with the same name, hex, blink
 # Do I really want the Hero model in hero advanteages?
@@ -35,7 +45,6 @@ good_response_logger = logging.getLogger('good_response')
 # Add abilities from talents or aghanims (be careful they don't override existing abilities, e.g. Brewmaster's Drunken Haze)  # noqa
 # Talents
 # Removable by types of dispel
-# Linkens sphere interactions
 # Ability duration
 # Ability Range
 # All details of spell
@@ -51,8 +60,6 @@ def index(request):
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
     User.log_user(google_request.user_id)
-    if not google_request.text:
-        return JsonResponse(AppResponse().ask("Hi, I'm True Sight. Ask me a question about Dota."))
 
     context = None
     if google_request.conversation_token:

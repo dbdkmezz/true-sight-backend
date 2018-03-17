@@ -7,7 +7,8 @@ from .question_parser import QuestionParser
 from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
-    SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse,
+    SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
+    DescriptionResponse,
 )
 
 
@@ -74,6 +75,9 @@ class Context(object):
     @staticmethod
     def get_context_from_question(question):
         """Returns the context to be used answering the question"""
+        if not question.text:
+            return IntroductionContext()
+
         if len(question.abilities) == 1:
             if question.contains_any_string(('cool down', 'cooldown')):
                 return AbilityCooldownContext()
@@ -98,6 +102,9 @@ class Context(object):
 
         if len(question.heroes) == 1:
             return EnemyAdvantageContext(question.heroes[0])
+
+        if question.contains_any_string(('what can you do', 'what do you do', 'how does this work')):
+            return DescriptionContext()
 
         failed_response_logger.warning("Unable to respond to question. %s", question)
         raise DoNotUnderstandQuestion
@@ -145,6 +152,16 @@ class Context(object):
 
     def _generate_direct_response(self, question):
         raise NotImplemented
+
+
+class IntroductionContext(Context):
+    def _generate_direct_response(self, question):
+        return IntroductionResponse.respond()
+
+
+class DescriptionContext(Context):
+    def _generate_direct_response(self, question):
+        return DescriptionResponse.respond()
 
 
 class SingleAbilityContext(Context):
