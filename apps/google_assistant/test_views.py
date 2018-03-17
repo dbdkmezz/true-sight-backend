@@ -6,7 +6,7 @@ from libs.google_actions.tests.mocks import MockRequest
 from libs.google_actions.tests.utils import Utils as GoogleTestUtils
 
 from apps.hero_abilities.factories import AbilityFactory
-from apps.hero_advantages.factories import HeroFactory
+from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 
 from .views import index
 
@@ -27,6 +27,12 @@ class TestViews(TestCase):
         response = make_request_and_return_text("what is Disruptor's ultimate")
         assert "Static Storm" in response
 
+    def test_counters_end_to_end(self):
+        storm_spirit = HeroFactory(name='Storm Spirit')
+        queen_of_pain = HeroFactory(name='Queen of Pain')
+        AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=1.75)
+        response = make_request_and_return_text("what heroes are good against Queen of Pain")
+        assert "Storm Spirit" in response
 
 def make_request_and_return_text(text=None, user_id=None, conversation_token=None):
     response = index(

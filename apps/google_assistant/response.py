@@ -1,5 +1,7 @@
 import logging
 
+from apps.hero_advantages.models import Hero
+
 from .exceptions import DoNotUnderstandQuestion, Goodbye
 from .question_parser import QuestionParser
 from .response_text import (
@@ -214,12 +216,12 @@ class EnemyAdvantageContext(Context):
 
     def serialise(self):
         result = super().serialise()
-        result['enemy'] = self.enemy
+        result['enemy'] = self.enemy.name
         return result
 
     def _deserialise(self, data):
         super()._deserialise(data)
-        self.enemy = data['enemy']
+        self.enemy = Hero.objects.get(name=data['enemy'])
 
     def _generate_direct_response(self, question):
         all_heroes = set(question.heroes + [self.enemy])
