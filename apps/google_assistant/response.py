@@ -162,11 +162,15 @@ class AbilityCooldownContext(SingleAbilityContext):
 
 class AbilityDescriptionContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
+        if len(question.abilities) < 1:  # or == 1?
+            raise InnapropriateContextError
         return AbilityDescriptionResponse.respond(question.abilities[0])
 
 
 class AbilitySpellImmunityContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
+        if len(question.abilities) < 1:  # or == 1?
+            raise InnapropriateContextError
         return AbilitySpellImmunityResponse.respond(question.abilities[0])
 
 
@@ -180,16 +184,22 @@ class SingleHeroContext(Context):
 
 class AbilityUltimateContext(SingleHeroContext):
     def _generate_direct_response(self, question):
+        if len(question.heroes) < 1:
+            raise InnapropriateContextError
         return AbilityUltimateResponse.respond(question.heroes[0])
 
 
 class AbilityListContext(SingleHeroContext):
     def _generate_direct_response(self, question):
+        if len(question.heroes) < 1:
+            raise InnapropriateContextError
         return AbilityListResponse.respond(question.heroes[0])
 
 
 class AbilityHotkeyContext(Context):
     def _generate_direct_response(self, question):
+        if len(question.heroes) < 1:
+            raise InnapropriateContextError
         return AbilityHotkeyResponse.respond(question.heroes[0], question.ability_hotkey)
 
 

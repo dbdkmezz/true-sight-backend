@@ -194,6 +194,16 @@ class TestFollowUpRespones(TestCase):
         with self.assertRaises(Goodbye):
             ResponseGenerator.respond('Nope.', token)
 
+    def test_no_ability_list(self):
+        AbilityFactory(
+            name='Glimpse',
+            cooldown='60/46/32/18',
+            hero=HeroFactory(name='Disruptor'),
+        )
+        _, token = ResponseGenerator.respond("What are Disruptor's abilities?")
+        with self.assertRaises(Goodbye):
+            ResponseGenerator.respond('No.', token)
+
     def test_changing_context(self):
         AbilityFactory(
             hero=HeroFactory(name='Disruptor'),

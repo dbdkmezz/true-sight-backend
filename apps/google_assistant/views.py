@@ -52,7 +52,7 @@ def index(request):
 
     User.log_user(google_request.user_id)
     if not google_request.text:
-        return JsonResponse(AppResponse().ask("Hi, I'm Roshan. Ask me a question about Dota."))
+        return JsonResponse(AppResponse().ask("Hi, I'm True Sight. Ask me a question about Dota."))
 
     context = None
     if google_request.conversation_token:
