@@ -130,7 +130,7 @@ class Advantage(models.Model):
     @staticmethod
     def _nature_bug_workaround(enemy_names):
         return [
-            "Nature's Prophet" if e == "Nature" else e
+            "Nature's Prophet" if e.lower() == "nature" else e
             for e in enemy_names
         ]
 
