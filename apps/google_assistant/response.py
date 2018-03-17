@@ -42,13 +42,10 @@ class Context(object):
         self.useage_count = 0
 
     def serialise(self):
-        result = self._serialise()
-        result['context-class'] = type(self).__name__
-        result['useage-count'] = self.useage_count
-        return result
-
-    def _serialise(self):
-        return {}
+        return {
+            'context-class': type(self).__name__,
+            'useage-count': self.useage_count,
+        }
 
     @staticmethod
     def deserialise(data):
@@ -57,20 +54,20 @@ class Context(object):
         try:
             context_classes = (
                 AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
-                AbilityUltimateContext, AbilityListContext,
+                AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext,
             )
             klass = next(
                 k for k in context_classes
                 if data['context-class'] == k.__name__)
         except StopIteration:
             return None
-        return klass._deserialise(data)
 
-    @classmethod
-    def _deserialise(cls, data):
-        result = cls()
-        result.useage_count = data.get('useage-count', 0)
+        result = klass()
+        result._deserialise(data)
         return result
+
+    def _deserialise(self, data):
+        self.useage_count = data.get('useage-count', 0)  # no get?
 
     @staticmethod
     def get_context_from_question(question):
@@ -83,7 +80,7 @@ class Context(object):
 
         if len(question.heroes) == 1:
             if question.contains_any_string(('strong', 'against', 'counter', 'counters')):
-                return SingleEnemyAdvantageContext()
+                return EnemyAdvantageContext(question.heroes[0])
             if question.contains_any_string(('ultimate', )):
                 return AbilityUltimateContext()
             if question.contains_any_string(('abilities', )):
@@ -92,13 +89,13 @@ class Context(object):
                 return AbilityHotkeyContext()
 
         if len(question.heroes) == 2:
-            return TwoHeroAdvantageContext()
+            return EnemyAdvantageContext(question.heroes[1])
 
         if len(question.abilities) == 1:
             return AbilityDescriptionContext()
 
         if len(question.heroes) == 1:
-            return SingleEnemyAdvantageContext()
+            return EnemyAdvantageContext(question.heroes[0])
 
         failed_response_logger.warning("Unable to respond to question. %s", question)
         raise DoNotUnderstandQuestion
@@ -196,11 +193,29 @@ class AbilityHotkeyContext(Context):
         return AbilityHotkeyResponse.respond(question.heroes[0], question.ability_hotkey)
 
 
-class SingleEnemyAdvantageContext(Context):
-    def _generate_direct_response(self, question):
-        return SingleEnemyAdvantageResponse.respond(question.heroes[0], question.role)
+class EnemyAdvantageContext(Context):
+    _can_be_used_for_next_context = True
+    _first_follow_up_question = "Any specific hero you'd like to know about?"
+    _second_follow_up_question = "Any others?"
 
+    def __init__(self, enemy=None):
+        super().__init__()
+        self.enemy = enemy
 
-class TwoHeroAdvantageContext(Context):
+    def serialise(self):
+        result = super().serialise()
+        result['enemy'] = self.enemy
+        return result
+
+    def _deserialise(self, data):
+        super()._deserialise(data)
+        self.enemy = data['enemy']
+
     def _generate_direct_response(self, question):
-        return TwoHeroAdvantageResponse.respond(question.heroes[0], question.heroes[1])
+        all_heroes = set(question.heroes + [self.enemy])
+        if len(all_heroes) == 2:
+            other_hero = all_heroes.difference(set([self.enemy])).pop()
+            return TwoHeroAdvantageResponse.respond(hero=other_hero, enemy=self.enemy)
+        if len(all_heroes) == 1:
+            return SingleEnemyAdvantageResponse.respond(all_heroes.pop(), question.role)
+        raise InnapropriateContextError

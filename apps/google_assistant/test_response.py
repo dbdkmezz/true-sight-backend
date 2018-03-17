@@ -135,6 +135,10 @@ class TestAbiltyParserAndResponders(TestCase):
 @pytest.mark.django_db
 class TestAdvantageParserAndResponders(TestCase):
     def setUp(self):
+        self.setUpAdvantages()
+
+    @staticmethod
+    def setUpAdvantages():
         storm_spirit = HeroFactory(name='Storm Spirit', is_mid=True)
         queen_of_pain = HeroFactory(name='Queen of Pain', is_mid=True)
         shadow_fiend = HeroFactory(name='Shadow Fiend', is_mid=True)
@@ -153,22 +157,21 @@ class TestAdvantageParserAndResponders(TestCase):
 
     def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
-        assert response == (
+        assert response.startswith(
             "Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good."
         )
 
     def test_mid_advantage(self):
         response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
-        assert response == (
+        assert response.startswith(
             "Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good."
         )
 
     def test_two_hero_advantage(self):
         response, _ = ResponseGenerator.respond("Is Disruptor good against Storm Spirit?")
-        assert response == (
-            "Disruptor is not bad against Storm Spirit. Disruptor's advantage is 1.75.")
+        assert "Disruptor's advantage is 1.75" in response
 
 
 @pytest.mark.django_db
@@ -208,3 +211,9 @@ class TestFollowUpRespones(TestCase):
         assert "ultimate" in response
         assert token['context-class'] == 'AbilityUltimateContext'
         assert token['useage-count'] == 1
+
+    def test_hero_advantage_remembers_hero(self):
+        TestAdvantageParserAndResponders.setUpAdvantages()
+        _, token = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("What about Sniper?", token)
+        assert "-3.11" in response

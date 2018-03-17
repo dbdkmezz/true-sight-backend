@@ -67,10 +67,15 @@ def index(request):
     except Goodbye:
         return JsonResponse(AppResponse().tell('Goodbye'))
 
-    json_context = json.dumps(context)
-    logger.info("context: %s", json_context)
+    good_response_logger.info(
+        "%s Response: %s",
+        QuestionParser(google_request.text),
+        response)
     DailyUse.log_use(success=True)
-    good_response_logger.info("%s Response: %s",
-                              QuestionParser(google_request.text),
-                              response)
-    return JsonResponse(AppResponse().ask(response, json_context))
+
+    if context:
+        json_context = json.dumps(context)
+        logger.info("context: %s", json_context)
+        return JsonResponse(AppResponse().ask(response, json_context))
+    else:
+        return JsonResponse(AppResponse().tell(response))
