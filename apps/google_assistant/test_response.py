@@ -13,6 +13,9 @@ from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 class TestWelcomeAndIntroduction(TestCase):
     def test_welcome_message(self):
+        response, _ = ResponseGenerator.respond(None)
+        assert "True Sight" in response
+
         response, _ = ResponseGenerator.respond("")
         assert "True Sight" in response
 
