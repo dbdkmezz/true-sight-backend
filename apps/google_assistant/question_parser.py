@@ -48,7 +48,7 @@ class QuestionParser(object):
             h for h in Hero.objects.all()
             if self.contains_any_string(h.aliases)
         ]
-        if len(result) < 1:
+        if len(result) <= 1:
             return result
 
         # We need to order them in the order they are in the text
@@ -57,7 +57,7 @@ class QuestionParser(object):
             for alias in hero.aliases:
                 position = self.text.find(alias.lower())
                 if position != -1:
-                    if not positions.get(hero) or position < positions['hero']:
+                    if not positions.get(hero) or position < positions[hero]:
                         positions[hero] = position
         return [k for k in sorted(positions, key=positions.get)]
 

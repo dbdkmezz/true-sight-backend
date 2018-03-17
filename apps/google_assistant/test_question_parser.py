@@ -24,7 +24,7 @@ class TestQuestionParser(TestCase):
         parser = QuestionParser("What's the cooldown of Chemical Rage?")
         assert parser.abilities == [chemical_rage]
 
-    def test_identify_heroe(self):
+    def test_identify_hero(self):
         parser = QuestionParser("What are Disruptor's abilities?")
         assert parser.heroes == [self.disruptor]
 
@@ -37,6 +37,11 @@ class TestQuestionParser(TestCase):
         wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
         parser = QuestionParser("What are Wind Rangers abilities?")
         assert parser.heroes == [wind_ranger]
+
+    def test_identify_hero_with_substring_alias(self):
+        dark_willow = HeroFactory(name='Dark Willow', aliases_data='dark will')
+        parser = QuestionParser("what's the dark Willows abilities")
+        assert parser.heroes == [dark_willow]
 
     def test_yes(self):
         parser = QuestionParser("Yes.")
