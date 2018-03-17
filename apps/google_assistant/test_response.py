@@ -204,6 +204,14 @@ class TestFollowUpRespones(TestCase):
         with self.assertRaises(Goodbye):
             ResponseGenerator.respond('No.', token)
 
+    def test_no_counter_picking(self):
+        storm_spirit = HeroFactory(name='Storm Spirit')
+        queen_of_pain = HeroFactory(name='Queen of Pain')
+        AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=1.75)
+        _, token = ResponseGenerator.respond("What heroes are good against Queen of Pain")
+        with self.assertRaises(Goodbye):
+            ResponseGenerator.respond('No.', token)
+
     def test_changing_context(self):
         AbilityFactory(
             hero=HeroFactory(name='Disruptor'),

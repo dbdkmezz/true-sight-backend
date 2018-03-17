@@ -34,6 +34,7 @@ class TestViews(TestCase):
         response = make_request_and_return_text("what heroes are good against Queen of Pain")
         assert "Storm Spirit" in response
 
+
 def make_request_and_return_text(text=None, user_id=None, conversation_token=None):
     response = index(
         MockRequest(text=text, user_id=user_id, conversation_token=conversation_token))

@@ -224,6 +224,8 @@ class EnemyAdvantageContext(Context):
         self.enemy = Hero.objects.get(name=data['enemy'])
 
     def _generate_direct_response(self, question):
+        if len(question.heroes) < 1:
+            raise InnapropriateContextError
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
             other_hero = all_heroes.difference(set([self.enemy])).pop()
