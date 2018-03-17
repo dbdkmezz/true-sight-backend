@@ -47,9 +47,9 @@ class IntroductionResponse(Response):
     @classmethod
     def _respond(cls):
         return "{} {} {}".format(
+            DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
             DescriptionResponse.sample_question(),
-            DescriptionResponse.DESCRIPTION,
         )
 
 
@@ -65,7 +65,7 @@ class DescriptionResponse(Response):
         return "For example, you could ask me '" + random.choice((
             "Which mid heroes are good against Invoker?",
             "What is the cooldown of Monkey King's ultimate?",
-            "Does Assassinate goes through BKB?",
+            "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
             "What is Disruptor's Q?",
         )) + "'."

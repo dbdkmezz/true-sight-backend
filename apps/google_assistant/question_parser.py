@@ -1,8 +1,13 @@
+import logging
+
 from django.utils.functional import cached_property
 
 from apps.hero_advantages.roles import HeroRole
 from apps.hero_advantages.models import Hero
 from apps.hero_abilities.models import Ability
+
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionParser(object):
@@ -12,6 +17,7 @@ class QuestionParser(object):
         except AttributeError:
             #  question_text is None
             self.text = ""
+        logger.info("Recieved question: {}".format(question_text))
 
     def __str__(self):
         return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
