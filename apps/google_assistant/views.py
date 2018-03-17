@@ -65,6 +65,8 @@ def index(request):
     if google_request.conversation_token:
         context = json.loads(google_request.conversation_token)
 
+    logger.info("Recieved question: {}, context: {}".format(google_request.text, context))
+
     try:
         response, context = ResponseGenerator.respond(google_request.text, context)
     except DoNotUnderstandQuestion:
