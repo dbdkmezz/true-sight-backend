@@ -7,7 +7,7 @@ from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
 from apps.hero_abilities.models import SpellImmunity
 
-from .response import ResponseGenerator
+from .response import ResponseGenerator, Context, FreshContext
 from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 
@@ -87,7 +87,6 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
-        print(response)
         assert response == (
             "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Any other ability?")
         assert conversation_token['context-class'] == 'AbilityCooldownContext'
@@ -206,10 +205,16 @@ class TestFollowUpRespones(TestCase):
 
     def test_no(self):
         AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
-
         _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('Nope.', token)
+        assert isinstance(Context.deserialise(token), FreshContext)
+
+    def test_no_a_no(self):
+        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
+        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('No.', token)
         with self.assertRaises(Goodbye):
-            ResponseGenerator.respond('Nope.', token)
+            r, token = ResponseGenerator.respond('No.', token)
 
     def test_no_ability_list(self):
         AbilityFactory(
@@ -218,16 +223,16 @@ class TestFollowUpRespones(TestCase):
             hero=HeroFactory(name='Disruptor'),
         )
         _, token = ResponseGenerator.respond("What are Disruptor's abilities?")
-        with self.assertRaises(Goodbye):
-            ResponseGenerator.respond('No.', token)
+        _, token = ResponseGenerator.respond('No.', token)
+        assert isinstance(Context.deserialise(token), FreshContext)
 
     def test_no_counter_picking(self):
         storm_spirit = HeroFactory(name='Storm Spirit')
         queen_of_pain = HeroFactory(name='Queen of Pain')
         AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=1.75)
         _, token = ResponseGenerator.respond("What heroes are good against Queen of Pain")
-        with self.assertRaises(Goodbye):
-            ResponseGenerator.respond('No.', token)
+        _, token = ResponseGenerator.respond('No.', token)
+        assert isinstance(Context.deserialise(token), FreshContext)
 
     def test_changing_context(self):
         AbilityFactory(

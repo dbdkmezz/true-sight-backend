@@ -26,8 +26,9 @@ good_response_logger = logging.getLogger('good_response')
 # Think of phrasing for all prompts
 #
 # # Pre reddit
+# Just "hex" and "blink" don't work
 # Try saying all heroes
-# fix cron
+# Respond to ability questions not with "any more ability" but if they want to know more about it
 # Aghs upgrades
 # damange type
 # aghs damage type

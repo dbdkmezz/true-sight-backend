@@ -49,7 +49,7 @@ class IntroductionResponse(Response):
         return "{} {} {}".format(
             DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
-            DescriptionResponse.sample_question(),
+            SampleQuestionResponse.sample_question(),
         )
 
 
@@ -60,6 +60,12 @@ class DescriptionResponse(Response):
         "whether they are blocked by BKB."
     )
 
+    @classmethod
+    def _respond(cls):
+        return "{} {}".format(cls.DESCRIPTION, SampleQuestionResponse.sample_question())
+
+
+class SampleQuestionResponse(Response):
     @staticmethod
     def sample_question():
         return "For example, you could ask me '" + random.choice((
@@ -72,7 +78,7 @@ class DescriptionResponse(Response):
 
     @classmethod
     def _respond(cls):
-        return "{} {}".format(cls.DESCRIPTION, cls.sample_question())
+        return "Is there anything else you'd like to know? {}".format(cls.sample_question())
 
 
 class AbilityResponse(Response):

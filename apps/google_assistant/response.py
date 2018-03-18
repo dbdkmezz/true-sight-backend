@@ -8,7 +8,7 @@ from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
     SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
-    DescriptionResponse,
+    DescriptionResponse, SampleQuestionResponse
 )
 
 
@@ -57,7 +57,8 @@ class Context(object):
         try:
             context_classes = (
                 AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
-                AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext,
+                AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
+                IntroductionContext, DescriptionContext,
             )
             klass = next(
                 k for k in context_classes
@@ -127,7 +128,7 @@ class Context(object):
                 # The question doesn't include enough to get a new context,
                 # But perhaps the response was yes or no and we can respond to that...
                 if question.no:
-                    raise Goodbye
+                    return FreshContext().generate_response(question)
                 if question.yes and self._can_respond_to_yes_response:
                     return self._yes_response, self
                 raise
@@ -174,6 +175,15 @@ class IntroductionContext(ContextWithBlankFollowUpQuestions):
 class DescriptionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
         return DescriptionResponse.respond()
+
+
+class FreshContext(ContextWithBlankFollowUpQuestions):
+    """A clean context, which asks the user what they'd like to know, giving sample questions"""
+    def _generate_direct_response(self, question):
+        if self.useage_count > 0:
+            # We should only use this context the first time, otherwise we shuold just give up
+            raise Goodbye
+        return SampleQuestionResponse.respond()
 
 
 class SingleAbilityContext(Context):
