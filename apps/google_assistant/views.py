@@ -72,7 +72,8 @@ def index(request):
     except DoNotUnderstandQuestion:
         DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
-            "Sorry, I don't understand. I heard you say: {}".format(google_request.text)))
+            "Sorry, I don't understand. I heard you say: {}".format(google_request.text),
+            json.dumps(context)))
     except Goodbye:
         return JsonResponse(AppResponse().tell('Goodbye'))
 

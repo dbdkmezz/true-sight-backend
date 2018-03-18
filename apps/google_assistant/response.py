@@ -103,7 +103,8 @@ class Context(object):
         if len(question.heroes) == 1:
             return EnemyAdvantageContext(question.heroes[0])
 
-        if question.contains_any_string(('what can you do', 'what do you do', 'how does this work')):
+        if question.contains_any_string((
+                'what can you do', 'what do you do', 'how does this work')):
             return DescriptionContext()
 
         failed_response_logger.warning("Unable to respond to question. %s", question)
@@ -154,12 +155,23 @@ class Context(object):
         raise NotImplemented
 
 
-class IntroductionContext(Context):
+class ContextWithBlankFollowUpQuestions(Context):
+    """Context which doesn't append a follow up question.
+
+    This may be used when the response itself includes a follow up question.
+    """
+    _can_be_used_for_next_context = True
+
+    def _add_follow_up_question_to_response(self, response):
+        return response
+
+
+class IntroductionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
         return IntroductionResponse.respond()
 
 
-class DescriptionContext(Context):
+class DescriptionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
         return DescriptionResponse.respond()
 

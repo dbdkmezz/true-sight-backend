@@ -13,16 +13,19 @@ from .exceptions import DoNotUnderstandQuestion, Goodbye
 
 class TestWelcomeAndIntroduction(TestCase):
     def test_welcome_message(self):
-        response, _ = ResponseGenerator.respond(None)
+        response, token = ResponseGenerator.respond(None)
         assert "True Sight" in response
+        assert token is not None
 
-        response, _ = ResponseGenerator.respond("")
+        response, token = ResponseGenerator.respond("")
         assert "True Sight" in response
+        assert token is not None
 
     def test_what_can_you_do(self):
-        response, _ = ResponseGenerator.respond("What can you do?")
+        response, token = ResponseGenerator.respond("What can you do?")
         assert "counters" in response
         assert "abilities" in response
+        assert token is not None
 
 
 @pytest.mark.django_db
