@@ -27,6 +27,15 @@ class TestWelcomeAndIntroduction(TestCase):
         assert "abilities" in response
         assert token is not None
 
+    def test_can_ask_questions_after_welcome(self):
+        AbilityFactory(
+            name='Static Storm',
+            cooldown='90/80/70',
+        )
+        _, token = ResponseGenerator.respond(None)
+        response, _ = ResponseGenerator.respond("What is the cooldown of static storm?", token)
+        assert "90" in response
+
 
 @pytest.mark.django_db
 class TestAbiltyParserAndResponders(TestCase):

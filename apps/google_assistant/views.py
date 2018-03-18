@@ -16,16 +16,15 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Pre google
-# Introduction (with copywrite) (shorter if regular user)
 # Try it lots
 # don't log in the db if talking to me
 # persona?
-# fix logo
 # invocation phrases
 # no listening without a promt.
 # Think of phrasing for all prompts
 #
 # # Pre reddit
+# say the valve stuff faster
 # Just "hex" and "blink" don't work
 # Try saying all heroes
 # Respond to ability questions not with "any more ability" but if they want to know more about it

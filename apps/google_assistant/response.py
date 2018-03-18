@@ -169,11 +169,15 @@ class ContextWithBlankFollowUpQuestions(Context):
 
 class IntroductionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
+        if self.useage_count > 0:
+            raise InnapropriateContextError
         return IntroductionResponse.respond()
 
 
 class DescriptionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
+        if self.useage_count > 0:
+            raise InnapropriateContextError
         return DescriptionResponse.respond()
 
 
