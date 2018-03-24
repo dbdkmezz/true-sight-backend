@@ -55,6 +55,14 @@ good_response_logger = logging.getLogger('good_response')
 
 def index(request):
     try:
+        return _respond_to_request(request)
+    except:
+        logger.exception("Uncaught exception")
+        return JsonResponse(AppResponse().tell("I'm sorry, something went wrong."))
+
+
+def _respond_to_request(request):
+    try:
         google_request = AppRequest(request)
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
