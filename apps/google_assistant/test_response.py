@@ -225,6 +225,13 @@ class TestFollowUpRespones(TestCase):
         with self.assertRaises(Goodbye):
             r, token = ResponseGenerator.respond('No.', token)
 
+    def test_respond_to_fresh_context(self):
+        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
+        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('No.', token)
+        response, _ = ResponseGenerator.respond('What is the cooldown of Glimpse?', token)
+        assert "cooldown" in response
+
     def test_no_ability_list(self):
         AbilityFactory(
             name='Glimpse',

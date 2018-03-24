@@ -189,8 +189,9 @@ class FreshContext(ContextWithBlankFollowUpQuestions):
     """A clean context, which asks the user what they'd like to know, giving sample questions"""
     def _generate_direct_response(self, question):
         if self.useage_count > 0:
-            # We should only use this context the first time, otherwise we shuold just give up
-            raise Goodbye
+            if question.no:
+                raise Goodbye
+            raise InnapropriateContextError
         return SampleQuestionResponse.respond()
 
 
