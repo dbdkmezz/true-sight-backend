@@ -74,6 +74,8 @@ class Context(object):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
+    ABILITY_WORDS = ('abilities', 'spells')
+    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
 
     @classmethod
     def get_context_from_question(cls, question):
@@ -92,7 +94,7 @@ class Context(object):
                 return EnemyAdvantageContext(question.heroes[0])
             if question.contains_any_string(('ultimate', )):
                 return AbilityUltimateContext()
-            if question.contains_any_string(('abilities', )):
+            if question.contains_any_string(cls.ABILITY_WORDS):
                 return AbilityListContext()
             if question.ability_hotkey:
                 return AbilityHotkeyContext()
@@ -275,6 +277,8 @@ class EnemyAdvantageContext(Context):
 
     def _generate_direct_response(self, question):
         if len(question.heroes) < 1:
+            raise InnapropriateContextError
+        if question.contains_any_string(self.ABILITY_WORDS):
             raise InnapropriateContextError
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
