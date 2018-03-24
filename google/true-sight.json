@@ -1,0 +1,19 @@
+{
+  "actions": [
+    {
+      "name": "MAIN",
+      "intent": {
+        "name": "actions.intent.MAIN"
+      },
+      "fulfillment": {
+        "conversationName": "True Sight"
+      }
+    }
+  ],
+  "conversations": {
+    "Roshan": {
+      "name": "True Sight",
+      "url": "https://URL/google_assistant/"
+    }
+  }
+}
