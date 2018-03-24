@@ -20,10 +20,8 @@ good_response_logger = logging.getLogger('good_response')
 # Try it lots
 # don't log in the db if talking to me
 # persona?
-# invocation phrases
 # no listening without a promt.
 # Think of phrasing for all prompts
-# don't ignore "against" when in hero context
 #
 # # Pre reddit
 # say the valve stuff faster
