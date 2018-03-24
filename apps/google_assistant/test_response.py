@@ -266,3 +266,24 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         response, _ = ResponseGenerator.respond("What about Sniper?", token)
         assert "-3.11" in response
+
+    def test_saying_against_breaks_hero_context(self):
+        storm_spirit = HeroFactory(name='Storm Spirit')
+        AbilityFactory(
+            name='Glimpse',
+            cooldown='60/46/32/18',
+            hero=HeroFactory(name='Disruptor'),
+        )
+        AbilityFactory(
+            name='Static Remnant',
+            hero=storm_spirit,
+        )
+        AdvantageFactory(
+            hero=HeroFactory(name='Queen of Pain'),
+            enemy=storm_spirit,
+            advantage=2.14,
+        )
+        _, token = ResponseGenerator.respond("Which are Disruptor's abilities?")
+        response, _ = ResponseGenerator.respond("Who is good against Storm Spirit?", token)
+        assert "Static Remnant" not in response
+        assert "Queen of Pain" in response

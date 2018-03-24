@@ -73,8 +73,10 @@ class Context(object):
     def _deserialise(self, data):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
-    @staticmethod
-    def get_context_from_question(question):
+    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
+
+    @classmethod
+    def get_context_from_question(cls, question):
         """Returns the context to be used answering the question"""
         if not question.text:
             return IntroductionContext()
@@ -86,7 +88,7 @@ class Context(object):
                 return AbilitySpellImmunityContext()
 
         if len(question.heroes) == 1:
-            if question.contains_any_string(('strong', 'against', 'counter', 'counters')):
+            if question.contains_any_string(cls.COUNTER_WORDS):
                 return EnemyAdvantageContext(question.heroes[0])
             if question.contains_any_string(('ultimate', )):
                 return AbilityUltimateContext()
@@ -226,18 +228,23 @@ class SingleHeroContext(Context):
     _can_respond_to_yes_response = True
     _yes_response = "Which hero?"
 
+    @classmethod
+    def _check_context_is_appropriate(cls, question):
+        if len(question.heroes) < 1:
+            raise InnapropriateContextError
+        if question.contains_any_string(cls.COUNTER_WORDS):
+            raise InnapropriateContextError
+
 
 class AbilityUltimateContext(SingleHeroContext):
     def _generate_direct_response(self, question):
-        if len(question.heroes) < 1:
-            raise InnapropriateContextError
+        self._check_context_is_appropriate(question)
         return AbilityUltimateResponse.respond(question.heroes[0])
 
 
 class AbilityListContext(SingleHeroContext):
     def _generate_direct_response(self, question):
-        if len(question.heroes) < 1:
-            raise InnapropriateContextError
+        self._check_context_is_appropriate(question)
         return AbilityListResponse.respond(question.heroes[0])
 
 

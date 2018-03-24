@@ -1,4 +1,5 @@
 import json
+import random
 import logging
 from django.http import HttpResponse, JsonResponse
 
@@ -22,6 +23,7 @@ good_response_logger = logging.getLogger('good_response')
 # invocation phrases
 # no listening without a promt.
 # Think of phrasing for all prompts
+# don't ignore "against" when in hero context
 #
 # # Pre reddit
 # say the valve stuff faster
@@ -72,7 +74,14 @@ def index(request):
     except DoNotUnderstandQuestion:
         DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
-            "Sorry, I don't understand. I heard you say: {}".format(google_request.text),
+            "Sorry, I don't understand. I heard you say: '{}'. {}".format(
+                google_request.text,
+                random.choice((
+                    "Have another go.",
+                    "Could you say that again?",
+                    "Please try again.",
+                )),
+            ),
             json.dumps(context)))
     except Goodbye:
         return JsonResponse(AppResponse().tell('Goodbye'))

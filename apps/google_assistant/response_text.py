@@ -46,9 +46,10 @@ class IntroductionResponse(Response):
 
     @classmethod
     def _respond(cls):
-        return "{} {} {}".format(
+        return "{} {} {} {} ".format(
             DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
+            "What would you like to know?",
             SampleQuestionResponse.sample_question(),
         )
 
@@ -62,7 +63,10 @@ class DescriptionResponse(Response):
 
     @classmethod
     def _respond(cls):
-        return "{} {}".format(cls.DESCRIPTION, SampleQuestionResponse.sample_question())
+        return "{} {}".format(
+            cls.DESCRIPTION,
+            SampleQuestionResponse.sample_question(),
+        )
 
 
 class SampleQuestionResponse(Response):
@@ -73,7 +77,6 @@ class SampleQuestionResponse(Response):
             "What is the cooldown of Monkey King's ultimate?",
             "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
-            "What is Disruptor's Q?",
         )) + "'."
 
     @classmethod
@@ -247,7 +250,7 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
             enemy=enemy, advantage__gte=0).order_by('-advantage')
         counters = cls._filter_by_role(counters, role)
         hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
-        soft_counters = (c for c in counters[:8] if c not in hard_counters)
+        soft_counters = [c for c in counters[:8] if c not in hard_counters]
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
