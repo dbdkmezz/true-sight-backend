@@ -9,7 +9,6 @@ hero_aliases = {
     'pangolier': ['pangolin'],
     'juggernaut': ['Jug'],
     'queen of pain': ['QOP', 'co-op'],
-    'sand king': ['king'],
     'storm spirit': ['Storm'],
     'skywrath mage': ['Skywrath'],
     'sven': ['stem', 'spam', 'spend', 'spain'],
