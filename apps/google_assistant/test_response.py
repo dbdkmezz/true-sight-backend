@@ -84,8 +84,8 @@ class TestAbiltyParserAndResponders(TestCase):
 
     @patch('apps.google_assistant.response_text.ResponderUse')
     def test_logs_responder_use(self, ResponderUse):
-        ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
-        ResponderUse.log_use.assert_called_with('AbilityDescriptionResponse')
+        ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?", user_id='USERID')
+        ResponderUse.log_use.assert_called_with('AbilityDescriptionResponse', 'USERID')
 
     def test_fallback_ability_response(self):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")

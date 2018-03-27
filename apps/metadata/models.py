@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 
 
@@ -51,6 +52,10 @@ class User(models.Model):
                 date_modified=timezone.now(),
             )
 
+    @staticmethod
+    def should_log_user(user_id):
+        return user_id not in settings.USERS_NOT_TO_LOG
+
 
 class DailyUse(models.Model):
     date = models.DateField(unique=True, db_index=True)
@@ -59,7 +64,9 @@ class DailyUse(models.Model):
     total_failures = models.IntegerField(default=0)
 
     @staticmethod
-    def log_use(success):
+    def log_use(success, user_id):
+        if not User.should_log_user(user_id):
+            return
         today = timezone.datetime.today()
         if not DailyUse.objects.filter(date=today).exists():
             DailyUse.objects.create(date=today)
@@ -77,7 +84,9 @@ class ResponderUse(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     @staticmethod
-    def log_use(responder):
+    def log_use(responder, user_id):
+        if not User.should_log_user(user_id):
+            return
         if not ResponderUse.objects.filter(responder=responder).exists():
             ResponderUse.objects.create(responder=responder)
         else:

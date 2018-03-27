@@ -21,7 +21,8 @@ class Response(object):
 
     @classmethod
     def respond(cls, *args, **kwargs):
-        ResponderUse.log_use(cls.__name__)
+        ResponderUse.log_use(cls.__name__, kwargs['user_id'])
+        del kwargs['user_id']
         return cls._respond(*args, **kwargs)
 
     @staticmethod

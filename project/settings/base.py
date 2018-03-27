@@ -36,6 +36,9 @@ def get_secret(setting):
 SECRET_KEY = get_secret('SECRET_KEY')
 
 
+USERS_NOT_TO_LOG = get_secret('USERS_NOT_TO_LOG')
+
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',

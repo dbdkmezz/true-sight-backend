@@ -6,12 +6,13 @@ from apps.hero_abilities.models import Ability
 
 
 class QuestionParser(object):
-    def __init__(self, question_text):
+    def __init__(self, question_text, user_id):
         try:
             self.text = question_text.lower()
         except AttributeError:
             #  question_text is None
             self.text = ""
+        self.user_id = user_id
 
     def __str__(self):
         return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(

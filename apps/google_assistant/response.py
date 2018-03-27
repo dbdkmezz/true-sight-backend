@@ -22,8 +22,8 @@ class InnapropriateContextError(BaseException):
 
 class ResponseGenerator(object):
     @classmethod
-    def respond(cls, question_text, conversation_token=None):
-        question = QuestionParser(question_text)
+    def respond(cls, question_text, conversation_token=None, user_id=None):
+        question = QuestionParser(question_text, user_id)
 
         context = Context.deserialise(conversation_token)
         if not context:
@@ -73,6 +73,7 @@ class Context(object):
     def _deserialise(self, data):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
+    SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
     ABILITY_WORDS = ('abilities', 'spells')
     ULTIMATE_WORDS = ('ultimate', )
@@ -86,7 +87,7 @@ class Context(object):
         if len(question.abilities) == 1:
             if question.contains_any_string(('cool down', 'cooldown')):
                 return AbilityCooldownContext()
-            if question.contains_any_string(('spell immunity', 'black king', 'king bar', 'bkb')):
+            if question.contains_any_string(cls.SPELL_IMMUNITY_WORDS):
                 return AbilitySpellImmunityContext()
 
         if len(question.heroes) == 1:
@@ -175,14 +176,14 @@ class IntroductionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
         if self.useage_count > 0:
             raise InnapropriateContextError
-        return IntroductionResponse.respond()
+        return IntroductionResponse.respond(user_id=question.user_id)
 
 
 class DescriptionContext(ContextWithBlankFollowUpQuestions):
     def _generate_direct_response(self, question):
         if self.useage_count > 0:
             raise InnapropriateContextError
-        return DescriptionResponse.respond()
+        return DescriptionResponse.respond(user_id=question.user_id)
 
 
 class FreshContext(ContextWithBlankFollowUpQuestions):
@@ -192,7 +193,7 @@ class FreshContext(ContextWithBlankFollowUpQuestions):
             if question.no:
                 raise Goodbye
             raise InnapropriateContextError
-        return SampleQuestionResponse.respond()
+        return SampleQuestionResponse.respond(user_id=question.user_id)
 
 
 class SingleAbilityContext(Context):
@@ -206,7 +207,7 @@ class SingleAbilityContext(Context):
 class AbilityCooldownContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) == 1:
-            return AbilityCooldownResponse.respond(question.abilities[0])
+            return AbilityCooldownResponse.respond(question.abilities[0], user_id=question.user_id)
         raise InnapropriateContextError
 
 
@@ -214,14 +215,14 @@ class AbilityDescriptionContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) < 1:  # or == 1?
             raise InnapropriateContextError
-        return AbilityDescriptionResponse.respond(question.abilities[0])
+        return AbilityDescriptionResponse.respond(question.abilities[0], user_id=question.user_id)
 
 
 class AbilitySpellImmunityContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) < 1:  # or == 1?
             raise InnapropriateContextError
-        return AbilitySpellImmunityResponse.respond(question.abilities[0])
+        return AbilitySpellImmunityResponse.respond(question.abilities[0], user_id=question.user_id)
 
 
 class SingleHeroContext(Context):
@@ -242,20 +243,21 @@ class SingleHeroContext(Context):
 class AbilityUltimateContext(SingleHeroContext):
     def _generate_direct_response(self, question):
         self._check_context_is_appropriate(question)
-        return AbilityUltimateResponse.respond(question.heroes[0])
+        return AbilityUltimateResponse.respond(question.heroes[0], user_id=question.user_id)
 
 
 class AbilityListContext(SingleHeroContext):
     def _generate_direct_response(self, question):
         self._check_context_is_appropriate(question)
-        return AbilityListResponse.respond(question.heroes[0])
+        return AbilityListResponse.respond(question.heroes[0], user_id=question.user_id)
 
 
 class AbilityHotkeyContext(Context):
     def _generate_direct_response(self, question):
         if len(question.heroes) < 1:
             raise InnapropriateContextError
-        return AbilityHotkeyResponse.respond(question.heroes[0], question.ability_hotkey)
+        return AbilityHotkeyResponse.respond(
+            question.heroes[0], question.ability_hotkey, user_id=question.user_id)
 
 
 class EnemyAdvantageContext(Context):
@@ -286,7 +288,9 @@ class EnemyAdvantageContext(Context):
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
             other_hero = all_heroes.difference(set([self.enemy])).pop()
-            return TwoHeroAdvantageResponse.respond(hero=other_hero, enemy=self.enemy)
+            return TwoHeroAdvantageResponse.respond(
+                hero=other_hero, enemy=self.enemy, user_id=question.user_id)
         if len(all_heroes) == 1:
-            return SingleEnemyAdvantageResponse.respond(all_heroes.pop(), question.role)
+            return SingleEnemyAdvantageResponse.respond(
+                all_heroes.pop(), question.role, user_id=question.user_id)
         raise InnapropriateContextError

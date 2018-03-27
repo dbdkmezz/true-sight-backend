@@ -67,7 +67,8 @@ def _respond_to_request(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
-    User.log_user(google_request.user_id)
+    user_id = google_request.user_id
+    User.log_user(user_id)
 
     context = None
     if google_request.conversation_token:
@@ -76,7 +77,8 @@ def _respond_to_request(request):
     logger.info("Recieved question: {}, context: {}".format(google_request.text, context))
 
     try:
-        response, context = ResponseGenerator.respond(google_request.text, context)
+        response, context = ResponseGenerator.respond(
+            google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
         DailyUse.log_use(success=False)
         return JsonResponse(AppResponse().ask(
@@ -94,13 +96,12 @@ def _respond_to_request(request):
 
     good_response_logger.info(
         "%s Response: %s",
-        QuestionParser(google_request.text),
+        QuestionParser(google_request.text, user_id=user_id),
         response)
-    DailyUse.log_use(success=True)
+    DailyUse.log_use(success=True, user_id=user_id)
 
     if context:
         json_context = json.dumps(context)
-        logger.info("context: %s", json_context)
         return JsonResponse(AppResponse().ask(response, json_context))
     else:
         return JsonResponse(AppResponse().tell(response))
