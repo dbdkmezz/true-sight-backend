@@ -15,24 +15,28 @@ good_response_logger = logging.getLogger('good_response')
 
 
 # # TODO
-#
-# # Pre google
-# Try it lots
-# don't log in the db if talking to me
-# persona?
-# no listening without a promt.
-# Think of phrasing for all prompts
+# maximum 3 consecutive I don't understand respones!
+# leave (and others)
+# ensure I'm happy with the logging
+# add user to the logging
+# leave if they say "talk to"
+# what does just saying no do?
+# "help"
 #
 # # Pre reddit
+# persona?
+# fix all the ablities which aren't loading properly
 # say the valve stuff faster
-# Just "hex" and "blink" don't work
 # Try saying all heroes
-# Respond to ability questions not with "any more ability" but if they want to know more about it
-# Aghs upgrades
+# Respond to ability questions not with "any more ability" but if they want to know more about it.
+# Think about all prompts
 # damange type
 # aghs damage type
 
 # # V2
+# Just "hex" and "blink" don't work
+# Talents
+# Aghs upgrades
 # Linkens sphere interactions
 # Context and follow up questions
 # Abilities with the same name, hex, blink
@@ -40,10 +44,8 @@ good_response_logger = logging.getLogger('good_response')
 # Advantage against multiple heroes
 # Ability aliases
 # Warn if an ability was not found this time when loading them (e.g. name change)
-# Damage type
 # Add the abilities of heroes summoned units
 # Add abilities from talents or aghanims (be careful they don't override existing abilities, e.g. Brewmaster's Drunken Haze)  # noqa
-# Talents
 # Removable by types of dispel
 # Ability duration
 # Ability Range

@@ -113,7 +113,7 @@ class Context(object):
                 'what can you do', 'what do you do', 'how does this work')):
             return DescriptionContext()
 
-        failed_response_logger.warning("Unable to respond to question. %s", question)
+        failed_response_logger.warning("%s", question)
         raise DoNotUnderstandQuestion
 
     def generate_response(self, question):

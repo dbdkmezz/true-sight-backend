@@ -15,8 +15,8 @@ class QuestionParser(object):
         self.user_id = user_id
 
     def __str__(self):
-        return "Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
-            self.text, self.abilities, self.heroes, self.role)
+        return "User: {}. Question: '{}'. Abilities: {}, heroes: {}, role: {}.".format(
+            self.user_id, self.text, self.abilities, self.heroes, self.role)
 
     @cached_property
     def abilities(self):
