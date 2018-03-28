@@ -79,8 +79,6 @@ class TestAbiltyParserAndResponders(TestCase):
         with self.assertRaises(DoNotUnderstandQuestion):
             ResponseGenerator.respond("What is a pizza?")
         assert failed_response_logger.warning.call_count == 1
-        assert failed_response_logger.warning.call_args[0][0].startswith(
-            'Unable to respond to question.')
 
     @patch('apps.google_assistant.response_text.ResponderUse')
     def test_logs_responder_use(self, ResponderUse):
