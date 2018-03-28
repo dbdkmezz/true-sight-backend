@@ -18,6 +18,10 @@ class TestViews(TestCase):
         self.assertIsInstance(result, HttpResponse)
         self.assertIn("Hello", str(result.content))
 
+    def test_response_if_not_understand(self):
+        response = make_request_and_return_text("I love pizza")
+        assert "I don't understand" in response
+
     def test_basics_end_to_end(self):
         AbilityFactory(
             hero=HeroFactory(name='Disruptor'),
