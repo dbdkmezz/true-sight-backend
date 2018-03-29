@@ -45,6 +45,10 @@ class TestViews(TestCase):
         assert 'True Sight' in response_text
         assert 'Goodbye' in response_text
 
+    def test_saying_1_ends_conversation(self):
+        response = index(MockRequest(text="1"))
+        assert GoogleTestUtils.google_response_is_tell(response)
+
 
 def make_request_and_return_text(text=None, user_id=None, conversation_token=None):
     response = index(

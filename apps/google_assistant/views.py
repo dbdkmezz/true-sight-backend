@@ -82,7 +82,7 @@ def _respond_to_request(request):
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
-        if google_request.text.lower().startswith('talk to'):
+        if google_request.text.lower().startswith('talk to') or google_request.text == '1':
             return JsonResponse(AppResponse().tell((
                 "I'm sorry, you're currently talking to True Sight, I'll leave the conversation "
                 "so you can try again. Goodbye.")))
