@@ -83,8 +83,9 @@ def _respond_to_request(request):
             google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
         DailyUse.log_use(success=False)
-        return JsonResponse(AppResponse().ask(
-            "Sorry, I don't understand. I heard you say: '{}'. {}".format(
+        return JsonResponse(AppResponse().ask((
+            "Sorry, I don't understand. I heard you say: '{}'. {} "
+            "To end the conversation, just say 'goodbye'.").format(
                 google_request.text,
                 random.choice((
                     "Have another go.",
