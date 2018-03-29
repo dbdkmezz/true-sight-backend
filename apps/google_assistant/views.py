@@ -15,11 +15,11 @@ good_response_logger = logging.getLogger('good_response')
 
 
 # # TODO
+# move where I handle donotunderstand and the talk to responses to response.py
 # maximum 3 consecutive I don't understand respones!
 # leave (and others)
 # ensure I'm happy with the logging
 # add user to the logging
-# leave if they say "talk to"
 # what does just saying no do?
 # "help"
 #
@@ -82,7 +82,11 @@ def _respond_to_request(request):
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
-        DailyUse.log_use(success=False)
+        if google_request.text.lower().startswith('talk to'):
+            return JsonResponse(AppResponse().tell((
+                "I'm sorry, you're currently talking to True Sight, I'll leave the conversation "
+                "so you can try again. Goodbye.")))
+        DailyUse.log_use(success=False, user_id=user_id)
         return JsonResponse(AppResponse().ask((
             "Sorry, I don't understand. I heard you say: '{}'. {} "
             "To end the conversation, just say 'goodbye'.").format(
