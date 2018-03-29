@@ -78,7 +78,7 @@ class SampleQuestionResponse(Response):
             "What is the cooldown of Monkey King's ultimate?",
             "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
-        )) + "'."
+        ))
 
     @classmethod
     def _respond(cls):
