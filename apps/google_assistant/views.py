@@ -15,25 +15,26 @@ good_response_logger = logging.getLogger('good_response')
 
 
 # # TODO
-# move where I handle donotunderstand and the talk to responses to response.py
-# maximum 3 consecutive I don't understand respones!
-# leave (and others)
-# ensure I'm happy with the logging
-# add user to the logging
-# what does just saying no do?
-# "help"
 #
 # # Pre reddit
+# "help"
+# cooldown, damange type ... of ultimate (OR at least let them ask more about it)
+# ensure I'm happy with the logging
 # persona?
 # fix all the ablities which aren't loading properly
 # say the valve stuff faster
 # Try saying all heroes
 # Respond to ability questions not with "any more ability" but if they want to know more about it.
 # Think about all prompts
-# damange type
-# aghs damage type
-
+#
 # # V2
+# what does just saying no do?
+# don't just quit if they say 1, but quit if they say it twice in a row
+# move where I handle donotunderstand and the talk to responses to response.py
+# maximum 3 consecutive I don't understand respones!
+# leave (and others)
+#
+# # V3
 # Just "hex" and "blink" don't work
 # Talents
 # Aghs upgrades

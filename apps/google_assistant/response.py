@@ -8,7 +8,7 @@ from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
     SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
-    DescriptionResponse, SampleQuestionResponse
+    DescriptionResponse, SampleQuestionResponse, AbilityDamangeTypeResponse,
 )
 
 
@@ -58,7 +58,7 @@ class Context(object):
             context_classes = (
                 AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
                 AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
-                IntroductionContext, DescriptionContext,
+                IntroductionContext, DescriptionContext, AbilityDamageTypeContext,
             )
             klass = next(
                 k for k in context_classes
@@ -73,7 +73,9 @@ class Context(object):
     def _deserialise(self, data):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
+    COOLDOWN_WORDS = ('cool down', 'cooldown')
     SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
+    DAMAGE_TYPE_WORDS = ('damage', 'magical', 'physical', 'pure')
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
     ABILITY_WORDS = ('abilities', 'spells')
     ULTIMATE_WORDS = ('ultimate', )
@@ -85,10 +87,12 @@ class Context(object):
             return IntroductionContext()
 
         if len(question.abilities) == 1:
-            if question.contains_any_string(('cool down', 'cooldown')):
+            if question.contains_any_string(cls.COOLDOWN_WORDS):
                 return AbilityCooldownContext()
             if question.contains_any_string(cls.SPELL_IMMUNITY_WORDS):
                 return AbilitySpellImmunityContext()
+            if question.contains_any_string(cls.DAMAGE_TYPE_WORDS):
+                return AbilityDamageTypeContext()
 
         if len(question.heroes) == 1:
             if question.contains_any_string(cls.COUNTER_WORDS):
@@ -109,8 +113,10 @@ class Context(object):
         if len(question.heroes) == 1:
             return EnemyAdvantageContext(question.heroes[0])
 
-        if question.contains_any_string((
-                'what can you do', 'what do you do', 'how does this work')):
+        if (
+                question.contains_any_string((
+                    'what can you do', 'what do you do', 'how does this work'))
+                or question.text == 'what'):
             return DescriptionContext()
 
         failed_response_logger.warning("%s", question)
@@ -211,6 +217,14 @@ class AbilityCooldownContext(SingleAbilityContext):
         raise InnapropriateContextError
 
 
+class AbilityDamageTypeContext(SingleAbilityContext):
+    def _generate_direct_response(self, question):
+        if len(question.abilities) == 1:
+            return AbilityDamangeTypeResponse.respond(
+                question.abilities[0], user_id=question.user_id)
+        raise InnapropriateContextError
+
+
 class AbilityDescriptionContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) < 1:  # or == 1?
@@ -222,7 +236,8 @@ class AbilitySpellImmunityContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) < 1:  # or == 1?
             raise InnapropriateContextError
-        return AbilitySpellImmunityResponse.respond(question.abilities[0], user_id=question.user_id)
+        return AbilitySpellImmunityResponse.respond(
+            question.abilities[0], user_id=question.user_id)
 
 
 class SingleHeroContext(Context):

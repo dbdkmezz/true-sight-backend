@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
-from apps.hero_abilities.models import SpellImmunity
+from apps.hero_abilities.models import SpellImmunity, DamageType
 
 from .response import ResponseGenerator, Context, FreshContext
 from .exceptions import DoNotUnderstandQuestion, Goodbye
@@ -46,6 +46,7 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Thunder Strike',
             hotkey='Q',
             is_ultimate=False,
+            damage_type=DamageType.MAGICAL,
         )
         AbilityFactory(
             hero=disruptor,
@@ -72,6 +73,13 @@ class TestAbiltyParserAndResponders(TestCase):
             cooldown='90/80/70',
             hotkey='R',
             is_ultimate=True,
+        )
+        AbilityFactory(
+            hero=HeroFactory(name='Sniper'),
+            name='Assassinate',
+            is_ultimate=True,
+            damage_type=DamageType.MAGICAL,
+            aghanims_damage_type=DamageType.PHYSICAL,
         )
 
     @patch('apps.google_assistant.response.failed_response_logger')
@@ -153,6 +161,15 @@ class TestAbiltyParserAndResponders(TestCase):
             "What's the cooldown of Thunder Strike?", conversation_token)
         assert response.endswith('Any others?')
         assert conversation_token['useage-count'] == 2
+
+    def test_damage_type(self):
+        response, _ = ResponseGenerator.respond("What's the damage type of Thunder Strike?")
+        assert 'magical' in response
+
+    def test_aghs_damage_type(self):
+        response, _ = ResponseGenerator.respond("What's the damage type of Assassinate?")
+        assert 'magical' in response
+        assert "with Aghanim's Scepter it does physical damage" in response
 
 
 @pytest.mark.django_db

@@ -5,7 +5,7 @@ import logging
 from apps.hero_advantages.roles import HeroRole
 from apps.metadata.models import ResponderUse
 from apps.hero_advantages.models import Hero, Advantage
-from apps.hero_abilities.models import Ability, SpellImmunity
+from apps.hero_abilities.models import Ability, SpellImmunity, DamageType
 
 
 logger = logging.getLogger(__name__)
@@ -106,6 +106,15 @@ class AbilityResponse(Response):
         return ability.cooldown.replace('/', ', ')
 
     @staticmethod
+    def parse_damange_type(damage_type):
+        damange_type_map = {
+            DamageType.MAGICAL: 'magical',
+            DamageType.PHYSICAL: 'physical',
+            DamageType.PURE: 'pure',
+        }
+        return damange_type_map[damage_type]
+
+    @staticmethod
     def append_description_to_response(response, ability, only_if_short):
         if not ability.description or (only_if_short and len(ability.description) > 120):
             return response
@@ -188,6 +197,23 @@ class AbilityCooldownResponse(AbilityResponse):
             return "{} is a passive ability, with no cooldown".format(
                 ability.name,
             )
+
+
+class AbilityDamangeTypeResponse(AbilityResponse):
+    @classmethod
+    def _respond(cls, ability):
+        if not ability.damage_type:
+            return "{} is a passive ability, with no cooldown".format(
+                ability.name,
+            )
+        response = "{} does {} damange".format(
+            ability.name,
+            cls.parse_damange_type(ability.damage_type),
+        )
+        if ability.aghanims_damage_type and ability.aghanims_damage_type != ability.damage_type:
+            response += ", and with Aghanim's Scepter it does {} damage".format(
+                cls.parse_damange_type(ability.aghanims_damage_type))
+        return response
 
 
 class AbilitySpellImmunityResponse(AbilityResponse):
