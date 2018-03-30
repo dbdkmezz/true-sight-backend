@@ -39,21 +39,44 @@ class QuestionParser(object):
 
     @cached_property
     def heroes(self):
-        result = [
-            h for h in Hero.objects.all()
-            if self.contains_any_string(h.aliases)
-        ]
-        if len(result) <= 1:
-            return result
+        # Find all the heroes referred to in the text, if we are using a two letter abbreviation
+        # of a heroes name then it must be a whole word
+        result = {}
+        for hero in Hero.objects.all():
+            for alias in (a.lower() for a in hero.aliases):
+                if (
+                        (len(alias) > 2 and alias in self.text)
+                        or (len(alias) <= 2 and alias in self.words)
+                ):
+                    result[alias] = hero
 
-        # We need to order them in the order they are in the text
+        if len(result) <= 1:
+            return list(result.values())
+
+        # Remove heroes which share common substrings by removing the those that we have already
+        # found, starting with the longer aliases.
+        no_overlaps_text = self.text
+        for alias in sorted(result, key=len, reverse=True):
+            if alias in no_overlaps_text:
+                no_overlaps_text = no_overlaps_text.replace(alias, '')
+            else:
+                del result[alias]
+
+        if len(result) <= 1:
+            return list(result.values())
+
+        # Order the heroes in the order they are in the text
         positions = {}
-        for hero in result:
-            for alias in hero.aliases:
-                position = self.text.find(alias.lower())
-                if position != -1:
-                    if not positions.get(hero) or position < positions[hero]:
-                        positions[hero] = position
+        for alias, hero in result.items():
+            if len(alias) > 2:
+                position = self.text.find(alias)
+            else:
+                # this excludes punctution, but it's close enough
+                word_number = self.words.index(alias)
+                position = sum((1 + len(word)) for word in self.words[:word_number])
+            if position != -1:
+                if not positions.get(hero) or position < positions[hero]:
+                    positions[hero] = position
         return [k for k in sorted(positions, key=positions.get)]
 
     @cached_property

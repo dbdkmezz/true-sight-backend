@@ -76,7 +76,7 @@ class Context(object):
     COOLDOWN_WORDS = ('cool down', 'cooldown')
     SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
     DAMAGE_TYPE_WORDS = ('damage', 'magical', 'physical', 'pure')
-    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
+    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters', 'showing at')
     ABILITY_WORDS = ('abilities', 'spells')
     ULTIMATE_WORDS = ('ultimate', )
 
@@ -296,10 +296,16 @@ class EnemyAdvantageContext(Context):
     def _generate_direct_response(self, question):
         if len(question.heroes) < 1:
             raise InnapropriateContextError
-        if (
-                len(question.heroes) == 1
+        if (len(question.heroes) == 1
                 and question.contains_any_string(self.ABILITY_WORDS + self.ULTIMATE_WORDS)):
             raise InnapropriateContextError
+
+        if self.useage_count > 0:
+            if len(question.heroes) == 1 and question.contains_any_string(self.COUNTER_WORDS):
+                raise InnapropriateContextError
+            if len(question.heroes) > 1:
+                raise InnapropriateContextError
+
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
             other_hero = all_heroes.difference(set([self.enemy])).pop()
