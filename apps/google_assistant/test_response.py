@@ -289,6 +289,13 @@ class TestFollowUpRespones(TestCase):
         response, _ = ResponseGenerator.respond("What about Sniper?", token)
         assert "-3.11" in response
 
+    def test_hero_advantage_context_follow_up_with_role(self):
+        TestAdvantageParserAndResponders.setUpAdvantages()
+        _, token = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("Support", token)
+        assert "Disruptor" in response
+        assert "Queen of Pain" not in response
+
     def test_saying_against_breaks_hero_context(self):
         storm_spirit = HeroFactory(name='Storm Spirit')
         AbilityFactory(

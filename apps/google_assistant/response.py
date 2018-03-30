@@ -115,7 +115,7 @@ class Context(object):
 
         if (
                 question.contains_any_string((
-                    'what can you do', 'what do you do', 'how does this work'))
+                    'help', 'what can you do', 'what do you do', 'how does this work'))
                 or question.text == 'what'):
             return DescriptionContext()
 
@@ -277,7 +277,7 @@ class AbilityHotkeyContext(Context):
 
 class EnemyAdvantageContext(Context):
     _can_be_used_for_next_context = True
-    _first_follow_up_question = "Any specific hero you'd like to know about?"
+    _first_follow_up_question = "Any specific or role hero you'd like to know about?"
     _second_follow_up_question = "Any others?"
 
     def __init__(self, enemy=None):
@@ -294,13 +294,13 @@ class EnemyAdvantageContext(Context):
         self.enemy = Hero.objects.get(name=data['enemy'])
 
     def _generate_direct_response(self, question):
-        if len(question.heroes) < 1:
-            raise InnapropriateContextError
         if (len(question.heroes) == 1
                 and question.contains_any_string(self.ABILITY_WORDS + self.ULTIMATE_WORDS)):
             raise InnapropriateContextError
 
         if self.useage_count > 0:
+            if len(question.heroes) == 0 and not question.role:
+                raise InnapropriateContextError
             if len(question.heroes) == 1 and question.contains_any_string(self.COUNTER_WORDS):
                 raise InnapropriateContextError
             if len(question.heroes) > 1:

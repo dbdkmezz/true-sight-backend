@@ -24,7 +24,6 @@ good_response_logger = logging.getLogger('good_response')
 # persona?
 # fix all the ablities which aren't loading properly
 # Try saying all heroes
-# lane in response to counter question
 # Think about all prompts
 # emphasis of does pierce
 # say the valve stuff faster
