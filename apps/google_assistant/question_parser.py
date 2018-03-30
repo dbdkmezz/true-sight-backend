@@ -46,7 +46,7 @@ class QuestionParser(object):
             for alias in (a.lower() for a in hero.aliases):
                 if (
                         (len(alias) > 2 and alias in self.text)
-                        or (len(alias) <= 2 and alias in self.words)
+                        or (len(alias) == 2 and alias in self.words)
                 ):
                     result[alias] = hero
 
