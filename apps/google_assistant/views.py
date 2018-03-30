@@ -18,13 +18,13 @@ good_response_logger = logging.getLogger('good_response')
 #
 # # Pre reddit
 # Respond to ability questions not with "any more ability" but if they want to know more about it.
-# feedback
 # cooldown, damange type ... of ultimate (OR at least let them ask more about it)
 # ensure I'm happy with the logging
 # persona?
 # fix all the ablities which aren't loading properly
 # Try saying all heroes
 # Think about all prompts
+# feedback
 # emphasis of does pierce
 # say the valve stuff faster
 #

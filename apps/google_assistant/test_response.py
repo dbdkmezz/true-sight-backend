@@ -180,7 +180,7 @@ class TestAdvantageParserAndResponders(TestCase):
     @staticmethod
     def setUpAdvantages():
         storm_spirit = HeroFactory(name='Storm Spirit', is_mid=True)
-        queen_of_pain = HeroFactory(name='Queen of Pain', is_mid=True)
+        queen_of_pain = HeroFactory(name='Queen of Pain', is_mid=True, is_support=False)
         shadow_fiend = HeroFactory(name='Shadow Fiend', is_mid=True)
         razor = HeroFactory(name='Razor', is_mid=True)
         zeus = HeroFactory(name='Zeus', is_mid=True)
