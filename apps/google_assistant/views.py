@@ -17,9 +17,7 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Pre reddit
-# don't log if it's just google saying 1
 # Respond to ability questions not with "any more ability" but if they want to know more about it.
-# "help" (and make sure it tells them how to quit)
 # feedback
 # cooldown, damange type ... of ultimate (OR at least let them ask more about it)
 # ensure I'm happy with the logging
@@ -82,8 +80,6 @@ def _respond_to_request(request):
     if google_request.conversation_token:
         context = json.loads(google_request.conversation_token)
 
-    logger.info("Recieved question: {}, context: {}".format(google_request.text, context))
-
     try:
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
@@ -108,8 +104,9 @@ def _respond_to_request(request):
         return JsonResponse(AppResponse().tell('Goodbye'))
 
     good_response_logger.info(
-        "%s Response: %s",
+        "%s Context: %s. Response: %s",
         QuestionParser(google_request.text, user_id=user_id),
+        context,
         response)
     DailyUse.log_use(success=True, user_id=user_id)
 
