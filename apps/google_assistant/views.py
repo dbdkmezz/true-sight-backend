@@ -17,17 +17,22 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Pre reddit
-# "help"
+# don't log if it's just google saying 1
+# Respond to ability questions not with "any more ability" but if they want to know more about it.
+# "help" (and make sure it tells them how to quit)
+# feedback
 # cooldown, damange type ... of ultimate (OR at least let them ask more about it)
 # ensure I'm happy with the logging
 # persona?
 # fix all the ablities which aren't loading properly
-# say the valve stuff faster
 # Try saying all heroes
-# Respond to ability questions not with "any more ability" but if they want to know more about it.
+# lane in response to counter question
 # Think about all prompts
+# emphasis of does pierce
+# say the valve stuff faster
 #
 # # V2
+# lane in implicit discovery
 # what does just saying no do?
 # don't just quit if they say 1, but quit if they say it twice in a row
 # move where I handle donotunderstand and the talk to responses to response.py
