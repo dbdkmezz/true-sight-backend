@@ -11,8 +11,8 @@ from .question_parser import QuestionParser
 @pytest.mark.django_db
 class TestQuestionParser(TestCase):
     def setUp(self):
-        self.glimpse = AbilityFactory(name='Glimpse')
         self.disruptor = HeroFactory(name='Disruptor')
+        self.glimpse = AbilityFactory(name='Glimpse', hero=self.disruptor)
 
     def test_identify_abilities(self):
         parser = QuestionParser("What's the cooldown of Glimpse?", user_id=None)
@@ -33,6 +33,11 @@ class TestQuestionParser(TestCase):
         parser = QuestionParser("Is Storm Spirit good against Disruptor?", user_id=None)
         assert parser.heroes == [storm_spirit, self.disruptor]
 
+    def test_identify_heroes_in_order_with_two_letter_abbreviations(self):
+        anti_mage = HeroFactory(name='Anti-Mage', aliases_data='AM')
+        parser = QuestionParser("Is Disruptor good against AM?", user_id=None)
+        assert parser.heroes == [self.disruptor, anti_mage]
+
     def test_identify_heroes_with_alias(self):
         wind_ranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
         parser = QuestionParser("What are Wind Rangers abilities?", user_id=None)
@@ -42,6 +47,22 @@ class TestQuestionParser(TestCase):
         dark_willow = HeroFactory(name='Dark Willow', aliases_data='dark will')
         parser = QuestionParser("what's the dark Willows abilities", user_id=None)
         assert parser.heroes == [dark_willow]
+
+    def test_identify_hero_with_common_substrings(self):
+        lycan = HeroFactory(name='Lycan', aliases_data='lichen')
+        HeroFactory(name='Lich')
+        parser = QuestionParser("Lichen", user_id=None)
+        assert parser.heroes == [lycan]
+
+    def test_identify_two_letter_hero_abbrevations_if_whole_word(self):
+        anti_mage = HeroFactory(name='Anti-Mage', aliases_data='AM')
+        parser = QuestionParser('am', user_id=None)
+        assert parser.heroes == [anti_mage]
+
+    def test_dont_identify_two_letter_hero_abbrevations_if_not_whole_words(self):
+        HeroFactory(name='Anti-Mage', aliases_data='AM')
+        parser = QuestionParser('Pam', user_id=None)
+        assert parser.heroes == []
 
     def test_yes(self):
         parser = QuestionParser("Yes.", user_id=None)
