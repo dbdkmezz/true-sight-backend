@@ -74,7 +74,7 @@ class Context(object):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
     SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
-    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters')
+    COUNTER_WORDS = ('strong', 'against', 'counter', 'counters', 'showing at')
     ABILITY_WORDS = ('abilities', 'spells')
     ULTIMATE_WORDS = ('ultimate', )
 
@@ -222,7 +222,8 @@ class AbilitySpellImmunityContext(SingleAbilityContext):
     def _generate_direct_response(self, question):
         if len(question.abilities) < 1:  # or == 1?
             raise InnapropriateContextError
-        return AbilitySpellImmunityResponse.respond(question.abilities[0], user_id=question.user_id)
+        return AbilitySpellImmunityResponse.respond(
+            question.abilities[0], user_id=question.user_id)
 
 
 class SingleHeroContext(Context):
@@ -281,15 +282,15 @@ class EnemyAdvantageContext(Context):
     def _generate_direct_response(self, question):
         if len(question.heroes) < 1:
             raise InnapropriateContextError
-        if (
-                len(question.heroes) == 1
+        if (len(question.heroes) == 1
                 and question.contains_any_string(self.ABILITY_WORDS + self.ULTIMATE_WORDS)):
             raise InnapropriateContextError
-        if (
-                len(question.heroes) == 1
-                and self.useage_count > 0
-                and question.contains_any_string(self.COUNTER_WORDS)):
-            raise InnapropriateContextError
+
+        if self.useage_count > 0:
+            if len(question.heroes) == 1 and question.contains_any_string(self.COUNTER_WORDS):
+                raise InnapropriateContextError
+            if len(question.heroes) > 1:
+                raise InnapropriateContextError
 
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
