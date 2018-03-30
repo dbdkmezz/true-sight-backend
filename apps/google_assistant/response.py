@@ -285,6 +285,12 @@ class EnemyAdvantageContext(Context):
                 len(question.heroes) == 1
                 and question.contains_any_string(self.ABILITY_WORDS + self.ULTIMATE_WORDS)):
             raise InnapropriateContextError
+        if (
+                len(question.heroes) == 1
+                and self.useage_count > 0
+                and question.contains_any_string(self.COUNTER_WORDS)):
+            raise InnapropriateContextError
+
         all_heroes = set(question.heroes + [self.enemy])
         if len(all_heroes) == 2:
             other_hero = all_heroes.difference(set([self.enemy])).pop()

@@ -292,3 +292,9 @@ class TestFollowUpRespones(TestCase):
         response, _ = ResponseGenerator.respond("Who is good against Storm Spirit?", token)
         assert "Static Remnant" not in response
         assert "Queen of Pain" in response
+
+    def test_saying_counters_breaks_old_counter_context(self):
+        TestAdvantageParserAndResponders.setUpAdvantages()
+        _, token = ResponseGenerator.respond("Which heroes are good against Queen of Pain?")
+        response, _ = ResponseGenerator.respond("Who counters Storm Spirit?", token)
+        assert "Disruptor" in response
