@@ -116,7 +116,7 @@ class WebScraper(object):
 
         damage_info = damage_header.find_next_siblings('a')
         damage_type = cls._damange_type_map[damage_info[0].text]
-        if len(damage_info) == 1 or damage_info[1].get('title') == "Damage types":
+        if len(damage_info) == 1 or damage_info[1].get('title') in ("Damage types", "Talent"):
             return damage_type, None
 
         assert damage_info[1].get('title') == "Upgradable by Aghanim's Scepter."

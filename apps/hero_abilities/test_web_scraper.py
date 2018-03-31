@@ -19,6 +19,7 @@ mock_request_handler = MockRequestHandler(
         "https://dota2.gamepedia.com/Oracle": "Oracle - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Invoker": "Invoker - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Spectre": "Spectre - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Jakiro": "Jakiro - Dota 2 Wiki.html",
     },
     files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
@@ -90,6 +91,12 @@ class TestWebScraper(TestCase):
         assassinate = Ability.objects.get(name='Assassinate')
         self.assertEqual(assassinate.damage_type, DamageType.MAGICAL)
         self.assertEqual(assassinate.aghanims_damage_type, DamageType.PHYSICAL)
+
+    def test_damange_type_with_talent(self):
+        self.scraper.load_hero_abilities(HeroFactory(name='Jakiro'))
+        macropyre = Ability.objects.get(name='Macropyre')
+        self.assertEqual(macropyre.damage_type, DamageType.MAGICAL)
+        self.assertEqual(macropyre.aghanims_damage_type, None)
 
     def test_damage_type_with_hp_removal_detail(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Oracle'))
