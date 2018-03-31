@@ -92,7 +92,7 @@ class TestWebScraper(TestCase):
         self.assertEqual(assassinate.damage_type, DamageType.MAGICAL)
         self.assertEqual(assassinate.aghanims_damage_type, DamageType.PHYSICAL)
 
-    def test_damange_type_with_talent(self):
+    def test_damage_type_with_talent(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Jakiro'))
         macropyre = Ability.objects.get(name='Macropyre')
         self.assertEqual(macropyre.damage_type, DamageType.MAGICAL)
@@ -104,7 +104,7 @@ class TestWebScraper(TestCase):
         self.assertEqual(false_promise.damage_type, DamageType.PURE)
         self.assertIsNone(false_promise.aghanims_damage_type)
 
-    def test_hp_removal_with_no_damange_type(self):
+    def test_hp_removal_with_no_damage_type(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Spectre'))
         dispersion = Ability.objects.get(name='Dispersion')
         self.assertEqual(dispersion.damage_type, DamageType.PURE)

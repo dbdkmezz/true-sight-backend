@@ -9,7 +9,7 @@ from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
     SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
-    DescriptionResponse, SampleQuestionResponse, AbilityDamangeTypeResponse,
+    DescriptionResponse, SampleQuestionResponse, AbilityDamageTypeResponse,
     MultipleUltimateResponse,
 )
 
@@ -256,7 +256,7 @@ class SingleAbilityContext(Context):
         if question.contains_any_string(self.SPELL_IMMUNITY_WORDS):
             return AbilitySpellImmunityResponse.respond(self.ability, user_id=question.user_id)
         if question.contains_any_string(self.DAMAGE_TYPE_WORDS):
-            return AbilityDamangeTypeResponse.respond(self.ability, user_id=question.user_id)
+            return AbilityDamageTypeResponse.respond(self.ability, user_id=question.user_id)
         if question.contains_any_string(self.ULTIMATE_WORDS):
             return AbilityUltimateResponse.respond(self.ability, user_id=question.user_id)
         if self.useage_count == 0 and question.ability_hotkey:

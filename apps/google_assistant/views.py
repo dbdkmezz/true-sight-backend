@@ -18,7 +18,6 @@ good_response_logger = logging.getLogger('good_response')
 #
 # # Pre reddit
 # test that my exception logger works (then remove that code)
-# test that I say the valve stuff differently (and speak isn't printed)
 # ensure I'm happy with the logging
 # persona?
 # fix all the ablities which aren't loading properly

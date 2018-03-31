@@ -49,7 +49,7 @@ class IntroductionResponse(Response):
 
     @classmethod
     def _respond(cls):
-        return "{} {} {} {} ".format(
+        return "{} {} {} {}".format(
             DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
             "What would you like to know?",
@@ -108,13 +108,13 @@ class AbilityResponse(Response):
         return ability.cooldown.replace('/', ', ')
 
     @staticmethod
-    def parse_damange_type(damage_type):
-        damange_type_map = {
+    def parse_damage_type(damage_type):
+        damage_type_map = {
             DamageType.MAGICAL: 'magical',
             DamageType.PHYSICAL: 'physical',
             DamageType.PURE: 'pure',
         }
-        return damange_type_map[damage_type]
+        return damage_type_map[damage_type]
 
     @staticmethod
     def append_description_to_response(response, ability, only_if_short):
@@ -201,20 +201,20 @@ class AbilityCooldownResponse(AbilityResponse):
             )
 
 
-class AbilityDamangeTypeResponse(AbilityResponse):
+class AbilityDamageTypeResponse(AbilityResponse):
     @classmethod
     def _respond(cls, ability):
         if not ability.damage_type:
             return "{} is a passive ability, with no cooldown".format(
                 ability.name,
             )
-        response = "{} does {} damange".format(
+        response = "{} does {} damage".format(
             ability.name,
-            cls.parse_damange_type(ability.damage_type),
+            cls.parse_damage_type(ability.damage_type),
         )
         if ability.aghanims_damage_type and ability.aghanims_damage_type != ability.damage_type:
             response += ", and with Aghanim's Scepter it does {} damage".format(
-                cls.parse_damange_type(ability.aghanims_damage_type))
+                cls.parse_damage_type(ability.aghanims_damage_type))
         return response
 
 
