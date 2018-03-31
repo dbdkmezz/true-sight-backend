@@ -343,6 +343,6 @@ class FeedbackContext(ContextWithBlankFollowUpQuestions):
         if self.useage_count == 0:
             return "Great! What's your feedback?"
         if self.useage_count == 1:
-            feedback_logger.info(question.text)
+            feedback_logger.info("%s: %s", question.user_id, question.text)
             return "Thanks, I'll look into it."
         raise InnapropriateContextError
