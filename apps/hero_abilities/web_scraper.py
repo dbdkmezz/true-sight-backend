@@ -47,14 +47,10 @@ class WebScraper(object):
 
                 damage_type, aghanims_damage_type = self._get_damange_type(ability)
 
-                try:
-                    hotkey = header.find(title='Hotkey').text
-                except AttributeError:
-                    hotkey = ''
-                else:
-                    if hotkey in hotkeys_loaded:
-                        continue
-                    hotkeys_loaded += hotkey
+                hotkey = self._get_hotkey(hero, header)
+                if hotkey and hotkey in hotkeys_loaded:
+                    continue
+                hotkeys_loaded += hotkey
 
                 try:
                     cooldowns_including_talent = ability.find(
@@ -127,3 +123,13 @@ class WebScraper(object):
         assert damage_info[1].get('title') == "Upgradable by Aghanim's Scepter."
         aghanims_damage_type = cls._damange_type_map[damage_info[2].text]
         return damage_type, aghanims_damage_type
+
+    @staticmethod
+    def _get_hotkey(hero, header):
+        try:
+            hotkey = header.find(title='Hotkey').text
+        except AttributeError:
+            return ''
+        if hero.name == 'Invoker' and len(hotkey) > 1:
+            return ''
+        return hotkey
