@@ -127,7 +127,6 @@ class QuestionParser(object):
 
     def contains_any_word(self, words_to_look_for):
         """Whether any of the words in words_to_look_for feature in the question as a whole word"""
-        print(self.words)
         return any((w in self.words) for w in words_to_look_for)
 
     @cached_property

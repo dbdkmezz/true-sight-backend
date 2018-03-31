@@ -103,7 +103,7 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
         assert "The cooldown of Glimpse is 60, 46, 32, 18 seconds." in response
-        assert conversation_token['context-class'] == 'AbilityCooldownContext'
+        assert conversation_token['context-class'] == 'SingleAbilityContext'
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
@@ -132,8 +132,9 @@ class TestAbiltyParserAndResponders(TestCase):
         response, _ = ResponseGenerator.respond(
             "Does spell immunity protect against Kinetic Field?")
         assert response == (
-            "<speak>Kinetic Field does not pierce spell immunity. The Barrier's modifier persists "
-            "if it was placed before spell immunity. Any other ability?</speak>")
+            "<speak>Kinetic Field does not pierce spell immunity. "
+            "The Barrier's modifier persists if it was placed before spell immunity. "
+            "Anything else you'd like to know about it?</speak>")
 
     @pytest.mark.skip("Bug not fixed yet")
     def test_abilities_with_the_same_name(self):
@@ -155,11 +156,9 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_context_increments_useage_count(self):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
-        assert response.endswith('Any other ability?</speak>')
         assert conversation_token['useage-count'] == 1
         response, conversation_token = ResponseGenerator.respond(
-            "What's the cooldown of Thunder Strike?", conversation_token)
-        assert response.endswith('Any others?</speak>')
+            "What's it's cooldown?", conversation_token)
         assert conversation_token['useage-count'] == 2
 
     def test_damage_type(self):
@@ -217,15 +216,20 @@ class TestAdvantageParserAndResponders(TestCase):
 @pytest.mark.django_db
 class TestFollowUpRespones(TestCase):
     def test_yes(self):
-        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
-        AbilityFactory(name='Static Storm', cooldown='90/80/70')
+        AbilityFactory(
+            name='Thunder Strike',
+            cooldown='60/46/32/18',
+            damage_type=DamageType.MAGICAL,
+        )
 
-        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('What is the cooldown of Thunder Strike?')
         response, token = ResponseGenerator.respond('Yes.', token)
-        assert response == '<speak>Which ability?</speak>'
-        response, token = ResponseGenerator.respond('Static Storm', token)
-        assert '90' in response
-        assert 'Any other' in response
+        assert response == (
+            '<speak>What would you like to know? '
+            'You could ask about the cooldown or whether Thunder Strike goes through BKB.</speak>')
+        response, token = ResponseGenerator.respond('What is its damage type>', token)
+        assert 'magical' in response
+        assert 'Anything else?' in response
 
     def test_no(self):
         AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
@@ -275,7 +279,7 @@ class TestFollowUpRespones(TestCase):
         )
 
         _, token = ResponseGenerator.respond('What is the cooldown of Static Storm?')
-        assert token['context-class'] == 'AbilityCooldownContext'
+        assert token['context-class'] == 'SingleAbilityContext'
         assert token['useage-count'] == 1
 
         response, token = ResponseGenerator.respond("What is Disruptor's ultimate?", token)

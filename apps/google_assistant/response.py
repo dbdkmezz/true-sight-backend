@@ -1,6 +1,7 @@
 import logging
 
 from apps.hero_advantages.models import Hero
+from apps.hero_abilities.models import Ability
 
 from .exceptions import DoNotUnderstandQuestion, Goodbye
 from .question_parser import QuestionParser
@@ -57,9 +58,8 @@ class Context(object):
     @staticmethod
     def _context_classes():
         return (
-            AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
-            AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
-            IntroductionContext, DescriptionContext, AbilityDamageTypeContext,
+            SingleAbilityContext, AbilityUltimateContext, AbilityListContext,
+            EnemyAdvantageContext, FreshContext, IntroductionContext, DescriptionContext,
         )
 
     @classmethod
@@ -94,12 +94,9 @@ class Context(object):
             return IntroductionContext()
 
         if len(question.abilities) == 1:
-            if question.contains_any_string(cls.COOLDOWN_WORDS):
-                return AbilityCooldownContext()
-            if question.contains_any_string(cls.SPELL_IMMUNITY_WORDS):
-                return AbilitySpellImmunityContext()
-            if question.contains_any_string(cls.DAMAGE_TYPE_WORDS):
-                return AbilityDamageTypeContext()
+            if question.contains_any_string(
+                    cls.COOLDOWN_WORDS + cls.SPELL_IMMUNITY_WORDS + cls.DAMAGE_TYPE_WORDS):
+                return SingleAbilityContext()
 
         if len(question.heroes) == 1:
             if question.contains_any_string(cls.COUNTER_WORDS):
@@ -115,7 +112,7 @@ class Context(object):
             return EnemyAdvantageContext(question.heroes[1])
 
         if len(question.abilities) == 1:
-            return AbilityDescriptionContext()
+            return SingleAbilityContext()
 
         if len(question.heroes) == 1:
             return EnemyAdvantageContext(question.heroes[0])
@@ -211,40 +208,42 @@ class FreshContext(ContextWithBlankFollowUpQuestions):
 
 class SingleAbilityContext(Context):
     _can_be_used_for_next_context = True
-    _first_follow_up_question = "Any other ability?"
-    _second_follow_up_question = "Any others?"
+    _second_follow_up_question = "Anything else?"
     _can_respond_to_yes_response = True
-    _yes_response = "Which ability?"
+    _first_follow_up_question = "Anything else you'd like to know about it?"
 
+    @property
+    def _yes_response(self):
+        return (
+            "What would you like to know? "
+            "You could ask about the cooldown or whether {} goes through BKB."
+            "".format(self.ability.name))
 
-class AbilityCooldownContext(SingleAbilityContext):
+    def serialise(self):
+        result = super().serialise()
+        result['ability'] = self.ability.name
+        return result
+
+    def _deserialise(self, data):
+        super()._deserialise(data)
+        self.ability = Ability.objects.get(name=data['ability'])
+
     def _generate_direct_response(self, question):
-        if len(question.abilities) == 1:
-            return AbilityCooldownResponse.respond(question.abilities[0], user_id=question.user_id)
+        if self.useage_count == 0:
+            self.ability = question.abilities[0]
+        else:
+            if question.abilities or question.heroes:
+                raise InnapropriateContextError
+
+        if question.contains_any_string(self.COOLDOWN_WORDS):
+            return AbilityCooldownResponse.respond(self.ability, user_id=question.user_id)
+        if question.contains_any_string(self.SPELL_IMMUNITY_WORDS):
+            return AbilitySpellImmunityResponse.respond(self.ability, user_id=question.user_id)
+        if question.contains_any_string(self.DAMAGE_TYPE_WORDS):
+            return AbilityDamangeTypeResponse.respond(self.ability, user_id=question.user_id)
+        if self.useage_count == 0 or question.contains_any_word(('what', )):
+            return AbilityDescriptionResponse.respond(self.ability, user_id=question.user_id)
         raise InnapropriateContextError
-
-
-class AbilityDamageTypeContext(SingleAbilityContext):
-    def _generate_direct_response(self, question):
-        if len(question.abilities) == 1:
-            return AbilityDamangeTypeResponse.respond(
-                question.abilities[0], user_id=question.user_id)
-        raise InnapropriateContextError
-
-
-class AbilityDescriptionContext(SingleAbilityContext):
-    def _generate_direct_response(self, question):
-        if len(question.abilities) < 1:  # or == 1?
-            raise InnapropriateContextError
-        return AbilityDescriptionResponse.respond(question.abilities[0], user_id=question.user_id)
-
-
-class AbilitySpellImmunityContext(SingleAbilityContext):
-    def _generate_direct_response(self, question):
-        if len(question.abilities) < 1:  # or == 1?
-            raise InnapropriateContextError
-        return AbilitySpellImmunityResponse.respond(
-            question.abilities[0], user_id=question.user_id)
 
 
 class SingleHeroContext(Context):
