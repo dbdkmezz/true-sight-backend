@@ -70,7 +70,7 @@ def _respond_to_request(request):
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
     if google_request.text == '1':  # Google's ping
-        JsonResponse(AppResponse().tell("Hello Google"))
+        return JsonResponse(AppResponse().tell("Hello Google"))
 
     if google_request.text == 'test exception':
         raise Exception
