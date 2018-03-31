@@ -81,7 +81,7 @@ class Context(object):
     def _deserialise(self, data):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
-    COOLDOWN_WORDS = ('cool down', 'cooldown')
+    COOLDOWN_WORDS = ('cool down', 'cooldown', 'called down')
     SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
     DAMAGE_TYPE_WORDS = ('damage', 'magical', 'physical', 'pure')
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters', 'showing at')
@@ -136,7 +136,7 @@ class Context(object):
 
     def generate_response(self, question):
         try:
-            response = self._generate_direct_response(question)
+            response = self._generate_response_text(question)
         except InnapropriateContextError:
             if self.useage_count == 0:
                 # The current context is brand knew, and has just come from
@@ -175,7 +175,7 @@ class Context(object):
             follow_up_question = self._second_follow_up_question
         return "{} {}".format(response, follow_up_question)
 
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         raise NotImplemented
 
 
@@ -191,14 +191,14 @@ class ContextWithBlankFollowUpQuestions(Context):
 
 
 class IntroductionContext(ContextWithBlankFollowUpQuestions):
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if self.useage_count > 0:
             raise InnapropriateContextError
         return IntroductionResponse.respond(user_id=question.user_id)
 
 
 class DescriptionContext(ContextWithBlankFollowUpQuestions):
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if self.useage_count > 0:
             raise InnapropriateContextError
         return DescriptionResponse.respond(user_id=question.user_id)
@@ -206,7 +206,7 @@ class DescriptionContext(ContextWithBlankFollowUpQuestions):
 
 class FreshContext(ContextWithBlankFollowUpQuestions):
     """A clean context, which asks the user what they'd like to know, giving sample questions"""
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if self.useage_count > 0:
             if question.no:
                 raise Goodbye
@@ -228,7 +228,7 @@ class SingleAbilityContext(Context):
     def _yes_response(self):
         return (
             "What would you like to know? "
-            "You could ask about the cooldown or whether {} goes through BKB."
+            "You could ask about the cooldown, damage type, or whether {} goes through BKB."
             "".format(self.ability.name))
 
     def serialise(self):
@@ -240,7 +240,7 @@ class SingleAbilityContext(Context):
         super()._deserialise(data)
         self.ability = Ability.objects.get(name=data['ability'])
 
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if self.useage_count == 0:
             if not self.ability:
                 self.ability = question.abilities[0]
@@ -253,21 +253,28 @@ class SingleAbilityContext(Context):
 
         if question.contains_any_string(self.COOLDOWN_WORDS):
             return AbilityCooldownResponse.respond(self.ability, user_id=question.user_id)
+
         if question.contains_any_string(self.SPELL_IMMUNITY_WORDS):
             return AbilitySpellImmunityResponse.respond(self.ability, user_id=question.user_id)
+
         if question.contains_any_string(self.DAMAGE_TYPE_WORDS):
             return AbilityDamageTypeResponse.respond(self.ability, user_id=question.user_id)
-        if question.contains_any_string(self.ULTIMATE_WORDS):
-            return AbilityUltimateResponse.respond(self.ability, user_id=question.user_id)
-        if self.useage_count == 0 and question.ability_hotkey:
-            return AbilityHotkeyResponse.respond(self.ability, user_id=question.user_id)
-        if self.useage_count == 0 or question.contains_any_word(('what', )):
+
+        if self.useage_count == 0:
+            if question.contains_any_string(self.ULTIMATE_WORDS):
+                return AbilityUltimateResponse.respond(self.ability, user_id=question.user_id)
+            if question.ability_hotkey:
+                return AbilityHotkeyResponse.respond(self.ability, user_id=question.user_id)
             return AbilityDescriptionResponse.respond(self.ability, user_id=question.user_id)
+
+        if question.contains_any_word(('what', )):
+            return AbilityDescriptionResponse.respond(self.ability, user_id=question.user_id)
+
         raise InnapropriateContextError
 
 
 class MultipleUltimateContext(Context):
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         return MultipleUltimateResponse.respond(hero=question.heroes[0], user_id=question.user_id)
 
 
@@ -278,7 +285,7 @@ class AbilityListContext(Context):
     _can_respond_to_yes_response = True
     _yes_response = "Which hero?"
 
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if len(question.heroes) < 1:
             raise InnapropriateContextError
         if question.contains_any_string(self.COUNTER_WORDS):
@@ -304,7 +311,7 @@ class EnemyAdvantageContext(Context):
         super()._deserialise(data)
         self.enemy = Hero.objects.get(name=data['enemy'])
 
-    def _generate_direct_response(self, question):
+    def _generate_response_text(self, question):
         if self.useage_count > 0:
             if len(question.heroes) == 0 and not question.role:
                 raise InnapropriateContextError

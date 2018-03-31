@@ -49,7 +49,7 @@ class IntroductionResponse(Response):
 
     @classmethod
     def _respond(cls):
-        return "{} {} {} {}".format(
+        return "Hi, {} {} {} {}".format(
             DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
             "What would you like to know?",
@@ -59,9 +59,9 @@ class IntroductionResponse(Response):
 
 class DescriptionResponse(Response):
     DESCRIPTION = (
-        "Hi, I'm the Gem of True Sight. "
-        "You can ask me about Dota hero counters, and abilities, such as their cooldown or "
-        "whether they are blocked by BKB."
+        "I'm the Gem of True Sight. "
+        "I can help you counter pick enemy heroes, and tell you all about abilities "
+        "(such as their cooldown, damage type, or whether they are blocked by BKB)."
     )
 
     @classmethod
@@ -75,12 +75,14 @@ class DescriptionResponse(Response):
 class SampleQuestionResponse(Response):
     @staticmethod
     def sample_question():
-        return "For example, you could ask me '" + random.choice((
+        return "For example, you could ask me '{}'".format(random.choice((
             "Which mid heroes are good against Invoker?",
+            "Which supports counter Disruptor?",
+            "Which roaming heroes counter Sniper?",
             "What is the cooldown of Monkey King's ultimate?",
             "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
-        ))
+        )))
 
     @classmethod
     def _respond(cls):

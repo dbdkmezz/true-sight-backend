@@ -23,7 +23,7 @@ class TestWelcomeAndIntroduction(TestCase):
 
     def test_what_can_you_do(self):
         response, token = ResponseGenerator.respond("What can you do?")
-        assert "counters" in response
+        assert "counter" in response
         assert "abilities" in response
         assert token is not None
 
@@ -244,8 +244,8 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond('What is the cooldown of Thunder Strike?')
         response, token = ResponseGenerator.respond('Yes.', token)
         assert response == (
-            '<speak>What would you like to know? '
-            'You could ask about the cooldown or whether Thunder Strike goes through BKB.</speak>')
+            '<speak>What would you like to know? You could ask about the cooldown, damage type, '
+            'or whether Thunder Strike goes through BKB.</speak>')
         response, token = ResponseGenerator.respond('What is its damage type>', token)
         assert 'magical' in response
         assert 'Anything else?' in response

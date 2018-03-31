@@ -19,10 +19,12 @@ good_response_logger = logging.getLogger('good_response')
 # # Pre reddit
 # persona?
 # Think about all prompts
-# don't quit if they say 'talk to true sight'
 # feedback
 #
 # # V2
+# twitter?
+# don't quit if they say 'talk to true sight'
+# bad against
 # lane in implicit discovery
 # add talent damage type
 # what does just saying no do?
@@ -85,19 +87,22 @@ def _respond_to_request(request):
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
-        if google_request.text.lower().startswith('talk to') or google_request.text == '1':
+        if google_request.text.lower().startswith('talk to'):
             return JsonResponse(AppResponse().tell((
                 "I'm sorry, you're currently talking to True Sight, I'll leave the conversation "
                 "so you can try again. Goodbye.")))
         DailyUse.log_use(success=False, user_id=user_id)
         return JsonResponse(AppResponse().ask((
-            "Sorry, I don't understand. I heard you say: '{}'. {} "
+            "Sorry, {}. I heard you say: '{}'. {} "
             "To end the conversation, just say 'goodbye'.").format(
+                random.choice((
+                    "I don't understand",
+                    "I missed that",
+                )),
                 google_request.text,
                 random.choice((
                     "Have another go.",
                     "Could you say that again?",
-                    "Please try again.",
                 )),
             ),
             json.dumps(context)))
