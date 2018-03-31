@@ -120,6 +120,9 @@ class WebScraper(object):
         damage_type = cls._damange_type_map[damage_info[0].text]
         if len(damage_info) == 1:
             return damage_type, None
+        if damage_type == DamageType.PURE:
+            # Spells doing pure damange also have a link to info about them, but we can ignore that
+            return damage_type, None
 
         assert damage_info[1].get('title') == "Upgradable by Aghanim's Scepter."
         aghanims_damage_type = cls._damange_type_map[damage_info[2].text]
