@@ -14,7 +14,7 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
+        'default': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
@@ -41,13 +41,8 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['file'],
+            'handlers': ['default', 'error'],
             'level': 'INFO',
-            'propagate': True,
-        },
-        '': {
-            'handlers': ['error'],
-            'level': 'ERROR',
             'propagate': True,
         },
         'good_response': {
