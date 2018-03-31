@@ -15,6 +15,7 @@ class TestWelcomeAndIntroduction(TestCase):
     def test_welcome_message(self):
         response, token = ResponseGenerator.respond(None)
         assert "True Sight" in response
+        assert response.endswith("?'</speak>")
         assert token is not None
 
         response, token = ResponseGenerator.respond("")

@@ -164,7 +164,7 @@ class Context(object):
                 return new_context.generate_response(question)
 
         self.useage_count += 1
-        if not response[-1:] in ('.', '?'):
+        if not response[-1:] in ('.', '?') and not response[-2:] == "?'":
             response += '.'
 
         if self._can_be_used_for_next_context:
