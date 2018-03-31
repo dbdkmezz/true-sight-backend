@@ -103,6 +103,8 @@ class WebScraper(object):
         'Magical': DamageType.MAGICAL,
         'Physical': DamageType.PHYSICAL,
         'Pure': DamageType.PURE,
+        # Spectre has this, no one else, probably just a bug on the wiki
+        'HP Removal': DamageType.PURE,
     }
 
     @classmethod

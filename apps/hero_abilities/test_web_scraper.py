@@ -18,6 +18,7 @@ mock_request_handler = MockRequestHandler(
         "https://dota2.gamepedia.com/Sniper": "Sniper - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Oracle": "Oracle - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Invoker": "Invoker - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Spectre": "Spectre - Dota 2 Wiki.html",
     },
     files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
@@ -96,7 +97,13 @@ class TestWebScraper(TestCase):
         self.assertEqual(false_promise.damage_type, DamageType.PURE)
         self.assertIsNone(false_promise.aghanims_damage_type)
 
-    def test_invoker(self):
+    def test_hp_removal_with_no_damange_type(self):
+        self.scraper.load_hero_abilities(HeroFactory(name='Spectre'))
+        dispersion = Ability.objects.get(name='Dispersion')
+        self.assertEqual(dispersion.damage_type, DamageType.PURE)
+        self.assertIsNone(dispersion.aghanims_damage_type)
+
+    def test_invoker_hotkeys(self):
         self.scraper.load_hero_abilities(HeroFactory(name='Invoker'))
         for a in Ability.objects.all():
             assert (not a.hotkey or len(a.hotkey) == 1)
