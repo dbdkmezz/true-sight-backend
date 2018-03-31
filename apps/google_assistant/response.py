@@ -34,6 +34,7 @@ class ResponseGenerator(object):
         if follow_up_context:
             new_converstaion_token = follow_up_context.serialise()
 
+        response = "<speak>{}</speak>".format(response)
         return response, new_converstaion_token
 
 

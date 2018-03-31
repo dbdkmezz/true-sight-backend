@@ -23,7 +23,7 @@ class Response(object):
     def respond(cls, *args, **kwargs):
         ResponderUse.log_use(cls.__name__, kwargs['user_id'])
         del kwargs['user_id']
-        return '<speak>' + cls._respond(*args, **kwargs) + '</speak>'
+        return cls._respond(*args, **kwargs)
 
     @staticmethod
     def comma_separate_with_final_and(words):
@@ -129,10 +129,11 @@ class AbilityResponse(Response):
 
         if not response[-1:] in ('.', ','):
             response += ','
-        return "{} its cooldown is {} seconds".format(
+        response = "{} its cooldown is {} seconds".format(
             response,
             cls.parse_cooldown(ability),
         )
+        return response.replace(". its", ". Its")
 
 
 class AbilityDescriptionResponse(AbilityResponse):

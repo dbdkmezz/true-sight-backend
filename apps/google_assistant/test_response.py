@@ -95,45 +95,45 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_fallback_ability_response(self):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
-        assert response == (
+        assert (
             "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
-            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds. Any "
-            "other ability?")
+            "seconds ago. Instantly kills illusions. Its cooldown is 60, 46, 32, 18 seconds."
+            in response)
 
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
-        assert response == (
-            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Any other ability?")
+        assert "The cooldown of Glimpse is 60, 46, 32, 18 seconds." in response
         assert conversation_token['context-class'] == 'AbilityCooldownContext'
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
-        assert response.startswith("The cooldown of Glimpse is")
+        assert "The cooldown of Glimpse is" in response
 
     def test_ability_hotkey_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's W?")
-        assert response == (
+        assert (
             "Disruptor's W is Glimpse. Teleports the target hero back to where it was 4 seconds "
-            "ago. Instantly kills illusions.")
+            "ago. Instantly kills illusions."
+            in response)
 
     def test_hero_ultimate_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's ultimate?")
-        assert response == (
-            "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds. Any other "
-            "hero?")
+        assert (
+            "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds."
+            in response)
 
     def test_ability_list_response(self):
         response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
-        assert response == (
+        assert (
             "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm. "
-            "Any other hero?")
+            in response)
 
     def test_spell_immunity_response(self):
         response, _ = ResponseGenerator.respond(
             "Does spell immunity protect against Kinetic Field?")
         assert response == (
-            "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
-            "was placed before spell immunity. Any other ability?")
+            "<speak>Kinetic Field does not pierce spell immunity. The Barrier's modifier persists "
+            "if it was placed before spell immunity. Any other ability?</speak>")
 
     @pytest.mark.skip("Bug not fixed yet")
     def test_abilities_with_the_same_name(self):
@@ -155,11 +155,11 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_context_increments_useage_count(self):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
-        assert response.endswith('Any other ability?')
+        assert response.endswith('Any other ability?</speak>')
         assert conversation_token['useage-count'] == 1
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?", conversation_token)
-        assert response.endswith('Any others?')
+        assert response.endswith('Any others?</speak>')
         assert conversation_token['useage-count'] == 2
 
     def test_damage_type(self):
@@ -198,14 +198,14 @@ class TestAdvantageParserAndResponders(TestCase):
     def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response.startswith(
-            "Queen of Pain is very strong against Storm Spirit. "
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good."
         )
 
     def test_mid_advantage(self):
         response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
         assert response.startswith(
-            "Queen of Pain is very strong against Storm Spirit. "
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good."
         )
 
@@ -222,7 +222,7 @@ class TestFollowUpRespones(TestCase):
 
         _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
         response, token = ResponseGenerator.respond('Yes.', token)
-        assert response == 'Which ability?'
+        assert response == '<speak>Which ability?</speak>'
         response, token = ResponseGenerator.respond('Static Storm', token)
         assert '90' in response
         assert 'Any other' in response
