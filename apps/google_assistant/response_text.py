@@ -23,7 +23,7 @@ class Response(object):
     def respond(cls, *args, **kwargs):
         ResponderUse.log_use(cls.__name__, kwargs['user_id'])
         del kwargs['user_id']
-        return cls._respond(*args, **kwargs)
+        return '<speak>' + cls._respond(*args, **kwargs) + '</speak>'
 
     @staticmethod
     def comma_separate_with_final_and(words):
@@ -40,9 +40,11 @@ class Response(object):
 
 class IntroductionResponse(Response):
     TRADEMARKS = (
-        "Dota 2 is a registered trademark of Valve Corporation, all Dota 2 content is "
-        "property of Valve Corporation, this Application is not affiliated with Valve "
-        "Corporation."
+        '<emphasis level="reduced">'
+        'Dota 2 is a registered trademark of Valve Corporation, all Dota 2 content is '
+        'property of Valve Corporation, this Application is not affiliated with Valve '
+        'Corporation.'
+        '</emphasis>'
     )
 
     @classmethod
@@ -220,7 +222,7 @@ class AbilitySpellImmunityResponse(AbilityResponse):
     @classmethod
     def _respond(cls, ability):
         spell_immunity_map = {
-            SpellImmunity.PIERCES: 'does pierce spell immunity',
+            SpellImmunity.PIERCES: 'fully pierces spell immunity',
             SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
             SpellImmunity.DOES_NOT_PIERCE: 'does not pierce spell immunity',
         }

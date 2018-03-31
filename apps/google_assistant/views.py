@@ -18,6 +18,7 @@ good_response_logger = logging.getLogger('good_response')
 #
 # # Pre reddit
 # test that my exception logger works (then remove that code)
+# test that I say the valve stuff differently (and speak isn't printed)
 # Respond to ability questions not with "any more ability" but if they want to know more about it.
 # cooldown, damange type ... of ultimate (OR at least let them ask more about it)
 # ensure I'm happy with the logging
@@ -25,8 +26,6 @@ good_response_logger = logging.getLogger('good_response')
 # fix all the ablities which aren't loading properly
 # Think about all prompts
 # feedback
-# emphasis of does pierce
-# say the valve stuff faster
 #
 # # V2
 # lane in implicit discovery
