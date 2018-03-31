@@ -1,3 +1,5 @@
+import string
+
 from django.utils.functional import cached_property
 
 from apps.hero_advantages.roles import HeroRole
@@ -97,9 +99,11 @@ class QuestionParser(object):
                 matching_role = role
         return matching_role
 
+    _punctuation_remover = str.maketrans('', '', string.punctuation)
+
     @cached_property
     def words(self):
-        return self.text.strip('?').strip('.').strip(',').split(' ')
+        return self.text.translate(self._punctuation_remover).split(' ')
 
     @cached_property
     def ability_hotkey(self):

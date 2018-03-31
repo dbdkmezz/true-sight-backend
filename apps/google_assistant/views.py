@@ -23,7 +23,6 @@ good_response_logger = logging.getLogger('good_response')
 # ensure I'm happy with the logging
 # persona?
 # fix all the ablities which aren't loading properly
-# Try saying all heroes
 # Think about all prompts
 # feedback
 # emphasis of does pierce

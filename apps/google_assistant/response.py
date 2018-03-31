@@ -294,16 +294,14 @@ class EnemyAdvantageContext(Context):
         self.enemy = Hero.objects.get(name=data['enemy'])
 
     def _generate_direct_response(self, question):
-        if (len(question.heroes) == 1
-                and question.contains_any_string(self.ABILITY_WORDS + self.ULTIMATE_WORDS)):
-            raise InnapropriateContextError
-
         if self.useage_count > 0:
             if len(question.heroes) == 0 and not question.role:
                 raise InnapropriateContextError
-            if len(question.heroes) == 1 and question.contains_any_string(self.COUNTER_WORDS):
+            if len(question.heroes) == 1 and question.contains_any_string(
+                    self.COUNTER_WORDS + self.ABILITY_WORDS + self.ULTIMATE_WORDS):
                 raise InnapropriateContextError
             if len(question.heroes) > 1:
+                raise InnapropriateContextError
                 raise InnapropriateContextError
 
         all_heroes = set(question.heroes + [self.enemy])

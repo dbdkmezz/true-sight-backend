@@ -322,3 +322,8 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond("Which heroes are good against Queen of Pain?")
         response, _ = ResponseGenerator.respond("Who counters Storm Spirit?", token)
         assert "Disruptor" in response
+
+    def test_question_with_conflicting_context_words(self):
+        TestAdvantageParserAndResponders.setUpAdvantages()
+        response, _ = ResponseGenerator.respond("not that strong what a Queen of Pain's abilities")
+        assert 'Storm Spirit' in response
