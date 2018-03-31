@@ -122,6 +122,25 @@ class TestAbiltyParserAndResponders(TestCase):
             "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds."
             in response)
 
+    def test_hero_ultimate_response_multiple_ultimates(self):
+        dark_willow = HeroFactory(name='Dark Willow')
+        AbilityFactory(
+            hero=dark_willow,
+            name='Bedlam',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        AbilityFactory(
+            hero=dark_willow,
+            name='Terrorize',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        response, context = ResponseGenerator.respond("What is Dark Willow's ultimate?")
+        assert response == (
+            "<speak>Dark Willow has multiple ultimates: Bedlam and Terrorize.</speak>")
+        assert not context
+
     def test_ability_list_response(self):
         response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
         assert (
@@ -284,7 +303,8 @@ class TestFollowUpRespones(TestCase):
 
         response, token = ResponseGenerator.respond("What is Disruptor's ultimate?", token)
         assert "ultimate" in response
-        assert token['context-class'] == 'AbilityUltimateContext'
+        assert "Static Storm" in response
+        assert token['context-class'] == 'SingleAbilityContext'
         assert token['useage-count'] == 1
 
     def test_hero_advantage_remembers_hero(self):

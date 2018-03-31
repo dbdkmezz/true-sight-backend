@@ -10,6 +10,7 @@ from .response_text import (
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
     SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
     DescriptionResponse, SampleQuestionResponse, AbilityDamangeTypeResponse,
+    MultipleUltimateResponse,
 )
 
 
@@ -58,8 +59,8 @@ class Context(object):
     @staticmethod
     def _context_classes():
         return (
-            SingleAbilityContext, AbilityUltimateContext, AbilityListContext,
-            EnemyAdvantageContext, FreshContext, IntroductionContext, DescriptionContext,
+            SingleAbilityContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
+            IntroductionContext, DescriptionContext,
         )
 
     @classmethod
@@ -102,7 +103,11 @@ class Context(object):
             if question.contains_any_string(cls.COUNTER_WORDS):
                 return EnemyAdvantageContext(question.heroes[0])
             if question.contains_any_string(cls.ULTIMATE_WORDS):
-                return AbilityUltimateContext()
+                try:
+                    ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
+                except Ability.MultipleObjectsReturned:
+                    return MultipleUltimateContext()
+                return SingleAbilityContext(ability=ability)
             if question.contains_any_string(cls.ABILITY_WORDS):
                 return AbilityListContext()
             if question.ability_hotkey:
@@ -212,6 +217,10 @@ class SingleAbilityContext(Context):
     _can_respond_to_yes_response = True
     _first_follow_up_question = "Anything else you'd like to know about it?"
 
+    def __init__(self, ability=None):
+        super().__init__()
+        self.ability = ability
+
     @property
     def _yes_response(self):
         return (
@@ -230,9 +239,13 @@ class SingleAbilityContext(Context):
 
     def _generate_direct_response(self, question):
         if self.useage_count == 0:
-            self.ability = question.abilities[0]
+            if not self.ability:
+                self.ability = question.abilities[0]
         else:
-            if question.abilities or question.heroes:
+            if (
+                    question.abilities
+                    or question.heroes
+                    or question.contains_any_string(self.COUNTER_WORDS)):
                 raise InnapropriateContextError
 
         if question.contains_any_string(self.COOLDOWN_WORDS):
@@ -241,35 +254,30 @@ class SingleAbilityContext(Context):
             return AbilitySpellImmunityResponse.respond(self.ability, user_id=question.user_id)
         if question.contains_any_string(self.DAMAGE_TYPE_WORDS):
             return AbilityDamangeTypeResponse.respond(self.ability, user_id=question.user_id)
+        if question.contains_any_string(self.ULTIMATE_WORDS):
+            return AbilityUltimateResponse.respond(self.ability, user_id=question.user_id)
         if self.useage_count == 0 or question.contains_any_word(('what', )):
             return AbilityDescriptionResponse.respond(self.ability, user_id=question.user_id)
         raise InnapropriateContextError
 
 
-class SingleHeroContext(Context):
+class MultipleUltimateContext(Context):
+    def _generate_direct_response(self, question):
+        return MultipleUltimateResponse.respond(hero=question.heroes[0], user_id=question.user_id)
+
+
+class AbilityListContext(Context):
     _can_be_used_for_next_context = True
     _first_follow_up_question = "Any other hero?"
     _second_follow_up_question = "Any others?"
     _can_respond_to_yes_response = True
     _yes_response = "Which hero?"
 
-    @classmethod
-    def _check_context_is_appropriate(cls, question):
+    def _generate_direct_response(self, question):
         if len(question.heroes) < 1:
             raise InnapropriateContextError
-        if question.contains_any_string(cls.COUNTER_WORDS):
+        if question.contains_any_string(self.COUNTER_WORDS):
             raise InnapropriateContextError
-
-
-class AbilityUltimateContext(SingleHeroContext):
-    def _generate_direct_response(self, question):
-        self._check_context_is_appropriate(question)
-        return AbilityUltimateResponse.respond(question.heroes[0], user_id=question.user_id)
-
-
-class AbilityListContext(SingleHeroContext):
-    def _generate_direct_response(self, question):
-        self._check_context_is_appropriate(question)
         return AbilityListResponse.respond(question.heroes[0], user_id=question.user_id)
 
 

@@ -157,23 +157,23 @@ class AbilityListResponse(AbilityResponse):
 
 class AbilityUltimateResponse(AbilityResponse):
     @classmethod
-    def _respond(cls, hero):
-        try:
-            ability = Ability.objects.get(hero=hero, is_ultimate=True)
-        except Ability.MultipleObjectsReturned:
-            logger.warn("Multiple ultimate response.")
-            abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
-            return "{} has multiple ultimates: {}".format(
-                hero.name,
-                cls.comma_separate_with_final_and([a.name for a in abilities]),
-            )
-
+    def _respond(cls, ability):
         response = "{}'s ultimate is {}".format(
-                hero.name,
+                ability.hero.name,
                 ability.name,
             )
         response = cls.append_cooldown_to_response(response, ability)
         return cls.append_description_to_response(response, ability, True)
+
+
+class MultipleUltimateResponse(AbilityResponse):
+    @classmethod
+    def _respond(cls, hero):
+        abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
+        return "{} has multiple ultimates: {}".format(
+            hero.name,
+            cls.comma_separate_with_final_and([a.name for a in abilities]),
+        )
 
 
 class AbilityHotkeyResponse(AbilityResponse):
