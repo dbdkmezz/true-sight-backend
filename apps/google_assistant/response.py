@@ -288,7 +288,7 @@ class AbilityListContext(Context):
 
 class EnemyAdvantageContext(Context):
     _can_be_used_for_next_context = True
-    _first_follow_up_question = "Any specific or role hero you'd like to know about?"
+    _first_follow_up_question = "Any specific role or hero you'd like to know about?"
     _second_follow_up_question = "Any others?"
 
     def __init__(self, enemy=None):

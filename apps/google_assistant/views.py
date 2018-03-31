@@ -22,6 +22,7 @@ good_response_logger = logging.getLogger('good_response')
 # persona?
 # fix all the ablities which aren't loading properly
 # Think about all prompts
+# don't quit if they say 'talk to true sight'
 # feedback
 #
 # # V2
