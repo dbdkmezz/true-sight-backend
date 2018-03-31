@@ -111,7 +111,10 @@ class Context(object):
             if question.contains_any_string(cls.ABILITY_WORDS):
                 return AbilityListContext()
             if question.ability_hotkey:
-                return AbilityHotkeyContext()
+                ability = Ability.objects.get(
+                    hero=question.heroes[0],
+                    hotkey=question.ability_hotkey)
+                return SingleAbilityContext(ability=ability)
 
         if len(question.heroes) == 2:
             return EnemyAdvantageContext(question.heroes[1])
@@ -256,6 +259,8 @@ class SingleAbilityContext(Context):
             return AbilityDamangeTypeResponse.respond(self.ability, user_id=question.user_id)
         if question.contains_any_string(self.ULTIMATE_WORDS):
             return AbilityUltimateResponse.respond(self.ability, user_id=question.user_id)
+        if self.useage_count == 0 and question.ability_hotkey:
+            return AbilityHotkeyResponse.respond(self.ability, user_id=question.user_id)
         if self.useage_count == 0 or question.contains_any_word(('what', )):
             return AbilityDescriptionResponse.respond(self.ability, user_id=question.user_id)
         raise InnapropriateContextError
@@ -279,14 +284,6 @@ class AbilityListContext(Context):
         if question.contains_any_string(self.COUNTER_WORDS):
             raise InnapropriateContextError
         return AbilityListResponse.respond(question.heroes[0], user_id=question.user_id)
-
-
-class AbilityHotkeyContext(Context):
-    def _generate_direct_response(self, question):
-        if len(question.heroes) < 1:
-            raise InnapropriateContextError
-        return AbilityHotkeyResponse.respond(
-            question.heroes[0], question.ability_hotkey, user_id=question.user_id)
 
 
 class EnemyAdvantageContext(Context):

@@ -178,10 +178,9 @@ class MultipleUltimateResponse(AbilityResponse):
 
 class AbilityHotkeyResponse(AbilityResponse):
     @classmethod
-    def _respond(cls, hero, ability_hotkey):
-        ability = Ability.objects.get(hero=hero, hotkey=ability_hotkey)
+    def _respond(cls, ability):
         response = "{}'s {} is {}".format(
-            hero.name,
+            ability.hero.name,
             ability.hotkey,
             ability.name,
         )
