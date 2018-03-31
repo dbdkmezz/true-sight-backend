@@ -60,7 +60,7 @@ class IntroductionResponse(Response):
 class DescriptionResponse(Response):
     DESCRIPTION = (
         "I'm the Gem of True Sight. "
-        "I can help you counter pick enemy heroes, and tell you all about abilities "
+        "You can ask me about Dota hero counters, and abilities "
         "(such as their cooldown, damage type, or whether they are blocked by BKB)."
     )
 
