@@ -17,10 +17,7 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Pre reddit
-# test that my exception logger works (then remove that code)
-# ensure I'm happy with the logging
 # persona?
-# fix all the ablities which aren't loading properly
 # Think about all prompts
 # don't quit if they say 'talk to true sight'
 # feedback
@@ -29,7 +26,6 @@ good_response_logger = logging.getLogger('good_response')
 # lane in implicit discovery
 # add talent damage type
 # what does just saying no do?
-# don't just quit if they say 1, but quit if they say it twice in a row
 # move where I handle donotunderstand and the talk to responses to response.py
 # maximum 3 consecutive I don't understand respones!
 # leave (and others)
@@ -71,9 +67,10 @@ def _respond_to_request(request):
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
     if google_request.text == '1':  # Google's ping
+        logger.info("Ping")
         return JsonResponse(AppResponse().tell("Hello Google"))
 
-    if google_request.text == 'test exception':
+    if google_request.text == 'test catching exceptions':
         raise Exception
 
     user_id = google_request.user_id
