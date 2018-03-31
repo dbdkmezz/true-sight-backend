@@ -9,6 +9,9 @@ LOGGING = {
         'verbose': {
             'format': '[%(levelname)s %(asctime)s %(name)s] %(message)s',
         },
+        'time':  {
+            'format': '[%(asctime)s] %(message)s',
+        },
     },
     'handlers': {
         'file': {
@@ -17,21 +20,34 @@ LOGGING = {
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
             'formatter': 'verbose',
         },
+        'error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(os.sep, 'var', 'log', 'www', 'error.log'),
+            'formatter': 'verbose',
+        },
         'good_response_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'good-response.log'),
+            'formatter': 'time',
         },
         'failed_response_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'failed-response.log'),
+            'formatter': 'time',
         },
     },
     'loggers': {
         '': {
             'handlers': ['file'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        '': {
+            'handlers': ['error'],
+            'level': 'ERROR',
             'propagate': True,
         },
         'good_response': {

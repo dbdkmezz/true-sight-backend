@@ -17,6 +17,7 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Pre reddit
+# test that my exception logger works (then remove that code)
 # Respond to ability questions not with "any more ability" but if they want to know more about it.
 # cooldown, damange type ... of ultimate (OR at least let them ask more about it)
 # ensure I'm happy with the logging
@@ -72,6 +73,12 @@ def _respond_to_request(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
+    if google_request.text == '1':  # Google's ping
+        JsonResponse(AppResponse().tell("Hello Google"))
+
+    if google_request.text == 'test exception':
+        raise Exception
+
     user_id = google_request.user_id
     User.log_user(user_id)
 
@@ -79,6 +86,7 @@ def _respond_to_request(request):
     if google_request.conversation_token:
         context = json.loads(google_request.conversation_token)
 
+    logger.info("Recieved question: {}, context: {}".format(google_request.text, context))
     try:
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
