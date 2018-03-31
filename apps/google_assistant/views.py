@@ -27,6 +27,7 @@ good_response_logger = logging.getLogger('good_response')
 #
 # # V2
 # lane in implicit discovery
+# add talent damage type
 # what does just saying no do?
 # don't just quit if they say 1, but quit if they say it twice in a row
 # move where I handle donotunderstand and the talk to responses to response.py
