@@ -351,3 +351,21 @@ class TestFollowUpRespones(TestCase):
         TestAdvantageParserAndResponders.setUpAdvantages()
         response, _ = ResponseGenerator.respond("not that strong what a Queen of Pain's abilities")
         assert 'Storm Spirit' in response
+
+
+@pytest.mark.django_db
+class TestFeedback(TestCase):
+    @patch('apps.google_assistant.response.feedback_logger')
+    def test_feedback(self, feedback_logger):
+        AbilityFactory(
+            name='Glimpse',
+            hero=HeroFactory(name='Disruptor'),
+        )
+        response, context = ResponseGenerator.respond("Give feedback")
+        assert "Great" in response
+        response, context = ResponseGenerator.respond("I love you", context)
+        assert feedback_logger.info.called_with('I love you')
+        assert "Thank" in response
+        response, context = ResponseGenerator.respond("What are Disruptor's abilities?", context)
+        assert "Glimpse in response"
+        assert feedback_logger.info.call_count == 1

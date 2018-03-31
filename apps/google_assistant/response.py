@@ -16,6 +16,7 @@ from .response_text import (
 
 logger = logging.getLogger(__name__)
 failed_response_logger = logging.getLogger('failed_response')
+feedback_logger = logging.getLogger('feedback')
 
 
 class InnapropriateContextError(BaseException):
@@ -60,7 +61,7 @@ class Context(object):
     def _context_classes():
         return (
             SingleAbilityContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
-            IntroductionContext, DescriptionContext,
+            IntroductionContext, DescriptionContext, FeedbackContext,
         )
 
     @classmethod
@@ -87,6 +88,7 @@ class Context(object):
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters', 'showing at')
     ABILITY_WORDS = ('abilities', 'spells')
     ULTIMATE_WORDS = ('ultimate', )
+    FEEDBACK_WORDS = ('feedback', )
 
     @classmethod
     def get_context_from_question(cls, question):
@@ -130,6 +132,9 @@ class Context(object):
                     'help', 'what can you do', 'what do you do', 'how does this work'))
                 or question.text == 'what'):
             return DescriptionContext()
+
+        if question.contains_any_string(cls.FEEDBACK_WORDS):
+            return FeedbackContext()
 
         failed_response_logger.warning("%s", question)
         raise DoNotUnderstandQuestion
@@ -330,4 +335,14 @@ class EnemyAdvantageContext(Context):
         if len(all_heroes) == 1:
             return SingleEnemyAdvantageResponse.respond(
                 all_heroes.pop(), question.role, user_id=question.user_id)
+        raise InnapropriateContextError
+
+
+class FeedbackContext(ContextWithBlankFollowUpQuestions):
+    def _generate_response_text(self, question):
+        if self.useage_count == 0:
+            return "Great! What's your feedback?"
+        if self.useage_count == 1:
+            feedback_logger.info(question.text)
+            return "Thanks, I'll look into it."
         raise InnapropriateContextError
