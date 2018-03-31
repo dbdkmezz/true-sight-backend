@@ -46,23 +46,29 @@ class Context(object):
         self.useage_count = 0
 
     def serialise(self):
+        # Ensure that we're going to be able deserialise it again!
+        assert type(self) in self._context_classes()
+
         return {
             'context-class': type(self).__name__,
             'useage-count': self.useage_count,
         }
 
     @staticmethod
-    def deserialise(data):
+    def _context_classes():
+        return (
+            AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
+            AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
+            IntroductionContext, DescriptionContext, AbilityDamageTypeContext,
+        )
+
+    @classmethod
+    def deserialise(cls, data):
         if not data:
             return None
         try:
-            context_classes = (
-                AbilityCooldownContext, AbilityDescriptionContext, AbilitySpellImmunityContext,
-                AbilityUltimateContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
-                IntroductionContext, DescriptionContext, AbilityDamageTypeContext,
-            )
             klass = next(
-                k for k in context_classes
+                k for k in cls._context_classes()
                 if data['context-class'] == k.__name__)
         except StopIteration:
             return None
