@@ -29,10 +29,15 @@ class ResponseGenerator(object):
         question = QuestionParser(question_text, user_id)
 
         context = Context.deserialise(conversation_token)
-        if not context:
-            context = Context.get_context_from_question(question)
+        try:
+            if not context:
+                context = Context.get_context_from_question(question)
 
-        response, follow_up_context = context.generate_response(question)
+            response, follow_up_context = context.generate_response(question)
+        except DoNotUnderstandQuestion:
+            failed_response_logger.warning("%s", question)
+            raise
+
         new_converstaion_token = None
         if follow_up_context:
             new_converstaion_token = follow_up_context.serialise()
@@ -136,7 +141,6 @@ class Context(object):
         if question.contains_any_string(cls.FEEDBACK_WORDS):
             return FeedbackContext()
 
-        failed_response_logger.warning("%s", question)
         raise DoNotUnderstandQuestion
 
     def generate_response(self, question):

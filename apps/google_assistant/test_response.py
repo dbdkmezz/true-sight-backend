@@ -89,6 +89,13 @@ class TestAbiltyParserAndResponders(TestCase):
             ResponseGenerator.respond("What is a pizza?")
         assert failed_response_logger.warning.call_count == 1
 
+    @patch('apps.google_assistant.response.failed_response_logger')
+    def test_follow_up_raises_does_not_understand_and_logs(self, failed_response_logger):
+        _, token = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
+        with self.assertRaises(DoNotUnderstandQuestion):
+            ResponseGenerator.respond("Do you like pizza?", token)
+        assert failed_response_logger.warning.call_count == 1
+
     @patch('apps.google_assistant.response_text.ResponderUse')
     def test_logs_responder_use(self, ResponderUse):
         ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?", user_id='USERID')
@@ -262,7 +269,16 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
         _, token = ResponseGenerator.respond('No.', token)
         with self.assertRaises(Goodbye):
-            r, token = ResponseGenerator.respond('No.', token)
+            ResponseGenerator.respond('No.', token)
+
+    @patch('apps.google_assistant.response.failed_response_logger')
+    def test_no_a_no_does_not_log_a_failure(self, failed_response_logger):
+        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
+        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('No.', token)
+        with self.assertRaises(Goodbye):
+            ResponseGenerator.respond('No.', token)
+        assert failed_response_logger.warning.call_count == 0
 
     def test_respond_to_fresh_context(self):
         AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
