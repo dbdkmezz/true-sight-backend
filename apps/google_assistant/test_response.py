@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
-from apps.hero_abilities.models import SpellImmunity
+from apps.hero_abilities.models import SpellImmunity, DamageType
 
 from .response import ResponseGenerator, Context, FreshContext
 from .exceptions import DoNotUnderstandQuestion, Goodbye
@@ -15,6 +15,7 @@ class TestWelcomeAndIntroduction(TestCase):
     def test_welcome_message(self):
         response, token = ResponseGenerator.respond(None)
         assert "True Sight" in response
+        assert response.endswith("?'</speak>")
         assert token is not None
 
         response, token = ResponseGenerator.respond("")
@@ -23,7 +24,7 @@ class TestWelcomeAndIntroduction(TestCase):
 
     def test_what_can_you_do(self):
         response, token = ResponseGenerator.respond("What can you do?")
-        assert "counters" in response
+        assert "counter" in response
         assert "abilities" in response
         assert token is not None
 
@@ -46,6 +47,7 @@ class TestAbiltyParserAndResponders(TestCase):
             name='Thunder Strike',
             hotkey='Q',
             is_ultimate=False,
+            damage_type=DamageType.MAGICAL,
         )
         AbilityFactory(
             hero=disruptor,
@@ -73,6 +75,13 @@ class TestAbiltyParserAndResponders(TestCase):
             hotkey='R',
             is_ultimate=True,
         )
+        AbilityFactory(
+            hero=HeroFactory(name='Sniper'),
+            name='Assassinate',
+            is_ultimate=True,
+            damage_type=DamageType.MAGICAL,
+            aghanims_damage_type=DamageType.PHYSICAL,
+        )
 
     @patch('apps.google_assistant.response.failed_response_logger')
     def test_raises_does_not_understand_and_logs(self, failed_response_logger):
@@ -87,45 +96,65 @@ class TestAbiltyParserAndResponders(TestCase):
 
     def test_fallback_ability_response(self):
         response, _ = ResponseGenerator.respond("What's does Disruptor's Glimpse ablity do?")
-        assert response == (
+        assert (
             "Disruptor's ability Glimpse. Teleports the target hero back to where it was 4 "
-            "seconds ago. Instantly kills illusions. its cooldown is 60, 46, 32, 18 seconds. Any "
-            "other ability?")
+            "seconds ago. Instantly kills illusions. Its cooldown is 60, 46, 32, 18 seconds."
+            in response)
 
     def test_cooldown_response(self):
         response, conversation_token = ResponseGenerator.respond("What's the cooldown of Glimpse?")
-        assert response == (
-            "The cooldown of Glimpse is 60, 46, 32, 18 seconds. Any other ability?")
-        assert conversation_token['context-class'] == 'AbilityCooldownContext'
+        assert "The cooldown of Glimpse is 60, 46, 32, 18 seconds." in response
+        assert conversation_token['context-class'] == 'SingleAbilityContext'
 
     def test_cooldown_two_words(self):
         response, _ = ResponseGenerator.respond("What's the cool down of Glimpse?")
-        assert response.startswith("The cooldown of Glimpse is")
+        assert "The cooldown of Glimpse is" in response
 
     def test_ability_hotkey_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's W?")
-        assert response == (
+        assert (
             "Disruptor's W is Glimpse. Teleports the target hero back to where it was 4 seconds "
-            "ago. Instantly kills illusions.")
+            "ago. Instantly kills illusions."
+            in response)
 
     def test_hero_ultimate_response(self):
         response, _ = ResponseGenerator.respond("What is Disruptor's ultimate?")
+        assert (
+            "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds."
+            in response)
+
+    def test_hero_ultimate_response_multiple_ultimates(self):
+        dark_willow = HeroFactory(name='Dark Willow')
+        AbilityFactory(
+            hero=dark_willow,
+            name='Bedlam',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        AbilityFactory(
+            hero=dark_willow,
+            name='Terrorize',
+            cooldown='40,30,20',
+            is_ultimate=True,
+        )
+        response, context = ResponseGenerator.respond("What is Dark Willow's ultimate?")
         assert response == (
-            "Disruptor's ultimate is Static Storm, its cooldown is 90, 80, 70 seconds. Any other "
-            "hero?")
+            "<speak>Dark Willow has multiple ultimates: Bedlam and Terrorize.</speak>")
+        assert not context
 
     def test_ability_list_response(self):
         response, _ = ResponseGenerator.respond("What are Disruptor's abilities?")
-        assert response == (
+        assert (
             "Disruptor's abilities are Thunder Strike, Glimpse, Kinetic Field, and Static Storm. "
-            "Any other hero?")
+            in response)
 
     def test_spell_immunity_response(self):
         response, _ = ResponseGenerator.respond(
             "Does spell immunity protect against Kinetic Field?")
         assert response == (
-            "Kinetic Field does not pierce spell immunity. The Barrier's modifier persists if it "
-            "was placed before spell immunity. Any other ability?")
+            "<speak>Kinetic Field does not pierce spell immunity. "
+            "The Barrier's modifier persists if it was placed before spell immunity. "
+            "Anything else you'd like to know about it?</speak>")
 
     @pytest.mark.skip("Bug not fixed yet")
     def test_abilities_with_the_same_name(self):
@@ -147,12 +176,19 @@ class TestAbiltyParserAndResponders(TestCase):
     def test_context_increments_useage_count(self):
         response, conversation_token = ResponseGenerator.respond(
             "What's the cooldown of Thunder Strike?")
-        assert response.endswith('Any other ability?')
         assert conversation_token['useage-count'] == 1
         response, conversation_token = ResponseGenerator.respond(
-            "What's the cooldown of Thunder Strike?", conversation_token)
-        assert response.endswith('Any others?')
+            "What's it's cooldown?", conversation_token)
         assert conversation_token['useage-count'] == 2
+
+    def test_damage_type(self):
+        response, _ = ResponseGenerator.respond("What's the damage type of Thunder Strike?")
+        assert 'magical' in response
+
+    def test_aghs_damage_type(self):
+        response, _ = ResponseGenerator.respond("What's the damage type of Assassinate?")
+        assert 'magical' in response
+        assert "with Aghanim's Scepter it does physical damage" in response
 
 
 @pytest.mark.django_db
@@ -163,7 +199,7 @@ class TestAdvantageParserAndResponders(TestCase):
     @staticmethod
     def setUpAdvantages():
         storm_spirit = HeroFactory(name='Storm Spirit', is_mid=True)
-        queen_of_pain = HeroFactory(name='Queen of Pain', is_mid=True)
+        queen_of_pain = HeroFactory(name='Queen of Pain', is_mid=True, is_support=False)
         shadow_fiend = HeroFactory(name='Shadow Fiend', is_mid=True)
         razor = HeroFactory(name='Razor', is_mid=True)
         zeus = HeroFactory(name='Zeus', is_mid=True)
@@ -181,14 +217,14 @@ class TestAdvantageParserAndResponders(TestCase):
     def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         assert response.startswith(
-            "Queen of Pain is very strong against Storm Spirit. "
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good."
         )
 
     def test_mid_advantage(self):
         response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
         assert response.startswith(
-            "Queen of Pain is very strong against Storm Spirit. "
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Razor and Shadow Fiend are also good."
         )
 
@@ -200,15 +236,20 @@ class TestAdvantageParserAndResponders(TestCase):
 @pytest.mark.django_db
 class TestFollowUpRespones(TestCase):
     def test_yes(self):
-        AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
-        AbilityFactory(name='Static Storm', cooldown='90/80/70')
+        AbilityFactory(
+            name='Thunder Strike',
+            cooldown='60/46/32/18',
+            damage_type=DamageType.MAGICAL,
+        )
 
-        _, token = ResponseGenerator.respond('What is the cooldown of Glimpse?')
+        _, token = ResponseGenerator.respond('What is the cooldown of Thunder Strike?')
         response, token = ResponseGenerator.respond('Yes.', token)
-        assert response == 'Which ability?'
-        response, token = ResponseGenerator.respond('Static Storm', token)
-        assert '90' in response
-        assert 'Any other' in response
+        assert response == (
+            '<speak>What would you like to know? You could ask about the cooldown, damage type, '
+            'or whether Thunder Strike goes through BKB.</speak>')
+        response, token = ResponseGenerator.respond('What is its damage type>', token)
+        assert 'magical' in response
+        assert 'Anything else?' in response
 
     def test_no(self):
         AbilityFactory(name='Glimpse', cooldown='60/46/32/18')
@@ -258,12 +299,13 @@ class TestFollowUpRespones(TestCase):
         )
 
         _, token = ResponseGenerator.respond('What is the cooldown of Static Storm?')
-        assert token['context-class'] == 'AbilityCooldownContext'
+        assert token['context-class'] == 'SingleAbilityContext'
         assert token['useage-count'] == 1
 
         response, token = ResponseGenerator.respond("What is Disruptor's ultimate?", token)
         assert "ultimate" in response
-        assert token['context-class'] == 'AbilityUltimateContext'
+        assert "Static Storm" in response
+        assert token['context-class'] == 'SingleAbilityContext'
         assert token['useage-count'] == 1
 
     def test_hero_advantage_remembers_hero(self):
@@ -271,6 +313,13 @@ class TestFollowUpRespones(TestCase):
         _, token = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
         response, _ = ResponseGenerator.respond("What about Sniper?", token)
         assert "-3.11" in response
+
+    def test_hero_advantage_context_follow_up_with_role(self):
+        TestAdvantageParserAndResponders.setUpAdvantages()
+        _, token = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
+        response, _ = ResponseGenerator.respond("Support", token)
+        assert "Disruptor" in response
+        assert "Queen of Pain" not in response
 
     def test_saying_against_breaks_hero_context(self):
         storm_spirit = HeroFactory(name='Storm Spirit')
@@ -303,3 +352,21 @@ class TestFollowUpRespones(TestCase):
         TestAdvantageParserAndResponders.setUpAdvantages()
         response, _ = ResponseGenerator.respond("not that strong what a Queen of Pain's abilities")
         assert 'Storm Spirit' in response
+
+
+@pytest.mark.django_db
+class TestFeedback(TestCase):
+    @patch('apps.google_assistant.response.feedback_logger')
+    def test_feedback(self, feedback_logger):
+        AbilityFactory(
+            name='Glimpse',
+            hero=HeroFactory(name='Disruptor'),
+        )
+        response, context = ResponseGenerator.respond("Give feedback")
+        assert "Great" in response
+        response, context = ResponseGenerator.respond("I love you", context)
+        assert feedback_logger.info.called_with('I love you')
+        assert "Thank" in response
+        response, context = ResponseGenerator.respond("What are Disruptor's abilities?", context)
+        assert "Glimpse in response"
+        assert feedback_logger.info.call_count == 1

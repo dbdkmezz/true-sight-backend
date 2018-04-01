@@ -15,25 +15,24 @@ good_response_logger = logging.getLogger('good_response')
 
 
 # # TODO
-# move where I handle donotunderstand and the talk to responses to response.py
-# maximum 3 consecutive I don't understand respones!
-# leave (and others)
-# ensure I'm happy with the logging
-# add user to the logging
-# what does just saying no do?
-# "help"
 #
 # # Pre reddit
 # persona?
-# fix all the ablities which aren't loading properly
-# say the valve stuff faster
-# Try saying all heroes
-# Respond to ability questions not with "any more ability" but if they want to know more about it.
 # Think about all prompts
-# damange type
-# aghs damage type
-
+# feedback
+#
 # # V2
+# twitter?
+# don't quit if they say 'talk to true sight'
+# bad against
+# lane in implicit discovery
+# add talent damage type
+# what does just saying no do?
+# move where I handle donotunderstand and the talk to responses to response.py
+# maximum 3 consecutive I don't understand respones!
+# leave (and others)
+#
+# # V3
 # Just "hex" and "blink" don't work
 # Talents
 # Aghs upgrades
@@ -69,6 +68,13 @@ def _respond_to_request(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
+    if google_request.text == '1':  # Google's ping
+        logger.info("Ping")
+        return JsonResponse(AppResponse().tell("Hello Google"))
+
+    if google_request.text == 'test catching exceptions':
+        raise Exception
+
     user_id = google_request.user_id
     User.log_user(user_id)
 
@@ -77,24 +83,26 @@ def _respond_to_request(request):
         context = json.loads(google_request.conversation_token)
 
     logger.info("Recieved question: {}, context: {}".format(google_request.text, context))
-
     try:
         response, context = ResponseGenerator.respond(
             google_request.text, conversation_token=context, user_id=user_id)
     except DoNotUnderstandQuestion:
-        if google_request.text.lower().startswith('talk to') or google_request.text == '1':
+        if google_request.text.lower().startswith('talk to'):
             return JsonResponse(AppResponse().tell((
                 "I'm sorry, you're currently talking to True Sight, I'll leave the conversation "
                 "so you can try again. Goodbye.")))
         DailyUse.log_use(success=False, user_id=user_id)
         return JsonResponse(AppResponse().ask((
-            "Sorry, I don't understand. I heard you say: '{}'. {} "
+            "Sorry, {}. I heard you say: '{}'. {} "
             "To end the conversation, just say 'goodbye'.").format(
+                random.choice((
+                    "I don't understand",
+                    "I missed that",
+                )),
                 google_request.text,
                 random.choice((
                     "Have another go.",
                     "Could you say that again?",
-                    "Please try again.",
                 )),
             ),
             json.dumps(context)))
@@ -102,8 +110,9 @@ def _respond_to_request(request):
         return JsonResponse(AppResponse().tell('Goodbye'))
 
     good_response_logger.info(
-        "%s Response: %s",
+        "%s Context: %s. Response: %s",
         QuestionParser(google_request.text, user_id=user_id),
+        context,
         response)
     DailyUse.log_use(success=True, user_id=user_id)
 

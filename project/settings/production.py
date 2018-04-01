@@ -9,28 +9,45 @@ LOGGING = {
         'verbose': {
             'format': '[%(levelname)s %(asctime)s %(name)s] %(message)s',
         },
+        'time':  {
+            'format': '[%(asctime)s] %(message)s',
+        },
     },
     'handlers': {
-        'file': {
+        'default_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'true-sight.log'),
+            'formatter': 'verbose',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(os.sep, 'var', 'log', 'www', 'error.log'),
             'formatter': 'verbose',
         },
         'good_response_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'good-response.log'),
+            'formatter': 'time',
         },
         'failed_response_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'failed-response.log'),
+            'formatter': 'time',
+        },
+        'feedback_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(os.sep, 'var', 'log', 'www', 'feedback.log'),
+            'formatter': 'time',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['file'],
+            'handlers': ['default_file', 'error_file'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -41,6 +58,11 @@ LOGGING = {
         },
         'failed_response': {
             'handlers': ['failed_response_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'feedback': {
+            'handlers': ['feedback_file'],
             'level': 'INFO',
             'propagate': False,
         },

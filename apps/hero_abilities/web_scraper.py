@@ -45,7 +45,7 @@ class WebScraper(object):
                 spell_immunity = self._get_spell_immunity(header)
                 spell_immunity_detail = self._get_spell_immunity_detail(ability)
 
-                damage_type, aghanims_damage_type = self._get_damange_type(ability)
+                damage_type, aghanims_damage_type = self._get_damage_type(ability)
 
                 hotkey = self._get_hotkey(hero, header)
                 if hotkey and hotkey in hotkeys_loaded:
@@ -99,7 +99,7 @@ class WebScraper(object):
             raise Exception("Unexpected number of spell immunity images")
         return ''
 
-    _damange_type_map = {
+    _damage_type_map = {
         'Magical': DamageType.MAGICAL,
         'Physical': DamageType.PHYSICAL,
         'Pure': DamageType.PURE,
@@ -108,19 +108,19 @@ class WebScraper(object):
     }
 
     @classmethod
-    def _get_damange_type(cls, ability):
+    def _get_damage_type(cls, ability):
         try:
             damage_header = next(b for b in ability.find_all('b') if b.text == 'Damage')
         except StopIteration:
             return None, None
 
         damage_info = damage_header.find_next_siblings('a')
-        damage_type = cls._damange_type_map[damage_info[0].text]
+        damage_type = cls._damage_type_map[damage_info[0].text]
         if len(damage_info) == 1 or damage_info[1].get('title') in ("Damage types", "Talent"):
             return damage_type, None
 
         assert damage_info[1].get('title') == "Upgradable by Aghanim's Scepter."
-        aghanims_damage_type = cls._damange_type_map[damage_info[2].text]
+        aghanims_damage_type = cls._damage_type_map[damage_info[2].text]
         return damage_type, aghanims_damage_type
 
     @staticmethod

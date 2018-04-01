@@ -5,7 +5,7 @@ import logging
 from apps.hero_advantages.roles import HeroRole
 from apps.metadata.models import ResponderUse
 from apps.hero_advantages.models import Hero, Advantage
-from apps.hero_abilities.models import Ability, SpellImmunity
+from apps.hero_abilities.models import Ability, SpellImmunity, DamageType
 
 
 logger = logging.getLogger(__name__)
@@ -40,14 +40,16 @@ class Response(object):
 
 class IntroductionResponse(Response):
     TRADEMARKS = (
-        "Dota 2 is a registered trademark of Valve Corporation, all Dota 2 content is "
-        "property of Valve Corporation, this Application is not affiliated with Valve "
-        "Corporation."
+        '<emphasis level="reduced">'
+        'Dota 2 is a registered trademark of Valve Corporation, all Dota 2 content is '
+        'property of Valve Corporation, this Application is not affiliated with Valve '
+        'Corporation.'
+        '</emphasis>'
     )
 
     @classmethod
     def _respond(cls):
-        return "{} {} {} {} ".format(
+        return "Hi, {} {} {} {}".format(
             DescriptionResponse.DESCRIPTION,
             cls.TRADEMARKS,
             "What would you like to know?",
@@ -57,9 +59,9 @@ class IntroductionResponse(Response):
 
 class DescriptionResponse(Response):
     DESCRIPTION = (
-        "Hi, I'm the Gem of True Sight. "
-        "You can ask me about Dota hero counters, and abilities, such as their cooldown or "
-        "whether they are blocked by BKB."
+        "I'm the Gem of True Sight. "
+        "You can ask me about Dota hero counters, and abilities "
+        "(such as their cooldown, damage type, or whether they are blocked by BKB)."
     )
 
     @classmethod
@@ -73,12 +75,14 @@ class DescriptionResponse(Response):
 class SampleQuestionResponse(Response):
     @staticmethod
     def sample_question():
-        return "For example, you could ask me '" + random.choice((
+        return "For example, you could ask me '{}'".format(random.choice((
             "Which mid heroes are good against Invoker?",
+            "Which supports counter Disruptor?",
+            "Which roaming heroes counter Sniper?",
             "What is the cooldown of Monkey King's ultimate?",
             "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
-        ))
+        )))
 
     @classmethod
     def _respond(cls):
@@ -106,6 +110,15 @@ class AbilityResponse(Response):
         return ability.cooldown.replace('/', ', ')
 
     @staticmethod
+    def parse_damage_type(damage_type):
+        damage_type_map = {
+            DamageType.MAGICAL: 'magical',
+            DamageType.PHYSICAL: 'physical',
+            DamageType.PURE: 'pure',
+        }
+        return damage_type_map[damage_type]
+
+    @staticmethod
     def append_description_to_response(response, ability, only_if_short):
         if not ability.description or (only_if_short and len(ability.description) > 120):
             return response
@@ -118,10 +131,11 @@ class AbilityResponse(Response):
 
         if not response[-1:] in ('.', ','):
             response += ','
-        return "{} its cooldown is {} seconds".format(
+        response = "{} its cooldown is {} seconds".format(
             response,
             cls.parse_cooldown(ability),
         )
+        return response.replace(". its", ". Its")
 
 
 class AbilityDescriptionResponse(AbilityResponse):
@@ -145,31 +159,30 @@ class AbilityListResponse(AbilityResponse):
 
 class AbilityUltimateResponse(AbilityResponse):
     @classmethod
-    def _respond(cls, hero):
-        try:
-            ability = Ability.objects.get(hero=hero, is_ultimate=True)
-        except Ability.MultipleObjectsReturned:
-            logger.warn("Multiple ultimate response.")
-            abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
-            return "{} has multiple ultimates: {}".format(
-                hero.name,
-                cls.comma_separate_with_final_and([a.name for a in abilities]),
-            )
-
+    def _respond(cls, ability):
         response = "{}'s ultimate is {}".format(
-                hero.name,
+                ability.hero.name,
                 ability.name,
             )
         response = cls.append_cooldown_to_response(response, ability)
         return cls.append_description_to_response(response, ability, True)
 
 
+class MultipleUltimateResponse(AbilityResponse):
+    @classmethod
+    def _respond(cls, hero):
+        abilities = Ability.objects.filter(hero=hero, is_ultimate=True)
+        return "{} has multiple ultimates: {}".format(
+            hero.name,
+            cls.comma_separate_with_final_and([a.name for a in abilities]),
+        )
+
+
 class AbilityHotkeyResponse(AbilityResponse):
     @classmethod
-    def _respond(cls, hero, ability_hotkey):
-        ability = Ability.objects.get(hero=hero, hotkey=ability_hotkey)
+    def _respond(cls, ability):
         response = "{}'s {} is {}".format(
-            hero.name,
+            ability.hero.name,
             ability.hotkey,
             ability.name,
         )
@@ -190,11 +203,28 @@ class AbilityCooldownResponse(AbilityResponse):
             )
 
 
+class AbilityDamageTypeResponse(AbilityResponse):
+    @classmethod
+    def _respond(cls, ability):
+        if not ability.damage_type:
+            return "{} is a passive ability, with no cooldown".format(
+                ability.name,
+            )
+        response = "{} does {} damage".format(
+            ability.name,
+            cls.parse_damage_type(ability.damage_type),
+        )
+        if ability.aghanims_damage_type and ability.aghanims_damage_type != ability.damage_type:
+            response += ", and with Aghanim's Scepter it does {} damage".format(
+                cls.parse_damage_type(ability.aghanims_damage_type))
+        return response
+
+
 class AbilitySpellImmunityResponse(AbilityResponse):
     @classmethod
     def _respond(cls, ability):
         spell_immunity_map = {
-            SpellImmunity.PIERCES: 'does pierce spell immunity',
+            SpellImmunity.PIERCES: 'fully pierces spell immunity',
             SpellImmunity.PARTIALLY_PIERCES: 'partially pierces spell immunity',
             SpellImmunity.DOES_NOT_PIERCE: 'does not pierce spell immunity',
         }

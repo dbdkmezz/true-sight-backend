@@ -84,11 +84,11 @@ class QuestionParser(object):
     @cached_property
     def role(self):
         role_words_map = (
-            (('carry', ), HeroRole.CARRY),
+            (('carry', 'carrie'), HeroRole.CARRY),
             (('support', ), HeroRole.SUPPORT),
             (('off', ), HeroRole.OFF_LANE),
             (('jungle', 'jungling', 'jungler'), HeroRole.JUNGLER),
-            (('mid', 'middle'), HeroRole.MIDDLE),
+            (('mid', 'middle', 'meat'), HeroRole.MIDDLE),
             (('roaming', 'roamer'), HeroRole.ROAMING),
         )
         matching_role = None
@@ -127,7 +127,6 @@ class QuestionParser(object):
 
     def contains_any_word(self, words_to_look_for):
         """Whether any of the words in words_to_look_for feature in the question as a whole word"""
-        print(self.words)
         return any((w in self.words) for w in words_to_look_for)
 
     @cached_property
