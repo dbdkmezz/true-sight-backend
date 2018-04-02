@@ -16,10 +16,15 @@ good_response_logger = logging.getLogger('good_response')
 
 # # TODO
 #
-# # Pre reddit
-# persona?
-# Think about all prompts
-# feedback
+# # Post reddit
+# say the lane / role I'm talking about when giving counters
+# if they ask about BKB, mention BKB in my response
+# refer to two letter hero with an s at the end (pas, i.e PA's)
+# give heroes a one character name (e.g. 7)
+# "hero guide", "hero tips" "tips for playing"
+# items for a hero
+# damange for a spell (at a level)
+# manacost for a spell (at a level)
 #
 # # V2
 # twitter?

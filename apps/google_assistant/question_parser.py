@@ -84,16 +84,16 @@ class QuestionParser(object):
     @cached_property
     def role(self):
         role_words_map = (
-            (('carry', 'carrie'), HeroRole.CARRY),
+            (('carry', 'carrie', 'safe'), HeroRole.CARRY),
             (('support', ), HeroRole.SUPPORT),
-            (('off', ), HeroRole.OFF_LANE),
+            (('off', 'offlane'), HeroRole.OFF_LANE),
             (('jungle', 'jungling', 'jungler'), HeroRole.JUNGLER),
-            (('mid', 'middle', 'meat'), HeroRole.MIDDLE),
-            (('roaming', 'roamer'), HeroRole.ROAMING),
+            (('mid', 'middle', 'meat', 'made'), HeroRole.MIDDLE),
+            (('roaming', 'roamer', 'roman'), HeroRole.ROAMING),
         )
         matching_role = None
         for words, role in role_words_map:
-            if self.contains_any_string(words):
+            if self.contains_any_word(words):
                 if matching_role:
                     return None
                 matching_role = role
