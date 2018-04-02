@@ -99,7 +99,7 @@ class Context(object):
     @classmethod
     def get_context_from_question(cls, question):
         """Returns the context to be used answering the question"""
-        if not question.text:
+        if not question.text or question.text == 'talk to true sight':
             return IntroductionContext()
 
         if len(question.abilities) == 1:

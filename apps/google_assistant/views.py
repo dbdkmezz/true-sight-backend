@@ -16,7 +16,7 @@ good_response_logger = logging.getLogger('good_response')
 
 # # TODO
 #
-# # Post reddit
+# # Post reddit discoveries!
 # say the lane / role I'm talking about when giving counters
 # if they ask about BKB, mention BKB in my response
 # refer to two letter hero with an s at the end (pas, i.e PA's)
@@ -25,11 +25,11 @@ good_response_logger = logging.getLogger('good_response')
 # items for a hero
 # damange for a spell (at a level)
 # manacost for a spell (at a level)
+# why is Medusa strong against Sven
+# bad against
 #
 # # V2
 # twitter?
-# don't quit if they say 'talk to true sight'
-# bad against
 # lane in implicit discovery
 # add talent damage type
 # what does just saying no do?
