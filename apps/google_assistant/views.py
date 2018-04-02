@@ -17,11 +17,12 @@ good_response_logger = logging.getLogger('good_response')
 # # TODO
 #
 # # Post reddit discoveries!
+# Identify common requests which I can't respond to and say something sensible?
 # say the lane / role I'm talking about when giving counters
 # if they ask about BKB, mention BKB in my response
-# refer to two letter hero with an s at the end (pas, i.e PA's)
+# refer to two letter hero with an s at the end (pas, i.e PA's) (not really important for counters)
 # give heroes a one character name (e.g. 7)
-# "hero guide", "hero tips" "tips for playing"
+# "hero guide", "hero tips" "tips for playing" (dotawiki link?)
 # items for a hero
 # damange for a spell (at a level)
 # manacost for a spell (at a level)
