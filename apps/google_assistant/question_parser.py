@@ -86,9 +86,12 @@ class QuestionParser(object):
         role_words_map = (
             (('carry', 'carrie', 'safe', 'carries'), HeroRole.CARRY),
             (('support', 'supports'), HeroRole.SUPPORT),
-            (('off', 'offlane', 'offlanes'), HeroRole.OFF_LANE),
+            (('off', 'offlane', 'offlanes', 'offline', 'offlines'), HeroRole.OFF_LANE),
             (('jungle', 'jungling', 'jungler', 'junglers'), HeroRole.JUNGLER),
-            (('mid', 'mids', 'middle', 'meat', 'meats', 'made', 'meet'), HeroRole.MIDDLE),
+            (
+                ('mid', 'mids', 'middle', 'meat', 'meats', 'made', 'meet', 'meds', 'means',
+                 'middling', 'midlane'),
+                HeroRole.MIDDLE),
             (('roaming', 'roamer', 'roman', 'roamers'), HeroRole.ROAMING),
         )
         matching_role = None

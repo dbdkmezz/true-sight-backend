@@ -21,13 +21,17 @@ good_response_logger = logging.getLogger('good_response')
 # say the lane / role I'm talking about when giving counters
 # if they ask about BKB, mention BKB in my response
 # refer to two letter hero with an s at the end (pas, i.e PA's) (not really important for counters)
-# give heroes a one character name (e.g. 7)
+# give heroes a one character name (e.g. 7 for Sven)
 # "hero guide", "hero tips" "tips for playing" (dotawiki link?)
 # items for a hero
 # damange for a spell (at a level)
 # manacost for a spell (at a level)
 # why is Medusa strong against Sven
+# what items counter Viper?
+# intelligence growth
 # bad against
+# what is dota
+# which hero is very easy to play
 #
 # # V2
 # twitter?
@@ -36,7 +40,7 @@ good_response_logger = logging.getLogger('good_response')
 # what does just saying no do?
 # move where I handle donotunderstand and the talk to responses to response.py
 # maximum 3 consecutive I don't understand respones!
-# leave (and others)
+# leave, take me home (and others)
 #
 # # V3
 # Just "hex" and "blink" don't work
