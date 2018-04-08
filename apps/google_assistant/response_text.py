@@ -249,30 +249,24 @@ class AdvantageResponse(Response):
         role_map = {
             HeroRole.CARRY: 'carry',
             HeroRole.MIDDLE: 'mid',
-            HeroRole.SUPPORT: 'support ',
+            HeroRole.SUPPORT: 'support',
             HeroRole.OFF_LANE: 'off-lane',
             HeroRole.JUNGLER: 'jungle',
             HeroRole.ROAMING: 'roaming',
         }
         return role_map[role]
 
-    def _filter_by_role(counters, role):
-        if not role:
-            return counters
-
-        if role == HeroRole.CARRY:
-            heroes = Hero.objects.filter(is_carry=True)
-        elif role == HeroRole.MIDDLE:
-            heroes = Hero.objects.filter(is_mid=True)
-        elif role == HeroRole.SUPPORT:
-            heroes = Hero.objects.filter(is_support=True)
-        elif role == HeroRole.OFF_LANE:
-            heroes = Hero.objects.filter(is_off_lane=True)
-        elif role == HeroRole.JUNGLER:
-            heroes = Hero.objects.filter(is_jungler=True)
-        elif role == HeroRole.ROAMING:
-            heroes = Hero.objects.filter(is_roaming=True)
-        return counters.filter(hero__in=heroes)
+    @staticmethod
+    def _heroes_with_role(role):
+        role_map = {
+            HeroRole.CARRY: Hero.objects.filter(is_carry=True),
+            HeroRole.MIDDLE: Hero.objects.filter(is_mid=True),
+            HeroRole.SUPPORT: Hero.objects.filter(is_support=True),
+            HeroRole.OFF_LANE: Hero.objects.filter(is_off_lane=True),
+            HeroRole.JUNGLER: Hero.objects.filter(is_jungler=True),
+            HeroRole.ROAMING: Hero.objects.filter(is_roaming=True),
+        }
+        return role_map[role]
 
 
 class SingleHeroCountersResponse(AdvantageResponse):
@@ -292,7 +286,9 @@ class SingleHeroCountersResponse(AdvantageResponse):
     def _respond(cls, enemy, role):
         counters = Advantage.objects.filter(
             enemy=enemy, advantage__gte=0).order_by('-advantage')
-        counters = cls._filter_by_role(counters, role)
+        if role:
+            counters = counters.filter(hero__in=cls._heroes_with_role(role))
+
         hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
         soft_counters = [c for c in counters[:8] if c not in hard_counters]
         response = None
@@ -333,7 +329,9 @@ class SingleHeroAdvantagesResponse(AdvantageResponse):
     def _respond(cls, hero, role):
         counters = Advantage.objects.filter(
             hero=hero, advantage__gte=0).order_by('-advantage')
-        counters = cls._filter_by_role(counters, role)
+        if role:
+            counters = counters.filter(enemy__in=cls._heroes_with_role(role))
+
         hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
         soft_counters = [c for c in counters[:8] if c not in hard_counters]
         response = None
