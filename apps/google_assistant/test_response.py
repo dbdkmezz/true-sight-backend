@@ -219,7 +219,8 @@ class TestAdvantageParserAndResponders(TestCase):
         AdvantageFactory(hero=razor, enemy=storm_spirit, advantage=0.66)
         AdvantageFactory(hero=zeus, enemy=storm_spirit, advantage=-4.50)
         AdvantageFactory(hero=disruptor, enemy=storm_spirit, advantage=1.75)
-        AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=1.75)
+        AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=-1.75)
+        AdvantageFactory(hero=HeroFactory(name='Meepo'), enemy=queen_of_pain, advantage=4.34)
 
     def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
@@ -227,6 +228,28 @@ class TestAdvantageParserAndResponders(TestCase):
             "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good."
         )
+
+    def test_no_words_enemy_advantage(self):
+        response, _ = ResponseGenerator.respond("storm spirit")
+        assert response.startswith(
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
+            "Disruptor, Razor, and Shadow Fiend are also good."
+        )
+
+    def test_reverse_advantage(self):
+        response, _ = ResponseGenerator.respond("Which heroes are Queen of Pain good against?")
+        assert 'Storm Spirit' in response
+        assert 'Meepo' not in response
+
+    def test_bad_against(self):
+        response, _ = ResponseGenerator.respond("Who is bad against Queen of Pain?")
+        assert 'Storm Spirit' in response
+        assert 'Meepo' not in response
+
+    def test_bad_and_reverse_advantage(self):
+        response, _ = ResponseGenerator.respond("Who Queen of Pain bad against?")
+        assert 'Storm Spirit' not in response
+        assert 'Meepo' in response
 
     def test_mid_advantage(self):
         response, _ = ResponseGenerator.respond("Which mid heroes are good against Storm Spirit?")
@@ -366,8 +389,8 @@ class TestFollowUpRespones(TestCase):
 
     def test_question_with_conflicting_context_words(self):
         TestAdvantageParserAndResponders.setUpAdvantages()
-        response, _ = ResponseGenerator.respond("not that strong what a Queen of Pain's abilities")
-        assert 'Storm Spirit' in response
+        response, _ = ResponseGenerator.respond("not that strong what a Storm Spirit's abilities")
+        assert 'Queen of Pain' in response
 
 
 @pytest.mark.django_db

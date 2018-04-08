@@ -244,18 +244,6 @@ class AbilitySpellImmunityResponse(AbilityResponse):
 class AdvantageResponse(Response):
     STRONG_ADVANTAGE = 2
 
-
-class SingleEnemyAdvantageResponse(AdvantageResponse):
-    @classmethod
-    def _advantage_hero_list(cls, heroes):
-        names = [h.hero.name for h in heroes]
-        result = cls.comma_separate_with_final_and(names)
-        if len(names) == 1:
-            result += ' is'
-        else:
-            result += ' are'
-        return result
-
     @staticmethod
     def _filter_by_role(counters, role):
         if not role:
@@ -275,6 +263,20 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
             heroes = Hero.objects.filter(is_roaming=True)
         return counters.filter(hero__in=heroes)
 
+
+class SingleHeroCountersResponse(AdvantageResponse):
+    """Gives the list of heroes a hero is weak against"""
+
+    @classmethod
+    def _counters_hero_list(cls, heroes):
+        names = [h.hero.name for h in heroes]
+        result = cls.comma_separate_with_final_and(names)
+        if len(names) == 1:
+            result += ' is'
+        else:
+            result += ' are'
+        return result
+
     @classmethod
     def _respond(cls, enemy, role):
         counters = Advantage.objects.filter(
@@ -285,15 +287,46 @@ class SingleEnemyAdvantageResponse(AdvantageResponse):
         response = None
         if hard_counters:
             response = '{} very strong against {}'.format(
-                cls._advantage_hero_list(hard_counters),
+                cls._counters_hero_list(hard_counters),
                 enemy.name)
         if soft_counters:
             if response:
-                response += '. {} also good'.format(cls._advantage_hero_list(soft_counters))
+                response += '. {} also good'.format(cls._counters_hero_list(soft_counters))
             else:
                 response = '{} good against {}'.format(
-                    cls._advantage_hero_list(soft_counters),
+                    cls._counters_hero_list(soft_counters),
                     enemy.name)
+        return response
+
+
+class SingleHeroAdvantagesResponse(AdvantageResponse):
+    """Gives the list of heroes a hero is strong against"""
+
+    @classmethod
+    def _advantage_hero_list(cls, heroes):
+        names = [h.enemy.name for h in heroes]
+        return cls.comma_separate_with_final_and(names)
+
+    @classmethod
+    def _respond(cls, hero, role):
+        counters = Advantage.objects.filter(
+            hero=hero, advantage__gte=0).order_by('-advantage')
+        counters = cls._filter_by_role(counters, role)
+        hard_counters = counters.filter(advantage__gte=cls.STRONG_ADVANTAGE)
+        soft_counters = [c for c in counters[:8] if c not in hard_counters]
+        response = None
+        if hard_counters:
+            response = '{} is very strong against {}'.format(
+                hero.name,
+                cls._advantage_hero_list(hard_counters))
+        if soft_counters:
+            if response:
+                response += ', and also counters {}'.format(
+                    cls._advantage_hero_list(soft_counters))
+            else:
+                response = '{} is good against {}'.format(
+                    hero.name,
+                    cls._advantage_hero_list(soft_counters))
         return response
 
 

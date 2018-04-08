@@ -128,6 +128,20 @@ class QuestionParser(object):
         """Whether any of strings in strings_to_look_for feature in the question text"""
         return any((s.lower() in self.text) for s in strings_to_look_for)
 
+    def position_of_first_string(self, strings_to_look_for):
+        position = None
+        for s in strings_to_look_for:
+            try:
+                if not position:
+                    position = self.text.index(s)
+                else:
+                    position = min(self.text.index(s), position)
+            except ValueError:
+                pass
+        if not position:
+            raise ValueError
+        return position
+
     def contains_any_word(self, words_to_look_for):
         """Whether any of the words in words_to_look_for feature in the question as a whole word"""
         return any((w in self.words) for w in words_to_look_for)

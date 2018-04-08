@@ -1,4 +1,5 @@
 import logging
+from enum import IntEnum, unique
 
 from apps.hero_advantages.models import Hero
 from apps.hero_abilities.models import Ability
@@ -8,9 +9,9 @@ from .question_parser import QuestionParser
 from .response_text import (
     AbilityDescriptionResponse, AbilityListResponse, AbilityUltimateResponse,
     AbilityHotkeyResponse, AbilityCooldownResponse, AbilitySpellImmunityResponse,
-    SingleEnemyAdvantageResponse, TwoHeroAdvantageResponse, IntroductionResponse,
+    SingleHeroCountersResponse, TwoHeroAdvantageResponse, IntroductionResponse,
     DescriptionResponse, SampleQuestionResponse, AbilityDamageTypeResponse,
-    MultipleUltimateResponse,
+    MultipleUltimateResponse, SingleHeroAdvantagesResponse,
 )
 
 
@@ -65,7 +66,7 @@ class Context(object):
     @staticmethod
     def _context_classes():
         return (
-            SingleAbilityContext, AbilityListContext, EnemyAdvantageContext, FreshContext,
+            SingleAbilityContext, AbilityListContext, HeroAdvantageContext, FreshContext,
             IntroductionContext, DescriptionContext, FeedbackContext,
         )
 
@@ -109,7 +110,7 @@ class Context(object):
 
         if len(question.heroes) == 1:
             if question.contains_any_string(cls.COUNTER_WORDS):
-                return EnemyAdvantageContext(question.heroes[0])
+                return HeroAdvantageContext()
             if question.contains_any_string(cls.ULTIMATE_WORDS):
                 try:
                     ability = Ability.objects.get(hero=question.heroes[0], is_ultimate=True)
@@ -125,13 +126,13 @@ class Context(object):
                 return SingleAbilityContext(ability=ability)
 
         if len(question.heroes) == 2:
-            return EnemyAdvantageContext(question.heroes[1])
+            return HeroAdvantageContext()
 
         if len(question.abilities) == 1:
             return SingleAbilityContext()
 
         if len(question.heroes) == 1:
-            return EnemyAdvantageContext(question.heroes[0])
+            return HeroAdvantageContext()
 
         if (
                 question.contains_any_string((
@@ -303,25 +304,42 @@ class AbilityListContext(Context):
         return AbilityListResponse.respond(question.heroes[0], user_id=question.user_id)
 
 
-class EnemyAdvantageContext(Context):
+class HeroAdvantageContext(Context):
     _can_be_used_for_next_context = True
     _first_follow_up_question = "Any specific role or hero you'd like to know about?"
     _second_follow_up_question = "Any others?"
 
-    def __init__(self, enemy=None):
+    @unique
+    class Direction(IntEnum):
+        WHO_COUNTERS_HERO = 1
+        WHO_DOES_HERO_COUNTER = 2
+
+    def __init__(self, hero=None, direction=None):
         super().__init__()
-        self.enemy = enemy
+        self.hero = hero
+        self.direction = direction
 
     def serialise(self):
         result = super().serialise()
-        result['enemy'] = self.enemy.name
+        result['hero'] = self.hero.name
+        result['direction'] = self.direction
         return result
 
     def _deserialise(self, data):
         super()._deserialise(data)
-        self.enemy = Hero.objects.get(name=data['enemy'])
+        self.hero = Hero.objects.get(name=data['hero'])
+        self.direction = data['direction']
 
     def _generate_response_text(self, question):
+        if self.useage_count == 0:
+            if len(question.heroes) == 1:
+                self.hero = question.heroes[0]
+                self.direction = self._calculate_direction(question)
+            elif len(question.heroes) == 2:
+                self.hero = question.heroes[1]
+                self.direction = self.Direction.WHO_COUNTERS_HERO
+            else:
+                raise Exception("Question must have 1 or 2 heroes in it")
         if self.useage_count > 0:
             if len(question.heroes) == 0 and not question.role:
                 raise InnapropriateContextError
@@ -330,17 +348,49 @@ class EnemyAdvantageContext(Context):
                 raise InnapropriateContextError
             if len(question.heroes) > 1:
                 raise InnapropriateContextError
-                raise InnapropriateContextError
 
-        all_heroes = set(question.heroes + [self.enemy])
+        all_heroes = set(question.heroes + [self.hero])
         if len(all_heroes) == 2:
-            other_hero = all_heroes.difference(set([self.enemy])).pop()
+            other_hero = all_heroes.difference(set([self.hero])).pop()
             return TwoHeroAdvantageResponse.respond(
-                hero=other_hero, enemy=self.enemy, user_id=question.user_id)
+                hero=other_hero, enemy=self.hero, user_id=question.user_id)
         if len(all_heroes) == 1:
-            return SingleEnemyAdvantageResponse.respond(
-                all_heroes.pop(), question.role, user_id=question.user_id)
+            if self.direction == self.Direction.WHO_COUNTERS_HERO:
+                return SingleHeroCountersResponse.respond(
+                    all_heroes.pop(), question.role, user_id=question.user_id)
+            elif self.direction == self.Direction.WHO_DOES_HERO_COUNTER:
+                return SingleHeroAdvantagesResponse.respond(
+                    all_heroes.pop(), question.role, user_id=question.user_id)
+            else:
+                raise Exception("No direction specified")
         raise InnapropriateContextError
+
+    @classmethod
+    def _calculate_direction(cls, question):
+        """Checks whether the question is asking, 'Who counters Axe?' or 'Who does Axe counter?'
+
+        Also looks for the word 'bad' in the question and response accordingly, e.g.:
+          'Who is bad against Axe?'
+        """
+        assert len(question.heroes) == 1
+        if not question.contains_any_string(cls.COUNTER_WORDS):
+            return cls.Direction.WHO_COUNTERS_HERO
+
+        counter_position = question.position_of_first_string(cls.COUNTER_WORDS)
+        bad_against = question.text[:counter_position].endswith('bad ')
+        hero_position = question.position_of_first_string(
+            (a.lower() for a in question.heroes[0].aliases))
+
+        if counter_position <= hero_position:
+            if not bad_against:
+                return cls.Direction.WHO_COUNTERS_HERO
+            else:
+                return cls.Direction.WHO_DOES_HERO_COUNTER
+        else:
+            if not bad_against:
+                return cls.Direction.WHO_DOES_HERO_COUNTER
+            else:
+                return cls.Direction.WHO_COUNTERS_HERO
 
 
 class FeedbackContext(ContextWithBlankFollowUpQuestions):

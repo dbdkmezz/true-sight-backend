@@ -8,3 +8,5 @@ db.sqlite3
 google/
 project/static/
 project/settings/secrets.json
+.coverage
+htmlcov/
