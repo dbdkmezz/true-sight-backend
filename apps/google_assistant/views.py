@@ -29,7 +29,6 @@ good_response_logger = logging.getLogger('good_response')
 # why is Medusa strong against Sven
 # what items counter Viper?
 # intelligence growth
-# bad against / who does Alchemist counter
 # what is dota
 # which hero is very easy to play
 # who are the easiest supports

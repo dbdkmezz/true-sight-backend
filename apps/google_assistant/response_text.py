@@ -79,6 +79,7 @@ class SampleQuestionResponse(Response):
             "Which mid heroes are good against Invoker?",
             "Which supports counter Disruptor?",
             "Which roaming heroes counter Sniper?",
+            "Who does Alchemist counter?",
             "What is the cooldown of Monkey King's ultimate?",
             "Does Assassinate go through BKB?",
             "What are Dark Willow's abilities?",
