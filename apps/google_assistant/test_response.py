@@ -212,6 +212,7 @@ class TestAdvantageParserAndResponders(TestCase):
         zeus = HeroFactory(name='Zeus', is_mid=True)
         sniper = HeroFactory(name='Sniper', is_mid=True)
         disruptor = HeroFactory(name='Disruptor', is_mid=False, is_support=True)
+        meepo = HeroFactory(name='Meepo')
 
         AdvantageFactory(hero=queen_of_pain, enemy=storm_spirit, advantage=2.14)
         AdvantageFactory(hero=sniper, enemy=storm_spirit, advantage=-3.11)
@@ -220,7 +221,7 @@ class TestAdvantageParserAndResponders(TestCase):
         AdvantageFactory(hero=zeus, enemy=storm_spirit, advantage=-4.50)
         AdvantageFactory(hero=disruptor, enemy=storm_spirit, advantage=1.75)
         AdvantageFactory(hero=storm_spirit, enemy=queen_of_pain, advantage=-1.75)
-        AdvantageFactory(hero=HeroFactory(name='Meepo'), enemy=queen_of_pain, advantage=4.34)
+        AdvantageFactory(hero=meepo, enemy=queen_of_pain, advantage=4.34)
 
     def test_single_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("Which heroes are good against Storm Spirit?")
@@ -231,6 +232,13 @@ class TestAdvantageParserAndResponders(TestCase):
 
     def test_no_words_enemy_advantage(self):
         response, _ = ResponseGenerator.respond("storm spirit")
+        assert response.startswith(
+            "<speak>Queen of Pain is very strong against Storm Spirit. "
+            "Disruptor, Razor, and Shadow Fiend are also good."
+        )
+
+    def test_advantage_right_at_start_of_question(self):
+        response, _ = ResponseGenerator.respond("against storm spirit")
         assert response.startswith(
             "<speak>Queen of Pain is very strong against Storm Spirit. "
             "Disruptor, Razor, and Shadow Fiend are also good."

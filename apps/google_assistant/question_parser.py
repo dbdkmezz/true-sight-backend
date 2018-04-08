@@ -138,7 +138,7 @@ class QuestionParser(object):
                     position = min(self.text.index(s), position)
             except ValueError:
                 pass
-        if not position:
+        if position is None:
             raise ValueError
         return position
 

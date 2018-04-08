@@ -245,6 +245,17 @@ class AdvantageResponse(Response):
     STRONG_ADVANTAGE = 2
 
     @staticmethod
+    def _role_to_string(role):
+        role_map = {
+            HeroRole.CARRY: 'carry',
+            HeroRole.MIDDLE: 'mid',
+            HeroRole.SUPPORT: 'support ',
+            HeroRole.OFF_LANE: 'off-lane',
+            HeroRole.JUNGLER: 'jungle',
+            HeroRole.ROAMING: 'roaming',
+        }
+        return role_map[role]
+
     def _filter_by_role(counters, role):
         if not role:
             return counters
@@ -296,7 +307,18 @@ class SingleHeroCountersResponse(AdvantageResponse):
                 response = '{} good against {}'.format(
                     cls._counters_hero_list(soft_counters),
                     enemy.name)
-        return response
+        if response:
+            return response
+        return cls._no_match_response(enemy, role)
+
+    @classmethod
+    def _no_match_response(cls, enemy, role):
+        if not role:
+            raise Exception("Apparently no one counters %s, presumably that's a bug", enemy)
+        return "Sorry, I don't know of any {} heroes which counter {}".format(
+            cls._role_to_string(role),
+            enemy.name,
+        )
 
 
 class SingleHeroAdvantagesResponse(AdvantageResponse):
@@ -327,7 +349,18 @@ class SingleHeroAdvantagesResponse(AdvantageResponse):
                 response = '{} is good against {}'.format(
                     hero.name,
                     cls._advantage_hero_list(soft_counters))
-        return response
+        if response:
+            return response
+        return cls._no_match_response(hero, role)
+
+    @classmethod
+    def _no_match_response(cls, hero, role):
+        if not role:
+            raise Exception("Apparently %s doesn't counter anyone, presumably that's a bug", hero)
+        return "Sorry, I don't know of any {} heroes which {} counters".format(
+            cls._role_to_string(role),
+            hero.name,
+        )
 
 
 class TwoHeroAdvantageResponse(AdvantageResponse):

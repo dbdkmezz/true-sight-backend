@@ -2,6 +2,7 @@ import pytest
 
 from django.test import TestCase
 
+from apps.hero_advantages.roles import HeroRole
 from apps.hero_advantages.factories import HeroFactory, AdvantageFactory
 from apps.hero_abilities.factories import AbilityFactory
 
@@ -49,6 +50,13 @@ class TestReponses(TestCase):
         response = SingleHeroCountersResponse.respond(queen_of_pain, role=None, user_id=None)
         assert response == 'Meepo is very strong against Queen of Pain'
 
+    def test_counter_response_no_matching_hero(self):
+        queen_of_pain = HeroFactory(name='Queen of Pain')
+        response = SingleHeroCountersResponse.respond(
+            queen_of_pain, role=HeroRole.JUNGLER, user_id=None)
+        assert response == (
+            "Sorry, I don't know of any jungle heroes which counter Queen of Pain")
+
     def test_strengths_response(self):
         queen_of_pain = HeroFactory(name='Queen of Pain')
         storm_spirit = HeroFactory(name='Storm Spirit')
@@ -56,6 +64,13 @@ class TestReponses(TestCase):
 
         response = SingleHeroAdvantagesResponse.respond(queen_of_pain, role=None, user_id=None)
         assert response == 'Queen of Pain is good against Storm Spirit'
+
+    def test_strengths_response_no_matching_hero(self):
+        queen_of_pain = HeroFactory(name='Queen of Pain')
+        response = SingleHeroAdvantagesResponse.respond(
+            queen_of_pain, role=HeroRole.JUNGLER, user_id=None)
+        assert response == (
+            "Sorry, I don't know of any jungle heroes which Queen of Pain counters")
 
     def test_extreme_strengths_response(self):
         queen_of_pain = HeroFactory(name='Queen of Pain')
