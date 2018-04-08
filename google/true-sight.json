@@ -20,10 +20,146 @@
                 "trigger": {
                     "queryPatterns": [
                         "Which heroes are good against $HeroOptions",
+                        "Which heroes is $HeroOptions good against",
+                        "Which heroes are bad against $HeroOptions",
+                        "Which heroes are $HeroOptions bad against",
                         "Which heroes are strong vs $HeroOptions",
                         "Which heroes counter $HeroOptions",
+                        "Which heroes do $HeroOptions counter",
                         "Who counters $HeroOptions",
-                        "Who is good against $HeroOptions"
+                        "Who does $HeroOptions counter",
+                        "What counters $HeroOptions",
+                        "Who is good against $HeroOptions",
+                        "Who is bad against $HeroOptions",
+                        "Who is $HeroOptions bad against",
+                        "Who is $HeroOptions good against",
+                        "What hero counters $HeroOptions",
+                        "What is good against $HeroOptions",
+                        "What is bad against $HeroOptions",
+                        "How do I counter  $HeroOptions",
+                        "What is the counter to $HeroOptions"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "ROLE-COUNTER",
+            "intent": {
+                "name": "com.carver.true-sight.ROLE-COUNTER",
+                "parameters":[
+                    {
+                        "name": "hero",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "role",
+                        "type": "RoleOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "Which $RoleOptions heroes are good against $HeroOptions",
+                        "Which $RoleOptions are good against $HeroOptions",
+                        "Which $RoleOptions heroes are $HeroOptions good against",
+                        "Which $RoleOptions are $HeroOptions good against",
+                        "Which $RoleOptions heroes are bad against $HeroOptions",
+                        "Which $RoleOptions are bad against $HeroOptions",
+                        "Which $RoleOptions heroes are $HeroOptions bad against",
+                        "Which $RoleOptions are $HeroOptions bad against",
+                        "Which $RoleOptions heroes are strong vs $HeroOptions",
+                        "Which $RoleOptions are strong vs $HeroOptions",
+                        "Which $RoleOptions heroes counter $HeroOptions",
+                        "Which $RoleOptions counter $HeroOptions",
+                        "Which $RoleOptions heroes does $HeroOptions counter",
+                        "Which $RoleOptions does $HeroOptions counter"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-SPELLS",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-SPELLS",
+                "parameters":[{
+                    "name": "hero",
+                    "type": "HeroOptions"
+                }],
+                "trigger": {
+                    "queryPatterns": [
+                        "What does $HeroOptions do",
+                        "What are $HeroOptions spells",
+                        "What is $HeroOptions spells",
+                        "What's the $HeroOptions spells",
+                        "What are $HeroOptions abilities",
+                        "What is $HeroOptions abilities",
+                        "What's the $HeroOptions abilities",
+                        "What can $HeroOptions do"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-ULTIMATE",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-ULTIMATE",
+                "parameters":[{
+                    "name": "hero",
+                    "type": "HeroOptions"
+                }],
+                "trigger": {
+                    "queryPatterns": [
+                        "What is $HeroOptions ultimate",
+                        "What is $HeroOptions ultimate cooldown",
+                        "What is $HeroOptions ultimate cool-down",
+                        "Does $HeroOptions ultimate go through BKB",
+                        "Does $HeroOptions ultimate pierce spell immunity",
+                        "What is the damage type of $HeroOptions ultimate",
+                        "What type of damange does $HeroOptions ultimate do",
+                        "What is the cooldown of $HeroOptions ultimate",
+                        "What is the cool-down of $HeroOptions ultimate"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-HOTKEY",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-HOTKEY",
+                "parameters":[
+                    {
+                        "name": "hero",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "hotkey",
+                        "type": "HotkeyOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "What is $HeroOptions $HotkeyOptions",
+                        "What is $HeroOptions $HotkeyOptions cooldown",
+                        "What is $HeroOptions $HotkeyOptions cool-down",
+                        "Does $HeroOptions $HeroOptions go through BKB",
+                        "Does $HeroOptions $HeroOptions pierce spell immunity",
+                        "What does $HeroOptions $HotkeyOptions do",
+                        "What is $HeroOptions $HotkeyOptions",
+                        "What type of damange does $HeroOptions $HotkeyOptions do",
+                        "What is the damange type of $HeroOptions $HotkeyOptions",
+                        "What is the cooldown of $HeroOptions $HotkeyOptions",
+                        "What is the cool-down of $HeroOptions $HotkeyOptions"
                     ]
                 }
             },
@@ -39,125 +175,33 @@
             "fulfillmentApiVersion": 2
         }
     },
-    "types": [{
-        "name": "$HeroOptions",
-        "isUserDefined": true,
-        "entities": [
-            {"key": "Dark Willow", "synonyms": ["Dark Willow"]},
-            {"key": "Pangolier", "synonyms": ["Pangolier"]},
-            {"key": "Monkey King", "synonyms": ["Monkey King"]},
-            {"key": "Underlord", "synonyms": ["Underlord"]},
-            {"key": "Arc Warden", "synonyms": ["Arc Warden"]},
-            {"key": "Winter Wyvern", "synonyms": ["Winter Wyvern"]},
-            {"key": "Techies", "synonyms": ["Techies"]},
-            {"key": "Oracle", "synonyms": ["Oracle"]},
-            {"key": "Phoenix", "synonyms": ["Phoenix"]},
-            {"key": "Terrorblade", "synonyms": ["Terrorblade"]},
-            {"key": "Earth Spirit", "synonyms": ["Earth Spirit"]},
-            {"key": "Ember Spirit", "synonyms": ["Ember Spirit"]},
-            {"key": "Legion Commander", "synonyms": ["Legion Commander"]},
-            {"key": "Elder Titan", "synonyms": ["Elder Titan"]},
-            {"key": "Abaddon", "synonyms": ["Abaddon"]},
-            {"key": "Skywrath Mage", "synonyms": ["Skywrath Mage"]},
-            {"key": "Tusk", "synonyms": ["Tusk"]},
-            {"key": "Bristleback", "synonyms": ["Bristleback"]},
-            {"key": "Timbersaw", "synonyms": ["Timbersaw"]},
-            {"key": "Magnus", "synonyms": ["Magnus"]},
-            {"key": "Centaur Warrunner", "synonyms": ["Centaur Warrunner"]},
-            {"key": "Troll Warlord", "synonyms": ["Troll Warlord"]},
-            {"key": "Medusa", "synonyms": ["Medusa"]},
-            {"key": "Slark", "synonyms": ["Slark"]},
-            {"key": "Visage", "synonyms": ["Visage"]},
-            {"key": "Io", "synonyms": ["Io"]},
-            {"key": "Keeper of the Light", "synonyms": ["Keeper of the Light"]},
-            {"key": "Naga Siren", "synonyms": ["Naga Siren"]},
-            {"key": "Nyx Assassin", "synonyms": ["Nyx Assassin"]},
-            {"key": "Disruptor", "synonyms": ["Disruptor"]},
-            {"key": "Rubick", "synonyms": ["Rubick"]},
-            {"key": "Undying", "synonyms": ["Undying"]},
-            {"key": "Ogre Magi", "synonyms": ["Ogre Magi"]},
-            {"key": "Treant Protector", "synonyms": ["Treant Protector"]},
-            {"key": "Meepo", "synonyms": ["Meepo"]},
-            {"key": "Chaos Knight", "synonyms": ["Chaos Knight"]},
-            {"key": "Lone Druid", "synonyms": ["Lone Druid"]},
-            {"key": "Shadow Demon", "synonyms": ["Shadow Demon"]},
-            {"key": "Brewmaster", "synonyms": ["Brewmaster"]},
-            {"key": "Lycan", "synonyms": ["Lycan"]},
-            {"key": "Outworld Devourer", "synonyms": ["Outworld Devourer"]},
-            {"key": "Silencer", "synonyms": ["Silencer"]},
-            {"key": "Invoker", "synonyms": ["Invoker"]},
-            {"key": "Alchemist", "synonyms": ["Alchemist"]},
-            {"key": "Gyrocopter", "synonyms": ["Gyrocopter"]},
-            {"key": "Spirit Breaker", "synonyms": ["Spirit Breaker"]},
-            {"key": "Ursa", "synonyms": ["Ursa"]},
-            {"key": "Ancient Apparition", "synonyms": ["Ancient Apparition"]},
-            {"key": "Doom", "synonyms": ["Doom"]},
-            {"key": "Spectre", "synonyms": ["Spectre"]},
-            {"key": "Chen", "synonyms": ["Chen"]},
-            {"key": "Batrider", "synonyms": ["Batrider"]},
-            {"key": "Jakiro", "synonyms": ["Jakiro"]},
-            {"key": "Weaver", "synonyms": ["Weaver"]},
-            {"key": "Bounty Hunter", "synonyms": ["Bounty Hunter"]},
-            {"key": "Broodmother", "synonyms": ["Broodmother"]},
-            {"key": "Night Stalker", "synonyms": ["Night Stalker"]},
-            {"key": "Huskar", "synonyms": ["Huskar"]},
-            {"key": "Enchantress", "synonyms": ["Enchantress"]},
-            {"key": "Omniknight", "synonyms": ["Omniknight"]},
-            {"key": "Clinkz", "synonyms": ["Clinkz"]},
-            {"key": "Dark Seer", "synonyms": ["Dark Seer"]},
-            {"key": "Lifestealer", "synonyms": ["Lifestealer"]},
-            {"key": "Nature's Prophet", "synonyms": ["Nature's Prophet"]},
-            {"key": "Leshrac", "synonyms": ["Leshrac"]},
-            {"key": "Clockwerk", "synonyms": ["Clockwerk"]},
-            {"key": "Dazzle", "synonyms": ["Dazzle"]},
-            {"key": "Dragon Knight", "synonyms": ["Dragon Knight"]},
-            {"key": "Luna", "synonyms": ["Luna"]},
-            {"key": "Viper", "synonyms": ["Viper"]},
-            {"key": "Templar Assassin", "synonyms": ["Templar Assassin"]},
-            {"key": "Pugna", "synonyms": ["Pugna"]},
-            {"key": "Phantom Assassin", "synonyms": ["Phantom Assassin"]},
-            {"key": "Death Prophet", "synonyms": ["Death Prophet"]},
-            {"key": "Wraith King", "synonyms": ["Wraith King"]},
-            {"key": "Faceless Void", "synonyms": ["Faceless Void"]},
-            {"key": "Venomancer", "synonyms": ["Venomancer"]},
-            {"key": "Queen of Pain", "synonyms": ["Queen of Pain"]},
-            {"key": "Beastmaster", "synonyms": ["Beastmaster"]},
-            {"key": "Warlock", "synonyms": ["Warlock"]},
-            {"key": "Necrophos", "synonyms": ["Necrophos"]},
-            {"key": "Sniper", "synonyms": ["Sniper"]},
-            {"key": "Tinker", "synonyms": ["Tinker"]},
-            {"key": "Enigma", "synonyms": ["Enigma"]},
-            {"key": "Riki", "synonyms": ["Riki"]},
-            {"key": "Witch Doctor", "synonyms": ["Witch Doctor"]},
-            {"key": "Tidehunter", "synonyms": ["Tidehunter"]},
-            {"key": "Slardar", "synonyms": ["Slardar"]},
-            {"key": "Shadow Shaman", "synonyms": ["Shadow Shaman"]},
-            {"key": "Lion", "synonyms": ["Lion"]},
-            {"key": "Lich", "synonyms": ["Lich"]},
-            {"key": "Lina", "synonyms": ["Lina"]},
-            {"key": "Kunkka", "synonyms": ["Kunkka"]},
-            {"key": "Zeus", "synonyms": ["Zeus"]},
-            {"key": "Windranger", "synonyms": ["Windranger"]},
-            {"key": "Vengeful Spirit", "synonyms": ["Vengeful Spirit"]},
-            {"key": "Tiny", "synonyms": ["Tiny"]},
-            {"key": "Sven", "synonyms": ["Sven"]},
-            {"key": "Storm Spirit", "synonyms": ["Storm Spirit"]},
-            {"key": "Sand King", "synonyms": ["Sand King"]},
-            {"key": "Razor", "synonyms": ["Razor"]},
-            {"key": "Pudge", "synonyms": ["Pudge"]},
-            {"key": "Puck", "synonyms": ["Puck"]},
-            {"key": "Phantom Lancer", "synonyms": ["Phantom Lancer"]},
-            {"key": "Morphling", "synonyms": ["Morphling"]},
-            {"key": "Shadow Fiend", "synonyms": ["Shadow Fiend"]},
-            {"key": "Mirana", "synonyms": ["Mirana"]},
-            {"key": "Juggernaut", "synonyms": ["Juggernaut"]},
-            {"key": "Earthshaker", "synonyms": ["Earthshaker"]},
-            {"key": "Drow Ranger", "synonyms": ["Drow Ranger"]},
-            {"key": "Crystal Maiden", "synonyms": ["Crystal Maiden"]},
-            {"key": "Bloodseeker", "synonyms": ["Bloodseeker"]},
-            {"key": "Bane", "synonyms": ["Bane"]},
-            {"key": "Axe", "synonyms": ["Axe"]},
-            {"key": "Anti-Mage", "synonyms": ["Anti-Mage"]}
-        ]
-    }]
+    "types": [
+        {
+            "name": "$HeroOptions",
+            "isUserDefined": true,
+            "entities": [{"key": "Shadow Shaman", "synonyms": ["Shadow Shaman"]}, {"key": "Monkey King", "synonyms": ["Monkey King"]}, {"key": "Dazzle", "synonyms": ["Dazzle"]}, {"key": "Disruptor", "synonyms": ["Disruptor", "disrupter"]}, {"key": "Jakiro", "synonyms": ["Jakiro"]}, {"key": "Leshrac", "synonyms": ["Leshrac", "track", "electric", "lash rack"]}, {"key": "Bane", "synonyms": ["Bane", "spain", "bayne", "pane"]}, {"key": "Nature's Prophet", "synonyms": ["Nature's Prophet", "Furion", "nature"]}, {"key": "Clinkz", "synonyms": ["Clinkz", "clicks", "clinks"]}, {"key": "Magnus", "synonyms": ["Magnus"]}, {"key": "Earthshaker", "synonyms": ["Earthshaker", "shaker"]}, {"key": "Naga Siren", "synonyms": ["Naga Siren", "naga", "siren"]}, {"key": "Weaver", "synonyms": ["Weaver"]}, {"key": "Keeper of the Light", "synonyms": ["Keeper of the Light", "Keeper"]}, {"key": "Winter Wyvern", "synonyms": ["Winter Wyvern"]}, {"key": "Batrider", "synonyms": ["Batrider", "bat rider"]}, {"key": "Chen", "synonyms": ["Chen", "chan", "shen"]}, {"key": "Zeus", "synonyms": ["Zeus"]}, {"key": "Brewmaster", "synonyms": ["Brewmaster", "brew master"]}, {"key": "Ancient Apparition", "synonyms": ["Ancient Apparition", "aa", "ai"]}, {"key": "Spirit Breaker", "synonyms": ["Spirit Breaker"]}, {"key": "Gyrocopter", "synonyms": ["Gyrocopter", "gyro", "giro"]}, {"key": "Broodmother", "synonyms": ["Broodmother", "brood"]}, {"key": "Slardar", "synonyms": ["Slardar", "slider", "louder", "cider"]}, {"key": "Invoker", "synonyms": ["Invoker", "in walker", "in boca"]}, {"key": "Silencer", "synonyms": ["Silencer"]}, {"key": "Vengeful Spirit", "synonyms": ["Vengeful Spirit", "Venge"]}, {"key": "Riki", "synonyms": ["Riki", "rikke"]}, {"key": "Tiny", "synonyms": ["Tiny"]}, {"key": "Lone Druid", "synonyms": ["Lone Druid", "sloane", "lounge"]}, {"key": "Viper", "synonyms": ["Viper"]}, {"key": "Meepo", "synonyms": ["Meepo", "me po", "mitoo"]}, {"key": "Treant Protector", "synonyms": ["Treant Protector", "Treant"]}, {"key": "Ogre Magi", "synonyms": ["Ogre Magi", "ogre", "over major", "ogre magor", "over magi"]}, {"key": "Rubick", "synonyms": ["Rubick", "rubik"]}, {"key": "Nyx Assassin", "synonyms": ["Nyx Assassin", "nyx", "mix"]}, {"key": "Tidehunter", "synonyms": ["Tidehunter", "tide hunter", "tide", "tired", ""]}, {"key": "Io", "synonyms": ["Io"]}, {"key": "Spectre", "synonyms": ["Spectre", "inspector"]}, {"key": "Enigma", "synonyms": ["Enigma"]}, {"key": "Outworld Devourer", "synonyms": ["Outworld Devourer", "out world", "od", "outworld", "audi"]}, {"key": "Kunkka", "synonyms": ["Kunkka", "conker", "conquer", "commander"]}, {"key": "Witch Doctor", "synonyms": ["Witch Doctor", "which doctor", "doctor"]}, {"key": "Medusa", "synonyms": ["Medusa"]}, {"key": "Troll Warlord", "synonyms": ["Troll Warlord", "Troll"]}, {"key": "Sniper", "synonyms": ["Sniper"]}, {"key": "Timbersaw", "synonyms": ["Timbersaw", "imbecile", "timber"]}, {"key": "Visage", "synonyms": ["Visage", "visit", "research"]}, {"key": "Ember Spirit", "synonyms": ["Ember Spirit", "Ember", "mbna"]}, {"key": "Puck", "synonyms": ["Puck", "park", "pack"]}, {"key": "Phantom Lancer", "synonyms": ["Phantom Lancer", "pl"]}, {"key": "Dragon Knight", "synonyms": ["Dragon Knight", "dragonite", "on night", "dragon bite", "dragonette"]}, {"key": "Oracle", "synonyms": ["Oracle"]}, {"key": "Legion Commander", "synonyms": ["Legion Commander", "Legion"]}, {"key": "Arc Warden", "synonyms": ["Arc Warden", "walking"]}, {"key": "Necrophos", "synonyms": ["Necrophos", "necro"]}, {"key": "Bounty Hunter", "synonyms": ["Bounty Hunter"]}, {"key": "Pangolier", "synonyms": ["Pangolier", "pango", "spangly", "panggang", "pangolin", "pangalan"]}, {"key": "Huskar", "synonyms": ["Huskar", "tasker", "oscar"]}, {"key": "Axe", "synonyms": ["Axe", "tax"]}, {"key": "Storm Spirit", "synonyms": ["Storm Spirit", "Storm"]}, {"key": "Drow Ranger", "synonyms": ["Drow Ranger", "drow", "drought", "drawer"]}, {"key": "Lina", "synonyms": ["Lina", "lena"]}, {"key": "Juggernaut", "synonyms": ["Juggernaut", "Jug", "dragonaut"]}, {"key": "Warlock", "synonyms": ["Warlock", "war lock"]}, {"key": "Morphling", "synonyms": ["Morphling"]}, {"key": "Luna", "synonyms": ["Luna"]}, {"key": "Dark Seer", "synonyms": ["Dark Seer", "akira"]}, {"key": "Pudge", "synonyms": ["Pudge", "patch", "purge", "punch", "porridge", "fudge"]}, {"key": "Razor", "synonyms": ["Razor", "razer", "reza"]}, {"key": "Techies", "synonyms": ["Techies", "turkeys", "chucky"]}, {"key": "Slark", "synonyms": ["Slark", "rock", "lark", "luck"]}, {"key": "Phoenix", "synonyms": ["Phoenix"]}, {"key": "Lycan", "synonyms": ["Lycan", "i can", "lichen", "lucian"]}, {"key": "Earth Spirit", "synonyms": ["Earth Spirit"]}, {"key": "Lion", "synonyms": ["Lion"]}, {"key": "Mirana", "synonyms": ["Mirana", "marana"]}, {"key": "Lifestealer", "synonyms": ["Lifestealer", "life stealer"]}, {"key": "Doom", "synonyms": ["Doom"]}, {"key": "Tinker", "synonyms": ["Tinker"]}, {"key": "Beastmaster", "synonyms": ["Beastmaster", "beast master"]}, {"key": "Terrorblade", "synonyms": ["Terrorblade", "terror blade", "terra blade", "tb"]}, {"key": "Queen of Pain", "synonyms": ["Queen of Pain", "QOP", "co-op", "qwop", "queen of time"]}, {"key": "Underlord", "synonyms": ["Underlord", "under lord"]}, {"key": "Pugna", "synonyms": ["Pugna", "partner", "pubmed"]}, {"key": "Alchemist", "synonyms": ["Alchemist"]}, {"key": "Faceless Void", "synonyms": ["Faceless Void", "faceless", "void", "face less void"]}, {"key": "Death Prophet", "synonyms": ["Death Prophet"]}, {"key": "Enchantress", "synonyms": ["Enchantress"]}, {"key": "Phantom Assassin", "synonyms": ["Phantom Assassin", "pa"]}, {"key": "Clockwerk", "synonyms": ["Clockwerk", "clockwork", "clock"]}, {"key": "Chaos Knight", "synonyms": ["Chaos Knight", "CK"]}, {"key": "Wraith King", "synonyms": ["Wraith King", "racecourse", "raith king", "race king", "writing"]}, {"key": "Templar Assassin", "synonyms": ["Templar Assassin", "ta"]}, {"key": "Omniknight", "synonyms": ["Omniknight", "the light", "opening", "nonna night", "omni", "omni knight", "me night", "omni night"]}, {"key": "Night Stalker", "synonyms": ["Night Stalker", "nightstalker"]}, {"key": "Ursa", "synonyms": ["Ursa", "the sun", "airsoft", "earth that", "asa", "earth's uh"]}, {"key": "Shadow Demon", "synonyms": ["Shadow Demon"]}, {"key": "Undying", "synonyms": ["Undying", "and dying"]}, {"key": "Centaur Warrunner", "synonyms": ["Centaur Warrunner", "Centaur"]}, {"key": "Bristleback", "synonyms": ["Bristleback", "bristol", "bristle"]}, {"key": "Tusk", "synonyms": ["Tusk", "task"]}, {"key": "Skywrath Mage", "synonyms": ["Skywrath Mage", "Skywrath"]}, {"key": "Abaddon", "synonyms": ["Abaddon", "abadan"]}, {"key": "Elder Titan", "synonyms": ["Elder Titan"]}, {"key": "Dark Willow", "synonyms": ["Dark Willow", "dark will", "dog will", "dark with", "dog with", "stock will", "stock with"]}, {"key": "Anti-Mage", "synonyms": ["Anti-Mage", "AM", "anti mage"]}, {"key": "Bloodseeker", "synonyms": ["Bloodseeker", "blood seeker"]}, {"key": "Crystal Maiden", "synonyms": ["Crystal Maiden", "cm", "maiden"]}, {"key": "Shadow Fiend", "synonyms": ["Shadow Fiend", "sf"]}, {"key": "Sand King", "synonyms": ["Sand King", "sans king", "and king", "sand can", "san king"]}, {"key": "Sven", "synonyms": ["Sven", "stem", "spam", "spend", "stan", "spain", "spin"]}, {"key": "Windranger", "synonyms": ["Windranger", "Wind Ranger", "Lyralei"]}, {"key": "Lich", "synonyms": ["Lich"]}, {"key": "Venomancer", "synonyms": ["Venomancer", "vino", "veno", "villa monster"]}]
+        },
+        {
+            "name": "$RoleOptions",
+            "isUserDefined": true,
+            "entities": [
+                {"key": "carry", "synonyms": ["carry", "carrie", "safe", "carries"]},
+                {"key": "middle", "synonyms": ["mid", "mids", "middle", "meat", "meats", "made", "meet", "meds", "means", "middling", "midlane"]},
+                {"key": "support", "synonyms": ["support", "supports"]},
+                {"key": "off lane", "synonyms": ["off", "offlane", "offlanes", "offline", "offlines", "off lane"]},
+                {"key": "jungle", "synonyms": ["jungle", "jungling", "jungler", "junglers"]},
+                {"key": "roaming", "synonyms": ["roaming", "roamer", "roman", "roamers"]}
+            ]
+        },
+        {
+            "name": "$HotkeyOptions",
+            "isUserDefined": true,
+            "entities": [
+                {"key": "q", "synonyms": ["q"]},
+                {"key": "w", "synonyms": ["w"]},
+                {"key": "e", "synonyms": ["e"]},
+                {"key": "r", "synonyms": ["r"]}
+            ]
+        }
+    ]
 }
