@@ -23,10 +23,12 @@
                         "Which heroes is $HeroOptions good against",
                         "Which heroes are bad against $HeroOptions",
                         "Which heroes are $HeroOptions bad against",
-                        "Which heroes are strong vs $HeroOptions",
+                        "Which heroes are strong against $HeroOptions",
                         "Which heroes counter $HeroOptions",
                         "Which heroes do $HeroOptions counter",
                         "Who counters $HeroOptions",
+                        "Which Dota 2 hero counters $HeroOptions",
+                        "Which Dota hero counters $HeroOptions",
                         "Who does $HeroOptions counter",
                         "What counters $HeroOptions",
                         "Who is good against $HeroOptions",
@@ -34,10 +36,38 @@
                         "Who is $HeroOptions bad against",
                         "Who is $HeroOptions good against",
                         "What hero counters $HeroOptions",
+                        "What heroes does $HeroOptions counter",
                         "What is good against $HeroOptions",
                         "What is bad against $HeroOptions",
                         "How do I counter  $HeroOptions",
                         "What is the counter to $HeroOptions"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "TWO-HERO-COUNTER",
+            "intent": {
+                "name": "com.carver.true-sight.TWO-HERO-COUNTER",
+                "parameters":[
+                    {
+                        "name": "hero1",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "hero2",
+                        "type": "HeroOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "Does $HeroOptions counter $HeroOptions",
+                        "Does $HeroOptions counter $HeroOptions in Dota 2",
+                        "Is $HeroOptions strong against $HeroOptions",
+                        "Is $HeroOptions good against $HeroOptions"
                     ]
                 }
             },
@@ -69,13 +99,27 @@
                         "Which $RoleOptions are bad against $HeroOptions",
                         "Which $RoleOptions heroes are $HeroOptions bad against",
                         "Which $RoleOptions are $HeroOptions bad against",
-                        "Which $RoleOptions heroes are strong vs $HeroOptions",
                         "Which $RoleOptions are strong vs $HeroOptions",
                         "Which $RoleOptions heroes counter $HeroOptions",
                         "Which $RoleOptions counter $HeroOptions",
+                        "Which $RoleOptions counter $HeroOptions in Dota 2",
                         "Which $RoleOptions heroes does $HeroOptions counter",
-                        "Which $RoleOptions does $HeroOptions counter"
-                    ]
+                        "What $RoleOptions does $HeroOptions counter",
+                        "What $RoleOptions heroes are good against $HeroOptions",
+                        "What $RoleOptions are good against $HeroOptions",
+                        "What $RoleOptions heroes are $HeroOptions good against",
+                        "What $RoleOptions are $HeroOptions good against",
+                        "What $RoleOptions heroes are bad against $HeroOptions",
+                        "What $RoleOptions are bad against $HeroOptions",
+                        "What $RoleOptions heroes are $HeroOptions bad against",
+                        "What $RoleOptions are $HeroOptions bad against",
+                        "What $RoleOptions heroes are strong vs $HeroOptions",
+                        "What $RoleOptions are strong vs $HeroOptions",
+                        "What $RoleOptions heroes counter $HeroOptions",
+                        "What $RoleOptions counter $HeroOptions",
+                        "What $RoleOptions counter $HeroOptions in Dota 2",
+                        "What $RoleOptions heroes does $HeroOptions counter",
+                        "What $RoleOptions does $HeroOptions counter"                    ]
                 }
             },
             "fulfillment": {
@@ -94,11 +138,9 @@
                     "queryPatterns": [
                         "What does $HeroOptions do",
                         "What are $HeroOptions spells",
-                        "What is $HeroOptions spells",
-                        "What's the $HeroOptions spells",
+                        "What are $HeroOptions spells in Dota 2",
                         "What are $HeroOptions abilities",
                         "What is $HeroOptions abilities",
-                        "What's the $HeroOptions abilities",
                         "What can $HeroOptions do"
                     ]
                 }
@@ -108,35 +150,9 @@
             }
         },
         {
-            "name": "HERO-ULTIMATE",
+            "name": "HERO-ABILITY",
             "intent": {
-                "name": "com.carver.true-sight.HERO-ULTIMATE",
-                "parameters":[{
-                    "name": "hero",
-                    "type": "HeroOptions"
-                }],
-                "trigger": {
-                    "queryPatterns": [
-                        "What is $HeroOptions ultimate",
-                        "What is $HeroOptions ultimate cooldown",
-                        "What is $HeroOptions ultimate cool-down",
-                        "Does $HeroOptions ultimate go through BKB",
-                        "Does $HeroOptions ultimate pierce spell immunity",
-                        "What is the damage type of $HeroOptions ultimate",
-                        "What type of damange does $HeroOptions ultimate do",
-                        "What is the cooldown of $HeroOptions ultimate",
-                        "What is the cool-down of $HeroOptions ultimate"
-                    ]
-                }
-            },
-            "fulfillment": {
-                "conversationName": "True Sight"
-            }
-        },
-        {
-            "name": "HERO-HOTKEY",
-            "intent": {
-                "name": "com.carver.true-sight.HERO-HOTKEY",
+                "name": "com.carver.true-sight.HERO-ABILITY",
                 "parameters":[
                     {
                         "name": "hero",
@@ -150,16 +166,89 @@
                 "trigger": {
                     "queryPatterns": [
                         "What is $HeroOptions $HotkeyOptions",
+                        "What does $HeroOptions $HotkeyOptions do"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-ABILITY-COOLDOWN",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-ABILITY-COOLDOWN",
+                "parameters":[
+                    {
+                        "name": "hero",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "hotkey",
+                        "type": "HotkeyOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
                         "What is $HeroOptions $HotkeyOptions cooldown",
                         "What is $HeroOptions $HotkeyOptions cool-down",
-                        "Does $HeroOptions $HeroOptions go through BKB",
-                        "Does $HeroOptions $HeroOptions pierce spell immunity",
-                        "What does $HeroOptions $HotkeyOptions do",
-                        "What is $HeroOptions $HotkeyOptions",
-                        "What type of damange does $HeroOptions $HotkeyOptions do",
-                        "What is the damange type of $HeroOptions $HotkeyOptions",
                         "What is the cooldown of $HeroOptions $HotkeyOptions",
                         "What is the cool-down of $HeroOptions $HotkeyOptions"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-ABILITY-SPELL-IMMUNITY",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-ABILITY-SPELL-IMMUNITY",
+                "parameters":[
+                    {
+                        "name": "hero",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "hotkey",
+                        "type": "HotkeyOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "Does $HeroOptions $HeroOptions go through BKB",
+                        "Does $HeroOptions $HeroOptions go through Black King Bar",
+                        "Does $HeroOptions $HeroOptions go through spell immunity",
+                        "Does $HeroOptions $HeroOptions pierce spell immunity"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "conversationName": "True Sight"
+            }
+        },
+        {
+            "name": "HERO-ABILITY-DAMAGE-TYPE",
+            "intent": {
+                "name": "com.carver.true-sight.HERO-ABILITY-DAMAGE-TYPE",
+                "parameters":[
+                    {
+                        "name": "hero",
+                        "type": "HeroOptions"
+                    },
+                    {
+                        "name": "hotkey",
+                        "type": "HotkeyOptions"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "What type of damage does $HeroOptions $HotkeyOptions do",
+                        "Does $HeroOptions $HotkeyOptions do physical damage",
+                        "Does $HeroOptions $HotkeyOptions do magical damage",
+                        "Does $HeroOptions $HotkeyOptions do pure damage",
+                        "What is the damage type of $HeroOptions $HotkeyOptions"
                     ]
                 }
             },
@@ -200,7 +289,9 @@
                 {"key": "q", "synonyms": ["q"]},
                 {"key": "w", "synonyms": ["w"]},
                 {"key": "e", "synonyms": ["e"]},
-                {"key": "r", "synonyms": ["r"]}
+                {"key": "r", "synonyms": ["r"]},
+                {"key": "ultimate", "synonyms": ["ultimate"]},
+                {"key": "ulti", "synonyms": ["ulti"]}
             ]
         }
     ]
