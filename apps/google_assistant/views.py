@@ -32,7 +32,8 @@ good_response_logger = logging.getLogger('good_response')
 # what is dota
 # which hero is very easy to play
 # who are the easiest supports
-# what is the cost of a ship stick
+# what is the cost of a ship stick / how much does boots of travel cost
+# what changed in 7.13
 # how to play enchantress against rubick
 #
 # # V2
