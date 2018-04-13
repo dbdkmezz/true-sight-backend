@@ -290,8 +290,7 @@
                 {"key": "w", "synonyms": ["w"]},
                 {"key": "e", "synonyms": ["e"]},
                 {"key": "r", "synonyms": ["r"]},
-                {"key": "ultimate", "synonyms": ["ultimate"]},
-                {"key": "ulti", "synonyms": ["ulti"]}
+                {"key": "ultimate", "synonyms": ["ultimate", "ulti"]}
             ]
         }
     ]
