@@ -21,7 +21,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         'error_file': {
-            'level': 'ERROR',
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
             'filename': os.path.join(os.sep, 'var', 'log', 'www', 'error.log'),
             'formatter': 'verbose',
