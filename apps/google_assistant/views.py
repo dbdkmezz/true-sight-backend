@@ -81,9 +81,9 @@ def _respond_to_request(request):
     except NoJsonException:
         return HttpResponse("Hello there, I'm a Google Assistant App.")
 
-    if google_request.text == '1':  # Google's ping
-        logger.info("Ping")
-        return JsonResponse(AppResponse().tell("Hello Google"))
+    if google_request.is_health_check:
+        logger.info("Health check")
+        return JsonResponse(AppResponse().tell("Hello Google, I'm feeling healthy!"))
 
     if google_request.text == 'test catching exceptions':
         raise Exception

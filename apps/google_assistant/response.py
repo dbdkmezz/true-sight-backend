@@ -89,7 +89,7 @@ class Context(object):
         self.useage_count = data.get('useage-count', 0)  # no get?
 
     # don't include 'call down' -- that's an ability!
-    COOLDOWN_WORDS = ('cool down', 'cooldown', 'called down')
+    COOLDOWN_WORDS = ('cool down', 'cooldown', 'called down', 'codon')
     SPELL_IMMUNITY_WORDS = ('spell immunity', 'spell amenity', 'black king', 'king bar', 'bkb')
     DAMAGE_TYPE_WORDS = ('damage', 'magical', 'physical', 'pure')
     COUNTER_WORDS = ('strong', 'against', 'counter', 'counters', 'showing at')
