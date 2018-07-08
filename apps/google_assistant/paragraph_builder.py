@@ -2,6 +2,14 @@ class ListNotStartedError(Exception):
     pass
 
 
+class NoSingularListError(Exception):
+    pass
+
+
+class NoPluralListError(Exception):
+    pass
+
+
 class ParagraphBuilder(object):
     def __init__(self):
         self._current_sentence = None
@@ -60,8 +68,12 @@ class ListBuilder(object):
     def to_string(self):
         assert self._items
         if len(self._items) == 1:
+            if not self._singular_introduction:
+                raise NoSingularListError
             return '{} {}'.format(self._singular_introduction, self._items[0])
         else:
+            if not self._plural_introduction:
+                raise NoPluralListError
             self._items[-1] = 'and ' + self._items[-1]
             return '{} {}'.format(
                 self._plural_introduction,

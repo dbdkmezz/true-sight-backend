@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .paragraph_builder import ParagraphBuilder, ListNotStartedError
+from .paragraph_builder import ParagraphBuilder, ListBuilder, ListNotStartedError, NoSingularListError, NoPluralListError
 
 
 class TestParagraphBuilder(TestCase):
@@ -46,3 +46,18 @@ class TestParagraphBuilder(TestCase):
         builder = ParagraphBuilder()
         with self.assertRaises(ListNotStartedError):
             builder.add_to_list('Pizza')
+
+
+class TestListBuilder(TestCase):
+    def test_raises_if_no_singular_option(self):
+        builder = ListBuilder(None, 'pizzas are')
+        builder.add_item('Hawaiian')
+        with self.assertRaises(NoSingularListError):
+            builder.to_string()
+
+    def test_raises_if_no_plural_option(self):
+        builder = ListBuilder('pizza is', None)
+        builder.add_item('Hawaiian')
+        builder.add_item('Margherita')
+        with self.assertRaises(NoPluralListError):
+            builder.to_string()
