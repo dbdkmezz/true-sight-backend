@@ -11,14 +11,14 @@ class TestHeroModel(TestCase):
     def test_load_aliases(self):
         windranger = HeroFactory(name='Windranger')
         windranger.load_aliases()
-        assert windranger.aliases_data == 'Wind Ranger,Lyralei'
-        assert windranger.aliases == ['Windranger', 'Wind Ranger', 'Lyralei']
+        assert windranger.aliases_data == 'wind ranger,lyralei'
+        assert windranger.aliases == ['Windranger', 'wind ranger', 'lyralei']
 
     def test_add_alias(self):
-        windranger = HeroFactory(name='Windranger', aliases_data='Wind Ranger')
+        windranger = HeroFactory(name='Windranger', aliases_data='wind ranger')
         windranger.load_aliases()
-        assert windranger.aliases_data == 'Wind Ranger,Lyralei'
-        assert windranger.aliases == ['Windranger', 'Wind Ranger', 'Lyralei']
+        assert windranger.aliases_data == 'wind ranger,lyralei'
+        assert windranger.aliases == ['Windranger', 'wind ranger', 'lyralei']
 
 
 @pytest.mark.django_db
