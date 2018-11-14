@@ -19,28 +19,28 @@
                 }],
                 "trigger": {
                     "queryPatterns": [
-                        "Which heroes are good against $HeroOptions",
-                        "Which heroes is $HeroOptions good against",
-                        "Which heroes are bad against $HeroOptions",
-                        "Which heroes are $HeroOptions bad against",
-                        "Which heroes are strong against $HeroOptions",
-                        "Which heroes counter $HeroOptions",
-                        "Which heroes do $HeroOptions counter",
-                        "Who counters $HeroOptions",
-                        "Which Dota 2 hero counters $HeroOptions",
-                        "Which Dota hero counters $HeroOptions",
-                        "Who does $HeroOptions counter",
-                        "What counters $HeroOptions",
-                        "Who is good against $HeroOptions",
-                        "Who is bad against $HeroOptions",
-                        "Who is $HeroOptions bad against",
-                        "Who is $HeroOptions good against",
-                        "What hero counters $HeroOptions",
-                        "What heroes does $HeroOptions counter",
-                        "What is good against $HeroOptions",
-                        "What is bad against $HeroOptions",
-                        "How do I counter  $HeroOptions",
-                        "What is the counter to $HeroOptions"
+                        "Which heroes are good against $HeroOptions:hero",
+                        "Which heroes is $HeroOptions:hero good against",
+                        "Which heroes are bad against $HeroOptions:hero",
+                        "Which heroes are $HeroOptions:hero bad against",
+                        "Which heroes are strong against $HeroOptions:hero",
+                        "Which heroes counter $HeroOptions:hero",
+                        "Which heroes do $HeroOptions:hero counter",
+                        "Who counters $HeroOptions:hero",
+                        "Which Dota 2 hero counters $HeroOptions:hero",
+                        "Which Dota hero counters $HeroOptions:hero",
+                        "Who does $HeroOptions:hero counter",
+                        "What counters $HeroOptions:hero",
+                        "Who is good against $HeroOptions:hero",
+                        "Who is bad against $HeroOptions:hero",
+                        "Who is $HeroOptions:hero bad against",
+                        "Who is $HeroOptions:hero good against",
+                        "What hero counters $HeroOptions:hero",
+                        "What heroes does $HeroOptions:hero counter",
+                        "What is good against $HeroOptions:hero",
+                        "What is bad against $HeroOptions:hero",
+                        "How do I counter $HeroOptions:hero",
+                        "What is the counter to $HeroOptions:hero"
                     ]
                 }
             },
@@ -64,10 +64,10 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "Does $HeroOptions counter $HeroOptions",
-                        "Does $HeroOptions counter $HeroOptions in Dota 2",
-                        "Is $HeroOptions strong against $HeroOptions",
-                        "Is $HeroOptions good against $HeroOptions"
+                        "Does $HeroOptions:hero1 counter $HeroOptions:hero2",
+                        "Does $HeroOptions:hero1 counter $HeroOptions:hero2 in Dota 2",
+                        "Is $HeroOptions:hero1 strong against $HeroOptions:hero2",
+                        "Is $HeroOptions:hero1 good against $HeroOptions:hero2"
                     ]
                 }
             },
@@ -91,35 +91,35 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "Which $RoleOptions heroes are good against $HeroOptions",
-                        "Which $RoleOptions are good against $HeroOptions",
-                        "Which $RoleOptions heroes are $HeroOptions good against",
-                        "Which $RoleOptions are $HeroOptions good against",
-                        "Which $RoleOptions heroes are bad against $HeroOptions",
-                        "Which $RoleOptions are bad against $HeroOptions",
-                        "Which $RoleOptions heroes are $HeroOptions bad against",
-                        "Which $RoleOptions are $HeroOptions bad against",
-                        "Which $RoleOptions are strong vs $HeroOptions",
-                        "Which $RoleOptions heroes counter $HeroOptions",
-                        "Which $RoleOptions counter $HeroOptions",
-                        "Which $RoleOptions counter $HeroOptions in Dota 2",
-                        "Which $RoleOptions heroes does $HeroOptions counter",
-                        "What $RoleOptions does $HeroOptions counter",
-                        "What $RoleOptions heroes are good against $HeroOptions",
-                        "What $RoleOptions are good against $HeroOptions",
-                        "What $RoleOptions heroes are $HeroOptions good against",
-                        "What $RoleOptions are $HeroOptions good against",
-                        "What $RoleOptions heroes are bad against $HeroOptions",
-                        "What $RoleOptions are bad against $HeroOptions",
-                        "What $RoleOptions heroes are $HeroOptions bad against",
-                        "What $RoleOptions are $HeroOptions bad against",
-                        "What $RoleOptions heroes are strong vs $HeroOptions",
-                        "What $RoleOptions are strong vs $HeroOptions",
-                        "What $RoleOptions heroes counter $HeroOptions",
-                        "What $RoleOptions counter $HeroOptions",
-                        "What $RoleOptions counter $HeroOptions in Dota 2",
-                        "What $RoleOptions heroes does $HeroOptions counter",
-                        "What $RoleOptions does $HeroOptions counter"                    ]
+                        "Which $RoleOptions:role heroes are good against $HeroOptions:hero",
+                        "Which $RoleOptions:role are good against $HeroOptions:hero",
+                        "Which $RoleOptions:role heroes are $HeroOptions:hero good against",
+                        "Which $RoleOptions:role are $HeroOptions:hero good against",
+                        "Which $RoleOptions:role heroes are bad against $HeroOptions:hero",
+                        "Which $RoleOptions:role are bad against $HeroOptions:hero",
+                        "Which $RoleOptions:role heroes are $HeroOptions:hero bad against",
+                        "Which $RoleOptions:role are $HeroOptions:hero bad against",
+                        "Which $RoleOptions:role are strong vs $HeroOptions:hero",
+                        "Which $RoleOptions:role heroes counter $HeroOptions:hero",
+                        "Which $RoleOptions:role counter $HeroOptions:hero",
+                        "Which $RoleOptions:role counter $HeroOptions:hero in Dota 2",
+                        "Which $RoleOptions:role heroes does $HeroOptions:hero counter",
+                        "What $RoleOptions:role does $HeroOptions:hero counter",
+                        "What $RoleOptions:role heroes are good against $HeroOptions:hero",
+                        "What $RoleOptions:role are good against $HeroOptions:hero",
+                        "What $RoleOptions:role heroes are $HeroOptions:hero good against",
+                        "What $RoleOptions:role are $HeroOptions:hero good against",
+                        "What $RoleOptions:role heroes are bad against $HeroOptions:hero",
+                        "What $RoleOptions:role are bad against $HeroOptions:hero",
+                        "What $RoleOptions:role heroes are $HeroOptions:hero bad against",
+                        "What $RoleOptions:role are $HeroOptions:hero bad against",
+                        "What $RoleOptions:role heroes are strong vs $HeroOptions:hero",
+                        "What $RoleOptions:role are strong vs $HeroOptions:hero",
+                        "What $RoleOptions:role heroes counter $HeroOptions:hero",
+                        "What $RoleOptions:role counter $HeroOptions:hero",
+                        "What $RoleOptions:role counter $HeroOptions:hero in Dota 2",
+                        "What $RoleOptions:role heroes does $HeroOptions:hero counter",
+                        "What $RoleOptions:role does $HeroOptions:hero counter"                    ]
                 }
             },
             "fulfillment": {
@@ -136,12 +136,12 @@
                 }],
                 "trigger": {
                     "queryPatterns": [
-                        "What does $HeroOptions do",
-                        "What are $HeroOptions spells",
-                        "What are $HeroOptions spells in Dota 2",
-                        "What are $HeroOptions abilities",
-                        "What is $HeroOptions abilities",
-                        "What can $HeroOptions do"
+                        "What does $HeroOptions:hero do",
+                        "What are $HeroOptions:hero spells",
+                        "What are $HeroOptions:hero spells in Dota 2",
+                        "What are $HeroOptions:hero abilities",
+                        "What is $HeroOptions:hero abilities",
+                        "What can $HeroOptions:hero do"
                     ]
                 }
             },
@@ -165,8 +165,8 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "What is $HeroOptions $HotkeyOptions",
-                        "What does $HeroOptions $HotkeyOptions do"
+                        "What is $HeroOptions:hero $HotkeyOptions:hotkey",
+                        "What does $HeroOptions:hero $HotkeyOptions:hotkey do"
                     ]
                 }
             },
@@ -190,10 +190,10 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "What is $HeroOptions $HotkeyOptions cooldown",
-                        "What is $HeroOptions $HotkeyOptions cool-down",
-                        "What is the cooldown of $HeroOptions $HotkeyOptions",
-                        "What is the cool-down of $HeroOptions $HotkeyOptions"
+                        "What is $HeroOptions:hero $HotkeyOptions:hotkey cooldown",
+                        "What is $HeroOptions:hero $HotkeyOptions:hotkey cool-down",
+                        "What is the cooldown of $HeroOptions:hero $HotkeyOptions:hotkey",
+                        "What is the cool-down of $HeroOptions:hero $HotkeyOptions:hotkey"
                     ]
                 }
             },
@@ -217,10 +217,10 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "Does $HeroOptions $HeroOptions go through BKB",
-                        "Does $HeroOptions $HeroOptions go through Black King Bar",
-                        "Does $HeroOptions $HeroOptions go through spell immunity",
-                        "Does $HeroOptions $HeroOptions pierce spell immunity"
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey go through BKB",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey go through Black King Bar",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey go through spell immunity",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey pierce spell immunity"
                     ]
                 }
             },
@@ -244,11 +244,11 @@
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "What type of damage does $HeroOptions $HotkeyOptions do",
-                        "Does $HeroOptions $HotkeyOptions do physical damage",
-                        "Does $HeroOptions $HotkeyOptions do magical damage",
-                        "Does $HeroOptions $HotkeyOptions do pure damage",
-                        "What is the damage type of $HeroOptions $HotkeyOptions"
+                        "What type of damage does $HeroOptions:hero $HotkeyOptions:hotkey do",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey do physical damage",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey do magical damage",
+                        "Does $HeroOptions:hero $HotkeyOptions:hotkey do pure damage",
+                        "What is the damage type of $HeroOptions:hero $HotkeyOptions:hotkey"
                     ]
                 }
             },
@@ -260,7 +260,7 @@
     "conversations": {
         "True Sight": {
             "name": "True Sight",
-            "url": "https://URL/google_assistant/",
+            "url": "https://URL_GOES_HERE/google_assistant/",
             "fulfillmentApiVersion": 2
         }
     },
