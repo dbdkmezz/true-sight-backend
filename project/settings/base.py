@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import io
 import json
 from unipath import Path
 
@@ -21,7 +22,7 @@ SETTINGS_DIR = Path(__file__).ancestor(1)
 
 
 secrets_json = SETTINGS_DIR.child('secrets.json')
-with open(secrets_json) as f:
+with io.open(secrets_json, mode='r', encoding='utf8') as f:
     secrets = json.loads(f.read())
 
 
