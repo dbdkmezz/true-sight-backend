@@ -165,6 +165,8 @@ class Context(object):
                     return FreshContext().generate_response(question)
                 if question.yes and self._can_respond_to_yes_response:
                     return self._yes_response, self
+                if question.goodbye:
+                    raise Goodbye
                 raise
             else:
                 return new_context.generate_response(question)

@@ -153,3 +153,7 @@ class QuestionParser(object):
     @cached_property
     def no(self):
         return self.contains_any_word(('no', 'nope'))
+
+    @cached_property
+    def goodbye(self):
+        return self.contains_any_string(('goodbye', 'good bye', 'bye'))

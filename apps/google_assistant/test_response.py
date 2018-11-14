@@ -37,6 +37,15 @@ class TestWelcomeAndIntroduction(TestCase):
         response, _ = ResponseGenerator.respond("What is the cooldown of static storm?", token)
         assert "90" in response
 
+    def test_goodbye(self):
+        AbilityFactory(
+            hero=HeroFactory(name='Disruptor'),
+            name='Static Storm',
+            is_ultimate=True,
+        )
+        _, token = ResponseGenerator.respond("What is Disruptor's ultimate?")
+        with self.assertRaises(Goodbye):
+            ResponseGenerator.respond("goodbye", token)
 
 @pytest.mark.django_db
 class TestAbiltyParserAndResponders(TestCase):
