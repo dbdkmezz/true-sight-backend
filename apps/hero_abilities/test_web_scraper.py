@@ -20,6 +20,7 @@ mock_request_handler = MockRequestHandler(
         "https://dota2.gamepedia.com/Invoker": "Invoker - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Spectre": "Spectre - Dota 2 Wiki.html",
         "https://dota2.gamepedia.com/Jakiro": "Jakiro - Dota 2 Wiki.html",
+        "https://dota2.gamepedia.com/Keeper_of_the_Light": "Keeper of the Light - Dota 2 Wiki.html",
     },
     files_path=py.path.local().join("apps", "hero_abilities", "test_data"),
 )
@@ -114,3 +115,11 @@ class TestWebScraper(TestCase):
         self.scraper.load_hero_abilities(HeroFactory(name='Invoker'))
         for a in Ability.objects.all():
             assert (not a.hotkey or len(a.hotkey) == 1)
+
+    # I think there may be an error on the dota wiki website,
+    # I don't know the damange type of this spell, but lets deal with it better for now
+    @pytest.mark.xfail
+    def test_keeper_after_720(self):
+        self.scraper.load_hero_abilities(HeroFactory(name='Keeper of the Light'))
+        illuminate = Ability.objects.get(name='Blinding Light')
+        self.assertEqual(illuminate.damage_type, DamageType.MAGICAL)

@@ -1,3 +1,4 @@
+import io
 import time
 import logging
 import requests
@@ -48,5 +49,5 @@ class MockRequestHandler(RequestHandler):
     def get(self, url):
         filename = self.url_map[url]
         path = str(self.files_path.join(filename))
-        with open(path, "r") as f:
+        with io.open(path, mode='r', encoding='utf8') as f:
             return f.read()
