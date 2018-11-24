@@ -116,7 +116,7 @@ class WebScraper(object):
 
         damage_info = damage_header.find_next_siblings('a')
         if len(damage_info) == 0:
-            logger.warning("Unable to load damage type. Ability: {}", damage_header)
+            logger.warning("Unable to load damage type. Ability: {}".format(damage_header))
             return None, None
         damage_type = cls._damage_type_map[damage_info[0].text]
         if len(damage_info) == 1 or damage_info[1].get('title') in ("Damage types", "Talent"):
